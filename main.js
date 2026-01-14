@@ -1,8 +1,17 @@
+/* =========================
+CONFIG
+========================= */
 const LIFF_ID = "2008883587-vieENd7j";
-const FN_BASE = "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
-const SUPABASE_ANON_KEY = "YOUR_KEY";
+const FN_BASE =
+  "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
 
-/* API */
+// ❗ anon key 
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
+
+/* =========================
+HELPER : API CALL
+========================= */
 async function callFn(path, payload) {
   const res = await fetch(`${FN_BASE}/${path}`, {
     method: "POST",
@@ -20,13 +29,18 @@ async function callFn(path, payload) {
   return res.json();
 }
 
-/* INIT */
+/* =========================
+INIT
+========================= */
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isInClient()) {
-      renderCard(`<h3>❌ เปิดผ่าน LINE เท่านั้น</h3>`);
+      renderCard(`
+        <h3>❌ กรุณาเปิดจาก LINE</h3>
+        <p>กรุณาเข้าใช้งานผ่าน Rich Menu</p>
+      `);
       return;
     }
 
@@ -50,13 +64,16 @@ async function init() {
 }
 init();
 
-/* UI */
+/* =========================
+UI HELPERS
+========================= */
 function renderCard(html) {
-  document.getElementById("app").innerHTML =
-    `<div class="card">${html}</div>`;
+  document.getElementById("app").innerHTML = html;
 }
 
-/* GUEST */
+/* =========================
+GUEST FORM
+========================= */
 function showGuestForm() {
   renderCard(`
     <h3>สมัครสมาชิก KPOS</h3>
@@ -65,26 +82,32 @@ function showGuestForm() {
     <input id="id_card" />
 
     <label>เบอร์โทร</label>
-    <input id="phone" />
+    <input id="phone" inputmode="numeric" maxlength="10" />
 
-    <button onclick="verifyCustomer()">ตรวจสอบข้อมูล</button>
-
-    <div id="msg" class="message error"></div>
+    <button id="verifyBtn" onclick="verifyCustomer()">ตรวจสอบข้อมูล</button>
   `);
 }
 
+/* =========================
+VERIFY CUSTOMER
+========================= */
 async function verifyCustomer() {
-  const idCard = id_card.value.trim();
-  const phone = phone.value.trim();
-  const msg = document.getElementById("msg");
-
-  msg.style.display = "none";
+  const idCard = document.getElementById("id_card").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const btn = document.getElementById("verifyBtn");
 
   if (!idCard || !phone) {
-    msg.innerText = "กรุณากรอกข้อมูลให้ครบ";
-    msg.style.display = "block";
+    showModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
+
+  if (!/^\d{10}$/.test(phone)) {
+    showModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "กำลังตรวจสอบ...";
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -93,8 +116,12 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      msg.innerText = "❌ ไม่พบข้อมูลลูกค้า";
-      msg.style.display = "block";
+      showModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
+      return;
+    }
+
+    if (result.status !== "active") {
+      showModal("ไม่สามารถสมัครได้", result.message || "");
       return;
     }
 
@@ -110,14 +137,19 @@ async function verifyCustomer() {
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ตรวจสอบข้อมูล";
   }
 }
 
-/* MEMBER */
-function showMemberMenu(id) {
+/* =========================
+MEMBER MENU
+========================= */
+function showMemberMenu(customerId) {
   renderCard(`
     <h3>⭐ สมาชิก KPOS</h3>
-    <p>Customer ID: ${id}</p>
+    <p>Customer ID: ${customerId}</p>
 
     <button onclick="openPawn()">รายการขายฝาก</button><br/><br/>
     <button onclick="openInstallment()">รายการผ่อน</button><br/><br/>
@@ -125,7 +157,9 @@ function showMemberMenu(id) {
   `);
 }
 
-/* MODAL */
+/* =========================
+MODAL
+========================= */
 function showModal(title, message) {
   modalTitle.innerText = title;
   modalMessage.innerText = message;
@@ -134,10 +168,11 @@ function showModal(title, message) {
 
 function closeModal() {
   modal.style.display = "none";
-  location.reload();
 }
 
-/* ACTION */
+/* =========================
+ACTIONS
+========================= */
 function openPawn() { alert("ไปหน้าขายฝาก"); }
 function openInstallment() { alert("ไปหน้าผ่อน"); }
 function logout() { liff.logout(); location.reload(); }
