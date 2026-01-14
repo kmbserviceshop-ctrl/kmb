@@ -151,7 +151,7 @@ function showMemberMenu(customer) {
   const name = customer.name || "ลูกค้า KPOS";
   const phone = maskPhone(customer.phone || "");
 
-  render(`
+  renderCard(`
     <div class="container">
       <div class="card">
 
