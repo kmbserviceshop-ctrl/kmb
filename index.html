@@ -24,11 +24,11 @@
 
     .card {
       width: 100%;
-      max-width: 420px;
+      max-width: 380px; /* ขนาดแบบแอป KPOS */
       background: #ffffff;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 24px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
     h3 {
@@ -69,24 +69,6 @@
       color: #333;
     }
 
-    .message {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: none;
-    }
-
-    .message.error {
-      background: #fdecea;
-      color: #b71c1c;
-    }
-
-    .message.success {
-      background: #e8f5e9;
-      color: #1b5e20;
-    }
-
     /* Modal */
     .modal-backdrop {
       position: fixed;
@@ -95,7 +77,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 999;
+      z-index: 1000;
     }
 
     .modal {
@@ -110,12 +92,23 @@
     .modal h4 {
       margin: 0 0 12px;
     }
+
+    /* Loading */
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      font-size: 16px;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <!-- main.js จะ render ใส่ตรงนี้ -->
     <div id="app"></div>
   </div>
 
@@ -127,6 +120,9 @@
       <button onclick="closeModal()">ตกลง</button>
     </div>
   </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">กำลังโหลด...</div>
 
   <script src="./main.js"></script>
 </body>

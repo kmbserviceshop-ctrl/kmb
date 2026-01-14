@@ -1,16 +1,8 @@
-/* =========================
-   CONFIG
-========================= */
 const LIFF_ID = "2008883587-vieENd7j";
-const FN_BASE =
-  "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
+const FN_BASE = "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
+const SUPABASE_ANON_KEY = "YOUR_KEY";
 
-// ❗ ใช้ anon key เท่านั้น (ห้าม service role)
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
-
-/* =========================
-   HELPER : API CALL
-========================= */
+/* API */
 async function callFn(path, payload) {
   const res = await fetch(`${FN_BASE}/${path}`, {
     method: "POST",
@@ -23,98 +15,96 @@ async function callFn(path, payload) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`API ${path} failed (${res.status}): ${text}`);
+    throw new Error(text);
   }
-
   return res.json();
 }
 
-/* =========================
-   INIT
-========================= */
+/* Loading */
+function showLoading(show) {
+  document.getElementById("loading").style.display = show ? "flex" : "none";
+}
+
+/* INIT */
 async function init() {
+  showLoading(true);
   try {
     await liff.init({ liffId: LIFF_ID });
 
-    // ❌ ห้ามเปิดนอก LINE
     if (!liff.isInClient()) {
-      render(`
-        <h3>❌ กรุณาเปิดจากแอป LINE เท่านั้น</h3>
-        <p>ให้กดผ่าน Rich Menu ในแชท King Mobile</p>
-      `);
+      renderCard("<h3>❌ กรุณาเปิดผ่าน LINE เท่านั้น</h3>");
       return;
     }
 
-    // 🔐 ยังไม่ login → login แล้วหยุด
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
     }
 
-    // ✅ login แล้ว
     const profile = await liff.getProfile();
-
     const status = await callFn("check_line_status", {
       line_user_id: profile.userId,
     });
 
-    if (status.status === "guest") {
-      showGuestForm();
-    } else if (status.status === "member") {
-      showMemberMenu(status.customer_id);
-    } else {
-      throw new Error("unknown status");
-    }
+    status.status === "guest"
+      ? showGuestForm()
+      : showMemberMenu(status.customer_id);
+
   } catch (err) {
-    render(`<pre>ERROR: ${err.message}</pre>`);
+    showModal("เกิดข้อผิดพลาด", err.message);
+  } finally {
+    showLoading(false);
   }
 }
-
 init();
 
-/* =========================
-   UI HELPERS
-========================= */
-function render(html) {
-  document.body.innerHTML = html;
+/* UI */
+function renderCard(html) {
+  document.getElementById("app").innerHTML =
+    `<div class="card">${html}</div>`;
 }
 
-/* =========================
-   GUEST FORM
-========================= */
+/* GUEST */
 function showGuestForm() {
-  render(`
+  renderCard(`
     <h3>สมัครสมาชิก KPOS</h3>
 
-    <label>เลขบัตรประชาชน</label><br/>
-    <input id="id_card" /><br/><br/>
+    <label>เลขบัตรประชาชน</label>
+    <input id="id_card" />
 
-    <label>เบอร์โทร</label><br/>
-    <input id="phone" /><br/><br/>
+    <label>เบอร์โทร</label>
+    <input
+      id="phone"
+      inputmode="numeric"
+      maxlength="10"
+      placeholder="กรอกเบอร์โทร 10 หลัก"
+    />
 
-    <button id="verifyBtn">ตรวจสอบข้อมูล</button>
-    <pre id="msg"></pre>
+    <button onclick="verifyCustomer()">ตรวจสอบข้อมูล</button>
   `);
 
-  document
-    .getElementById("verifyBtn")
-    .addEventListener("click", verifyCustomer);
+  // บังคับให้พิมพ์ได้เฉพาะตัวเลข
+  const phoneInput = document.getElementById("phone");
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = phoneInput.value.replace(/\D/g, "");
+  });
 }
 
-/* =========================
-   VERIFY CUSTOMER
-========================= */
 async function verifyCustomer() {
-  const idCard = document.getElementById("id_card").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const msg = document.getElementById("msg");
-
-  msg.innerText = "";
+  const idCard = id_card.value.trim();
+  const phone = phone.value.trim();
 
   if (!idCard || !phone) {
-    msg.innerText = "กรอกข้อมูลให้ครบ";
+    showModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
+
+  if (!/^\d{10}$/.test(phone)) {
+    showModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
+    return;
+  }
+
+  showLoading(true);
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -123,59 +113,65 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      msg.innerText = "❌ ไม่พบข้อมูลลูกค้า";
+      showModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
+      return;
+    }
+
+    if (result.status === "already_bound") {
+      showModal(
+        "บัญชีถูกผูกแล้ว",
+        "เลขบัตรหรือเบอร์โทรนี้ถูกผูกกับ LINE อื่นแล้ว\nกรุณาติดต่อร้าน"
+      );
       return;
     }
 
     if (result.status !== "active") {
-      msg.innerText = "❌ " + (result.message || "ไม่สามารถสมัครได้");
+      showModal("ไม่สามารถสมัครได้", result.message || "กรุณาติดต่อร้าน");
       return;
     }
 
     const profile = await liff.getProfile();
-
-    const bindResult = await callFn("register_customer_with_line", {
+    const bind = await callFn("register_customer_with_line", {
       customer_id: result.customer_id,
       line_user_id: profile.userId,
     });
 
-    if (bindResult.success) {
-      alert("✅ สมัครสมาชิกสำเร็จ");
-      location.reload();
-    } else {
-      msg.innerText = "❌ สมัครไม่สำเร็จ";
-    }
+    bind.success
+      ? showModal("สมัครสำเร็จ", "ยินดีต้อนรับสมาชิก KPOS")
+      : showModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
+
   } catch (err) {
-    msg.innerText = "ERROR: " + err.message;
+    showModal("เกิดข้อผิดพลาด", err.message);
+  } finally {
+    showLoading(false);
   }
 }
 
-/* =========================
-   MEMBER MENU
-========================= */
-function showMemberMenu(customerId) {
-  render(`
+/* MEMBER */
+function showMemberMenu(id) {
+  renderCard(`
     <h3>⭐ สมาชิก KPOS</h3>
-    <p>Customer ID: ${customerId}</p>
+    <p>Customer ID: ${id}</p>
 
     <button onclick="openPawn()">รายการขายฝาก</button><br/><br/>
     <button onclick="openInstallment()">รายการผ่อน</button><br/><br/>
-    <button onclick="logout()">ออกจากระบบ</button>
+    <button class="secondary" onclick="logout()">ออกจากระบบ</button>
   `);
 }
 
-/* =========================
-   ACTIONS
-========================= */
-function openPawn() {
-  alert("ไปหน้าขายฝาก (ขั้น G)");
+/* MODAL */
+function showModal(title, message) {
+  modalTitle.innerText = title;
+  modalMessage.innerText = message;
+  modal.style.display = "flex";
 }
 
-function openInstallment() {
-  alert("ไปหน้าผ่อน (ขั้นถัดไป)");
-}
-
-function logout() {
-  liff.logout();
+function closeModal() {
+  modal.style.display = "none";
   location.reload();
 }
+
+/* ACTION */
+function openPawn() { alert("ไปหน้าขายฝาก"); }
+function openInstallment() { alert("ไปหน้าผ่อน"); }
+function logout() { liff.logout(); location.reload(); }
