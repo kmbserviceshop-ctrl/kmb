@@ -1,6 +1,6 @@
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE = "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
+const SUPABASE_ANON_KEY = "YOUR_KEY";
 
 /* API */
 async function callFn(path, payload) {
@@ -20,19 +20,13 @@ async function callFn(path, payload) {
   return res.json();
 }
 
-/* Loading */
-function showLoading(show) {
-  document.getElementById("loading").style.display = show ? "flex" : "none";
-}
-
 /* INIT */
 async function init() {
-  showLoading(true);
   try {
     await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isInClient()) {
-      renderCard("<h3>❌ กรุณาเปิดผ่าน LINE เท่านั้น</h3>");
+      renderCard(`<h3>❌ เปิดผ่าน LINE เท่านั้น</h3>`);
       return;
     }
 
@@ -52,8 +46,6 @@ async function init() {
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
-  } finally {
-    showLoading(false);
   }
 }
 init();
@@ -73,38 +65,26 @@ function showGuestForm() {
     <input id="id_card" />
 
     <label>เบอร์โทร</label>
-    <input
-      id="phone"
-      inputmode="numeric"
-      maxlength="10"
-      placeholder="กรอกเบอร์โทร 10 หลัก"
-    />
+    <input id="phone" />
 
     <button onclick="verifyCustomer()">ตรวจสอบข้อมูล</button>
-  `);
 
-  // บังคับให้พิมพ์ได้เฉพาะตัวเลข
-  const phoneInput = document.getElementById("phone");
-  phoneInput.addEventListener("input", () => {
-    phoneInput.value = phoneInput.value.replace(/\D/g, "");
-  });
+    <div id="msg" class="message error"></div>
+  `);
 }
 
 async function verifyCustomer() {
   const idCard = id_card.value.trim();
   const phone = phone.value.trim();
+  const msg = document.getElementById("msg");
+
+  msg.style.display = "none";
 
   if (!idCard || !phone) {
-    showModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
+    msg.innerText = "กรุณากรอกข้อมูลให้ครบ";
+    msg.style.display = "block";
     return;
   }
-
-  if (!/^\d{10}$/.test(phone)) {
-    showModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
-    return;
-  }
-
-  showLoading(true);
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -113,20 +93,8 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      showModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
-      return;
-    }
-
-    if (result.status === "already_bound") {
-      showModal(
-        "บัญชีถูกผูกแล้ว",
-        "เลขบัตรหรือเบอร์โทรนี้ถูกผูกกับ LINE อื่นแล้ว\nกรุณาติดต่อร้าน"
-      );
-      return;
-    }
-
-    if (result.status !== "active") {
-      showModal("ไม่สามารถสมัครได้", result.message || "กรุณาติดต่อร้าน");
+      msg.innerText = "❌ ไม่พบข้อมูลลูกค้า";
+      msg.style.display = "block";
       return;
     }
 
@@ -142,8 +110,6 @@ async function verifyCustomer() {
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
-  } finally {
-    showLoading(false);
   }
 }
 
