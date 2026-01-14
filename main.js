@@ -55,8 +55,8 @@ async function init() {
     });
 
     status.status === "guest"
-      ? showGuestForm()
-      : showMemberMenu(status.customer_id);
+  ? showGuestForm()
+  : showMemberMenu(status.customer);
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
