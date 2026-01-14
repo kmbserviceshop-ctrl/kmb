@@ -1,6 +1,6 @@
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE = "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
-const SUPABASE_ANON_KEY = "YOUR_KEY";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
 
 /* API */
 async function callFn(path, payload) {
