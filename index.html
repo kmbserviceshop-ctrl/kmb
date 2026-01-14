@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>KPOS Customer</title>
+
+    <!-- ✅ LIFF SDK (จำเป็น) -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <style>
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+          padding: 24px;
+          background: #ffffff;
+        }
+        h2 {
+          margin-top: 0;
+        }
+        pre {
+          background: #f4f4f4;
+          padding: 12px;
+          border-radius: 6px;
+          overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🔐 KPOS LINE Login</h2>
+
+<!-- main.js จะมาเขียนทับตรงนี้ -->
+<div id="status">กำลังโหลด...</div>
+
+<pre id="profile" style="display:none"></pre>
+
+<!-- ✅ JS หลักของคุณ -->
+<script src="./main.js"></script>
+
+</body>
+</html>
