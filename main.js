@@ -209,3 +209,67 @@ MENU ACTIONS
 function openMyBills() {
   alert("📄 บิลของฉัน\n(บิลฝาก / บิลผ่อน)\nกำลังพัฒนา");
 }
+
+function openMyBills() {
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="init()">←</button>
+      <div class="top-title">บิลของฉัน</div>
+    </div>
+
+    <!-- ฝากของ -->
+    <div class="bill-section">
+      <h4>📦 บิลขายฝาก</h4>
+
+      <div class="bill-card">
+        <div class="bill-row">
+          <span>เลขที่บิล</span>
+          <span>#PD-10234</span>
+        </div>
+        <div class="bill-row">
+          <span>วันที่</span>
+          <span>12/01/2026</span>
+        </div>
+        <div class="bill-row">
+          <span>สถานะ</span>
+          <span class="bill-status">ยังไม่ไถ่ถอน</span>
+        </div>
+      </div>
+
+      <div class="bill-card">
+        <div class="bill-row">
+          <span>เลขที่บิล</span>
+          <span>#PD-10188</span>
+        </div>
+        <div class="bill-row">
+          <span>วันที่</span>
+          <span>02/12/2025</span>
+        </div>
+        <div class="bill-row">
+          <span>สถานะ</span>
+          <span class="bill-status warning">ครบกำหนด</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ผ่อน -->
+    <div class="bill-section">
+      <h4>📱 บิลผ่อน</h4>
+
+      <div class="bill-card">
+        <div class="bill-row">
+          <span>เลขที่สัญญา</span>
+          <span>#INS-55621</span>
+        </div>
+        <div class="bill-row">
+          <span>งวดปัจจุบัน</span>
+          <span>3 / 12</span>
+        </div>
+        <div class="bill-row">
+          <span>สถานะ</span>
+          <span class="bill-status">ปกติ</span>
+        </div>
+      </div>
+    </div>
+  `);
+}
