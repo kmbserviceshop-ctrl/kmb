@@ -147,47 +147,31 @@ async function verifyCustomer() {
 MEMBER MENU (UI ONLY)
 ========================= */
 function showMemberMenu(customer) {
-  // customer = { customer_id, name, phone }
   const name = customer.name || "ลูกค้า KPOS";
   const phone = maskPhone(customer.phone || "");
 
   renderCard(`
-    <div class="container">
-      <div class="card">
+    <div class="member-header">
+      <h3>ยินดีต้อนรับ</h3>
+      <div class="member-name">คุณ ${name}</div>
+      <div class="member-phone">เบอร์: ${phone}</div>
 
-        <!-- Card : Welcome -->
-        <div class="section">
-          <h3 style="margin-bottom:8px;">ยินดีต้อนรับ</h3>
-          <p style="margin:4px 0;">คุณ <b>${name}</b></p>
-          <p style="margin:4px 0;color:#666;">เบอร์: ${phone}</p>
-
-          <button class="secondary" onclick="logout()" style="margin-top:12px;">
-            ออกจากระบบ
-          </button>
-        </div>
-
-        <hr style="margin:20px 0;" />
-
-        <!-- Card : Menu -->
-        <div class="section">
-          <h3 style="margin-bottom:12px;">เมนูบริการ</h3>
-
-          <button onclick="openMyBills()">
-            📄 บิลของฉัน
-          </button>
-
-          <button disabled style="
-            margin-top:12px;
-            background:#e0e0e0;
-            color:#888;
-            cursor:not-allowed;
-          ">
-            🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
-          </button>
-        </div>
-
-      </div>
+      <button class="logout-btn" onclick="logout()">
+        ออกจากระบบ
+      </button>
     </div>
+
+    <div class="divider"></div>
+
+    <div class="menu-title">เมนูบริการ</div>
+
+    <button class="menu-btn" onclick="openMyBills()">
+      📄 บิลของฉัน
+    </button>
+
+    <button class="menu-btn secondary" disabled>
+      🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
+    </button>
   `);
 }
 
