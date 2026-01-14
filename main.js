@@ -151,27 +151,35 @@ function showMemberMenu(customer) {
   const phone = maskPhone(customer.phone || "");
 
   renderCard(`
-    <div class="member-header">
-      <h3>ยินดีต้อนรับ</h3>
-      <div class="member-name">คุณ ${name}</div>
-      <div class="member-phone">เบอร์: ${phone}</div>
+    <div class="app-page">
 
-      <button class="logout-btn" onclick="logout()">
-        ออกจากระบบ
-      </button>
+      <!-- Welcome Card -->
+      <div class="section-card">
+        <div class="member-header">
+          <h3>ยินดีต้อนรับ</h3>
+          <div class="member-name">คุณ ${name}</div>
+          <div class="member-phone">เบอร์: ${phone}</div>
+
+          <button class="logout-btn" onclick="logout()">
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu Card -->
+      <div class="section-card">
+        <div class="menu-title">เมนูบริการ</div>
+
+        <button class="menu-btn" onclick="openMyBills()">
+          📄 บิลของฉัน
+        </button>
+
+        <button class="menu-btn secondary" disabled>
+          🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
+        </button>
+      </div>
+
     </div>
-
-    <div class="divider"></div>
-
-    <div class="menu-title">เมนูบริการ</div>
-
-    <button class="menu-btn" onclick="openMyBills()">
-      📄 บิลของฉัน
-    </button>
-
-    <button class="menu-btn secondary" disabled>
-      🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
-    </button>
   `);
 }
 
