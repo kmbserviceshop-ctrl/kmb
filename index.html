@@ -1,42 +1,133 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPOS Customer</title>
 
-    <title>KPOS Customer</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-    <!-- ✅ LIFF SDK (จำเป็น) -->
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f3f5;
+    }
 
-    <style>
-        body {
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-          padding: 24px;
-          background: #ffffff;
-        }
-        h2 {
-          margin-top: 0;
-        }
-        pre {
-          background: #f4f4f4;
-          padding: 12px;
-          border-radius: 6px;
-          overflow-x: auto;
-        }
-    </style>
+    .container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    label {
+      font-size: 14px;
+      color: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #06c755;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      background: #fdecea;
+      color: #b71c1c;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal {
+      background: #fff;
+      width: 90%;
+      max-width: 320px;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .modal h4 {
+      margin: 0 0 12px;
+    }
+  </style>
 </head>
+
 <body>
+  <div class="container">
+    <!-- main.js จะ render ใส่ตรงนี้ -->
+    <div id="app"></div>
+  </div>
 
-<h2>🔐 KPOS Line Connect</h2>
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h4 id="modalTitle"></h4>
+      <p id="modalMessage"></p>
+      <button onclick="closeModal()">ตกลง</button>
+    </div>
+  </div>
 
-<!-- main.js จะมาเขียนทับตรงนี้ -->
-<div id="status">กำลังโหลด...</div>
-
-<pre id="profile" style="display:none"></pre>
-
-<!-- ✅ JS หลักของคุณ -->
-<script src="./main.js"></script>
-
+  <script src="./main.js"></script>
 </body>
 </html>
