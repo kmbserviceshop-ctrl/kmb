@@ -144,16 +144,50 @@ async function verifyCustomer() {
 }
 
 /* =========================
-MEMBER MENU
+MEMBER MENU (UI ONLY)
 ========================= */
-function showMemberMenu(customerId) {
-  renderCard(`
-    <h3>⭐ สมาชิก KPOS</h3>
-    <p>Customer ID: ${customerId}</p>
+function showMemberMenu(customer) {
+  // customer = { customer_id, name, phone }
+  const name = customer.name || "ลูกค้า KPOS";
+  const phone = maskPhone(customer.phone || "");
 
-    <button onclick="openPawn()">รายการขายฝาก</button><br/><br/>
-    <button onclick="openInstallment()">รายการผ่อน</button><br/><br/>
-    <button class="secondary" onclick="logout()">ออกจากระบบ</button>
+  render(`
+    <div class="container">
+      <div class="card">
+
+        <!-- Card : Welcome -->
+        <div class="section">
+          <h3 style="margin-bottom:8px;">ยินดีต้อนรับ</h3>
+          <p style="margin:4px 0;">คุณ <b>${name}</b></p>
+          <p style="margin:4px 0;color:#666;">เบอร์: ${phone}</p>
+
+          <button class="secondary" onclick="logout()" style="margin-top:12px;">
+            ออกจากระบบ
+          </button>
+        </div>
+
+        <hr style="margin:20px 0;" />
+
+        <!-- Card : Menu -->
+        <div class="section">
+          <h3 style="margin-bottom:12px;">เมนูบริการ</h3>
+
+          <button onclick="openMyBills()">
+            📄 บิลของฉัน
+          </button>
+
+          <button disabled style="
+            margin-top:12px;
+            background:#e0e0e0;
+            color:#888;
+            cursor:not-allowed;
+          ">
+            🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
+          </button>
+        </div>
+
+      </div>
+    </div>
   `);
 }
 
@@ -176,3 +210,18 @@ ACTIONS
 function openPawn() { alert("ไปหน้าขายฝาก"); }
 function openInstallment() { alert("ไปหน้าผ่อน"); }
 function logout() { liff.logout(); location.reload(); }
+
+/* =========================
+HELPER
+========================= */
+function maskPhone(phone) {
+  if (phone.length < 10) return phone;
+  return phone.slice(0,3) + "*****" + phone.slice(-2);
+}
+
+/* =========================
+MENU ACTIONS
+========================= */
+function openMyBills() {
+  alert("📄 บิลของฉัน\n(บิลฝาก / บิลผ่อน)\nกำลังพัฒนา");
+}
