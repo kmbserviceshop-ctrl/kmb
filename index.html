@@ -52,10 +52,15 @@
   }
 
   .logout-btn {
-    margin-top: 14px;
-    background: #eceef1;
-    color: #333;
-  }
+  margin-top: 12px;
+  padding: 8px 14px;
+  width: fit-content;
+  font-size: 14px;
+  border-radius: 10px;
+  background: #0740fa;
+  color: #f7f7fa;
+  border: 1px solid #e5e7eb;
+}
 
   .divider {
     height: 1px;
@@ -70,12 +75,29 @@
   }
 
   .menu-btn {
-    height: 52px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
+  height: 44px;              /* เตี้ยลง */
+  border-radius: 12px;       /* มุมโค้งแบบแอป */
+  font-size: 15px;           /* ตัวอักษรเล็กลง */
+  font-weight: 500;          /* ไม่หนาเกิน */
+  margin-bottom: 10px;
+  padding: 0 14px;
+  background: #f3f4f6;
+  color: #111;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-btn:active {
+  background: #e5e7eb;
+}
+
+.menu-btn.secondary {
+  background: #f1f1f1;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+}
 
   .menu-btn.secondary {
     background: #e6e7eb;
@@ -156,6 +178,23 @@
   padding: 20px 18px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.06);
   margin-bottom: 16px;
+}
+
+.section-card {
+  padding: 18px 18px;     /* จากเดิมที่อึดอัด */
+}
+
+.member-header h3 {
+  font-size: 18px;
+}
+
+.member-name {
+  font-size: 15px;
+}
+
+.menu-title {
+  font-size: 15px;
+  margin-bottom: 10px;
 }
 
 
