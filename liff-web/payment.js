@@ -63,6 +63,8 @@ function openPayment(bill) {
   serviceFeeBaht     // ✅ ส่ง “บาท” ตรง ๆ
   );
 
+  console.log("FINAL QR =", qrData); // (เสริม ดู payload หลังใส่ยอด)
+
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMyBills()">←</button>
