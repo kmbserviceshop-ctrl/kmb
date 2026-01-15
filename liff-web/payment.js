@@ -30,7 +30,10 @@ function generatePromptPayQR(baseQR, amount) {
 
   const cleanQR = baseQR.replace(/6304[0-9A-F]{4}$/, "");
 
-  const amt = Number(amount).toFixed(2).replace(".", "");
+  // ✅ บาท → สตางค์ (ถูกต้อง)
+  const satang = Math.round(Number(amount) * 100);
+  const amt = String(satang);
+
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
 
   const payload = `${cleanQR}${field54}6304`;
