@@ -42,9 +42,6 @@ function generatePromptPayQR(baseQR, amount) {
   return payload + crc;
 }
 
-/* =========================
-OPEN PAYMENT PAGE
-========================= */
 function openPayment(bill) {
   CURRENT_BILL = bill;
 
@@ -53,12 +50,13 @@ function openPayment(bill) {
   const newDueDate = new Date(dueDate);
   newDueDate.setDate(newDueDate.getDate() + 15);
 
-  const serviceFee = Number(bill?.service_fee ?? 0) / 100; // สตางค์ → บาท
-  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFee);
+  // 🔥 แยกหน่วยให้ชัด
+  const serviceFeeSatang = Number(bill?.service_fee ?? 0); // สตางค์ (ของจริง)
+  const serviceFeeBaht = serviceFeeSatang / 100;          // บาท (ไว้แสดงผล)
 
-  // -------------------------
-  // Render UI
-  // -------------------------
+  // ❗ QR รับ "บาท" แล้วไปแปลงเป็นสตางค์ข้างใน
+  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
+
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMyBills()">←</button>
@@ -83,7 +81,7 @@ function openPayment(bill) {
 
       <div class="bill-row" style="font-weight:600">
         <span>ยอดต้องชำระ</span>
-        <span>${serviceFee.toLocaleString()} บาท</span>
+        <span>${serviceFeeBaht.toLocaleString()} บาท</span>
       </div>
 
       <hr style="opacity:.3"/>
@@ -91,34 +89,23 @@ function openPayment(bill) {
       <div style="text-align:center;margin:20px 0">
         <div style="color:#888">สแกนเพื่อชำระ</div>
         ${
-          serviceFee > 0
+          serviceFeeSatang > 0
             ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
             : `<div style="color:#aaa;margin-top:20px">ไม่มีค่าบริการ</div>`
         }
       </div>
 
-      <p style="color:#888;text-align:center">
-        กรุณากดดำเนินการต่อ เมื่อโอนเงินสำเร็จครับ
-      </p>
-
       <input type="file" id="slipFile" accept="image/*"/>
-
-      <button class="menu-btn" onclick="submitPawnPayment()">
-        ดำเนินการต่อจ้า
-      </button>
+      <button class="menu-btn" onclick="submitPawnPayment()">ดำเนินการต่อจ้า</button>
     </div>
   `);
 
-  // -------------------------
-  // ✅ Create QR after DOM + Library ready
-  // -------------------------
-  if (serviceFee > 0) {
+  if (serviceFeeSatang > 0) {
     const waitForQRCode = () => {
       if (typeof QRCode === "undefined") {
         setTimeout(waitForQRCode, 100);
         return;
       }
-
       const qrEl = document.getElementById("qrBox");
       if (!qrEl) return;
 
@@ -130,10 +117,10 @@ function openPayment(bill) {
         correctLevel: QRCode.CorrectLevel.M,
       });
     };
-
     waitForQRCode();
   }
 }
+
 
 /* =========================
 HELPER
