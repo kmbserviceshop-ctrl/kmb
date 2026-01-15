@@ -53,7 +53,7 @@ function openPayment(bill) {
   const newDueDate = new Date(dueDate);
   newDueDate.setDate(newDueDate.getDate() + 15);
 
-  const serviceFee = Number(bill?.service_fee ?? 0);
+  const serviceFee = Number(bill?.service_fee ?? 0) / 100; // สตางค์ → บาท
   const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFee);
 
   // -------------------------
