@@ -178,7 +178,7 @@ async function submitPawnPayment() {
   }
 
   const pawnTransactionId = CURRENT_BILL.id;
-  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์
+  const amount = Number(CURRENT_BILL.service_fee ?? 0);
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -194,21 +194,15 @@ async function submitPawnPayment() {
   };
 
   try {
-    // 🔐 ดึง Supabase JWT (จาก LINE)
-    let supabaseToken = localStorage.getItem("sb_access_token");
-    if (!supabaseToken) {
-      supabaseToken = await getSupabaseTokenFromLine();
-    }
-
     const res = await fetch(
       "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
-          "Authorization": `Bearer ${supabaseToken}`,
+
+          // ✅ ใช้แบบเดียวกับ main.js
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify(payload),
       }
