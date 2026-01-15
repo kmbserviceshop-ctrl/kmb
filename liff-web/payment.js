@@ -123,7 +123,7 @@ function openPayment(bill) {
 
 
 /* =========================
-HELPER
+HELPER(TEST)
 ========================= */
 function formatPaymentDate(date) {
   return new Date(date).toLocaleDateString("th-TH");
