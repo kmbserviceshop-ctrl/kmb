@@ -53,6 +53,9 @@ function openPayment(bill) {
   const serviceFee = Number(bill?.service_fee ?? 0);
   const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFee);
 
+  // -------------------------
+  // Render UI
+  // -------------------------
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMyBills()">←</button>
@@ -98,33 +101,35 @@ function openPayment(bill) {
       <input type="file" id="slipFile" accept="image/*"/>
 
       <button class="menu-btn" onclick="submitPawnPayment()">
-        ดำเนินการต่อ
+        ดำเนินการต่อจ้า
       </button>
     </div>
   `);
 
-  // ✅ สร้าง QR หลัง DOM + Library พร้อม
-if (serviceFee > 0) {
-  const waitForQRCode = () => {
-    if (typeof QRCode === "undefined") {
-      setTimeout(waitForQRCode, 100);
-      return;
-    }
+  // -------------------------
+  // ✅ Create QR after DOM + Library ready
+  // -------------------------
+  if (serviceFee > 0) {
+    const waitForQRCode = () => {
+      if (typeof QRCode === "undefined") {
+        setTimeout(waitForQRCode, 100);
+        return;
+      }
 
-    const qrEl = document.getElementById("qrBox");
-    if (!qrEl) return;
+      const qrEl = document.getElementById("qrBox");
+      if (!qrEl) return;
 
-    qrEl.innerHTML = "";
-    new QRCode(qrEl, {
-      text: qrData,
-      width: 180,
-      height: 180,
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  };
+      qrEl.innerHTML = "";
+      new QRCode(qrEl, {
+        text: qrData,
+        width: 180,
+        height: 180,
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    };
 
-  waitForQRCode();
-}
+    waitForQRCode();
+  }
 }
 
 /* =========================
