@@ -177,6 +177,13 @@ async function submitPawnPayment() {
     return;
   }
 
+  // 🔥 LINE access token (ของจริง)
+  const lineAccessToken = liff.getAccessToken();
+  if (!lineAccessToken) {
+    alert("ไม่พบ LINE access token");
+    return;
+  }
+
   const pawnTransactionId = CURRENT_BILL.id;
   const amount = Number(CURRENT_BILL.service_fee ?? 0);
 
@@ -201,8 +208,11 @@ async function submitPawnPayment() {
         headers: {
           "Content-Type": "application/json",
 
-          // ✅ ใช้แบบเดียวกับ main.js
+          // ✅ Supabase auth (แบบ main.js)
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+
+          // ✅ LINE token (ที่ backend ต้องการ)
+          "x-line-access-token": lineAccessToken,
         },
         body: JSON.stringify(payload),
       }
