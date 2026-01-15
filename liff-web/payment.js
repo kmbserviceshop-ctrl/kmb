@@ -87,9 +87,8 @@ function openPayment(bill) {
       </div>
 
       <div class="bill-row" style="font-weight:600">
-        <span>ยอดต้องชำระ1</span>
+        <span>ยอดต้องชำระ</span>
         <span>${serviceFeeSatang.toLocaleString()} บาท</span>
-        <span>${serviceFeeBaht.toLocaleString()} บาท</span>
       </div>
 
       <hr style="opacity:.3"/>
