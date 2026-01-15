@@ -51,11 +51,13 @@ function openPayment(bill) {
   newDueDate.setDate(newDueDate.getDate() + 15);
 
   // 🔥 แยกหน่วยให้ชัด
-  const serviceFeeBaht = Number(bill?.service_fee ?? 0); 
-  const serviceFeeSatang = serviceFeeBaht; 
+  const serviceFeeBaht   = Number(bill?.service_fee ?? 0); // บาทจาก DB
+const serviceFeeSatang = serviceFeeBaht * 100;           // แปลงเป็นสตางค์
 
-  // ❗ QR รับ "บาท" แล้วไปแปลงเป็นสตางค์ข้างใน
-  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
+const qrData = generatePromptPayQR(
+  SHOP_PROMPTPAY_QR,
+  serviceFeeSatang
+);
 
   renderCard(`
     <div class="top-bar">
