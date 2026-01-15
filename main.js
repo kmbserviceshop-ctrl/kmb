@@ -212,6 +212,15 @@ function maskPhone(phone) {
   return phone.slice(0,3) + "*****" + phone.slice(-2);
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
 /* =========================
 MENU ACTIONS
 ========================= */
@@ -247,11 +256,16 @@ async function openMyBills() {
 
 function renderPawnBill(bill) {
   const item = bill.pawn_items || {};
-  const statusText =
-    bill.status === "normal" ? "ปกติ" : "เกินกำหนด";
 
-  const statusClass =
-    bill.status === "normal" ? "bill-status" : "bill-status warning";
+  const today = new Date();
+  const dueDate = new Date(bill.due_date);
+
+  const isOverdue = today > dueDate;
+
+  const statusText = isOverdue ? "เกินกำหนด" : "ปกติ";
+  const statusClass = isOverdue
+    ? "bill-status warning"
+    : "bill-status";
 
   return `
     <div class="bill-card">
@@ -260,13 +274,14 @@ function renderPawnBill(bill) {
         <span class="${statusClass}">${statusText}</span>
       </div>
 
-      <div class="bill-row">
-        <span>วันที่</span>
-        <span>${bill.deposit_date}</span>
-      </div>
-
+      <!-- ชื่อสินค้า ต้องอยู่ก่อน -->
       <div style="margin:10px 0;font-weight:600">
         ${item.brand || ""} ${item.model || ""}
+      </div>
+
+      <div class="bill-row">
+        <span>วันที่</span>
+        <span>${formatDate(bill.deposit_date)}</span>
       </div>
 
       <div class="bill-row">
@@ -281,7 +296,7 @@ function renderPawnBill(bill) {
 
       <div class="bill-row">
         <span>ครบกำหนด</span>
-        <span>${bill.due_date}</span>
+        <span>${formatDate(bill.due_date)}</span>
       </div>
     </div>
   `;
