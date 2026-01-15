@@ -141,13 +141,12 @@ SUBMIT PAYMENT (BACKEND)
 ========================= */
 async function submitPawnPayment() {
   if (!CURRENT_BILL) {
-    alert("ไม่พบบิล");
+    alert("ไม่พบข้อมูลบิล");
     return;
   }
 
-  const pawnTransactionId = CURRENT_BILL.id; // 🔥 ใช้ id นี้เป็นหลัก
-  const serviceFeeSatang = Number(CURRENT_BILL?.service_fee ?? 0);
-  const amountBaht = serviceFeeSatang / 100;
+  const pawnTransactionId = CURRENT_BILL.id;
+  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์ (ของจริง)
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -158,13 +157,13 @@ async function submitPawnPayment() {
 
   const payload = {
     pawn_transaction_id: pawnTransactionId,
-    amount: amountBaht,       // ✅ ส่ง “บาท”
-    slip_base64: slipBase64,  // null ได้
+    amount: amount,
+    slip_base64: slipBase64, // null ได้
   };
 
   try {
     const res = await fetch(
-      "https://<PROJECT>.supabase.co/functions/v1/payment-request",
+      "https://YOUR_PROJECT_ID.supabase.co/functions/v1/payment-request",
       {
         method: "POST",
         headers: {
@@ -176,12 +175,15 @@ async function submitPawnPayment() {
     );
 
     const data = await res.json();
-    if (!res.ok) throw data;
+
+    if (!res.ok) {
+      throw data;
+    }
 
     alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
     liff.closeWindow();
   } catch (err) {
-    alert(err.message || "เกิดข้อผิดพลาด");
+    alert(err.error || "เกิดข้อผิดพลาด");
   }
 }
 
