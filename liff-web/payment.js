@@ -4,7 +4,7 @@ PAYMENT FLOW (A)
 
 let CURRENT_BILL = null;
 
-// 🔹 QR ร้าน (ฐาน) ของคุณ
+// 🔹 QR ร้าน (ฐาน)
 const SHOP_PROMPTPAY_QR =
   "00020101021130870016A00000067701011201150105546149531300220M00000000004284003820320S000000000000013142553037645802TH6304CAF8";
 
@@ -23,15 +23,13 @@ function crc16(payload) {
 }
 
 /* =========================
-GENERATE PROMPTPAY QR (FIX AMOUNT)
+GENERATE PROMPTPAY QR
 ========================= */
 function generatePromptPayQR(baseQR, amount) {
   if (!amount || amount <= 0) return baseQR;
 
-  // ตัด CRC เดิม
   const cleanQR = baseQR.replace(/6304[0-9A-F]{4}$/, "");
 
-  // amount → 2 decimal → ไม่มีจุด
   const amt = Number(amount).toFixed(2).replace(".", "");
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
 
@@ -86,7 +84,6 @@ function openPayment(bill) {
 
       <div style="text-align:center;margin:20px 0">
         <div style="color:#888">สแกนเพื่อชำระ</div>
-
         ${
           serviceFee > 0
             ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
@@ -95,7 +92,7 @@ function openPayment(bill) {
       </div>
 
       <p style="color:#888;text-align:center">
-        กรุณากดดำเนินการต่อ เมื่อโอนเงินสำเร็จ
+        กรุณากดดำเนินการต่อ เมื่อโอนเงินสำเร็จครับ
       </p>
 
       <input type="file" id="slipFile" accept="image/*"/>
@@ -106,51 +103,20 @@ function openPayment(bill) {
     </div>
   `);
 
-  /* ====== สร้าง QR หลัง render ====== */
+  // ✅ สร้าง QR หลัง DOM พร้อม
   if (serviceFee > 0) {
-    const qrEl = document.getElementById("qrBox");
-    if (qrEl) {
-      qrEl.innerHTML = ""; // กันซ้ำ
+    setTimeout(() => {
+      const qrEl = document.getElementById("qrBox");
+      if (!qrEl) return;
+
+      qrEl.innerHTML = "";
       new QRCode(qrEl, {
         text: qrData,
         width: 180,
         height: 180,
+        correctLevel: QRCode.CorrectLevel.M,
       });
-    }
-  }
-}
-
-function renderPawnPaymentPage({ bill, customer }) {
-  openPayment(bill);
-}
-
-/* =========================
-SUBMIT PAYMENT (PLACEHOLDER)
-========================= */
-async function submitPawnPayment() {
-  const fileInput = document.getElementById("slipFile");
-  if (!fileInput.files.length) {
-    showModal("ยังไม่ได้แนบสลิป", "กรุณาอัปโหลดหลักฐานการชำระเงิน");
-    return;
-  }
-
-  try {
-    const slipPath = "placeholder/slip.jpg";
-
-    await callFn("submit_pawn_payment", {
-      pawn_transaction_id: CURRENT_BILL.id,
-      slip_path: slipPath,
-      status: "pending_review",
-    });
-
-    showModal(
-      "ส่งข้อมูลสำเร็จ",
-      "ระบบได้รับข้อมูลแล้ว รอการตรวจสอบจากพนักงาน"
-    );
-
-    openMyBills();
-  } catch (err) {
-    showModal("เกิดข้อผิดพลาด", err.message);
+    }, 0);
   }
 }
 
@@ -158,6 +124,5 @@ async function submitPawnPayment() {
 HELPER
 ========================= */
 function formatPaymentDate(date) {
-  const d = new Date(date);
-  return d.toLocaleDateString("th-TH");
+  return new Date(date).toLocaleDateString("th-TH");
 }
