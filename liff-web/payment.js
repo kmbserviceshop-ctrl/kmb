@@ -56,7 +56,7 @@ const serviceFeeSatang = serviceFeeBaht * 100;           // แปลงเป�
 
 const qrData = generatePromptPayQR(
   SHOP_PROMPTPAY_QR,
-  serviceFeeSatang
+  serviceFeeBaht     // ✅ ส่ง “บาท” ตรง ๆ
 );
 
   renderCard(`
