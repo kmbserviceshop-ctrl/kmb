@@ -103,21 +103,28 @@ function openPayment(bill) {
     </div>
   `);
 
-  // ✅ สร้าง QR หลัง DOM พร้อม
-  if (serviceFee > 0) {
-    setTimeout(() => {
-      const qrEl = document.getElementById("qrBox");
-      if (!qrEl) return;
+  // ✅ สร้าง QR หลัง DOM + Library พร้อม
+if (serviceFee > 0) {
+  const waitForQRCode = () => {
+    if (typeof QRCode === "undefined") {
+      setTimeout(waitForQRCode, 100);
+      return;
+    }
 
-      qrEl.innerHTML = "";
-      new QRCode(qrEl, {
-        text: qrData,
-        width: 180,
-        height: 180,
-        correctLevel: QRCode.CorrectLevel.M,
-      });
-    }, 0);
-  }
+    const qrEl = document.getElementById("qrBox");
+    if (!qrEl) return;
+
+    qrEl.innerHTML = "";
+    new QRCode(qrEl, {
+      text: qrData,
+      width: 180,
+      height: 180,
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  };
+
+  waitForQRCode();
+}
 }
 
 /* =========================
