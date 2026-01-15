@@ -50,33 +50,61 @@ function openPayment(bill) {
   CURRENT_BILL = bill;
 
   const item = bill.pawn_items || {};
+  const dueDate = new Date(bill.due_date);
+  const newDueDate = new Date(dueDate);
+  newDueDate.setDate(newDueDate.getDate() + 15);
 
-  // 🔒 DB เก็บ "บาท"
-  const serviceFeeBaht = Number(bill?.service_fee ?? 0);
+  // 🔥 แยกหน่วยให้ชัด
+  const serviceFeeSatang = Number(bill?.service_fee ?? 0); // สตางค์ (ของจริง)
+  const serviceFeeBaht = serviceFeeSatang / 100;          // บาท (ไว้แสดงผล)
 
-  // ❗ ส่ง "บาท" ให้ QR
-  const qrData = generatePromptPayQR(
-    SHOP_PROMPTPAY_QR,
-    serviceFeeBaht
-  );
+  // ❗ QR รับ "บาท" แล้วไปแปลงเป็นสตางค์ข้างใน
+  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
 
   renderCard(`
-    <div class="bill-row" style="font-weight:600">
-      <span>ยอดต้องชำระ</span>
-      <span>${serviceFeeBaht.toLocaleString()} บาท</span>
+    <div class="top-bar">
+      <button class="back-btn" onclick="openMyBills()">←</button>
+      <div class="top-title">ต่ออายุบิล / ชำระค่างวด</div>
     </div>
 
-    <div style="text-align:center;margin:20px 0">
-      <div style="color:#888">สแกนเพื่อชำระ</div>
-      ${
-        serviceFeeBaht > 0
-          ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
-          : `<div style="color:#aaa;margin-top:20px">ไม่มีค่าบริการ</div>`
-      }
+    <div class="section-card">
+      <h3>${item.brand || ""} ${item.model || ""}</h3>
+      <p>ID : ${item.imei || item.sn || "-"}</p>
+
+      <hr/>
+
+      <div class="bill-row">
+        <span>ครบกำหนดเดิม</span>
+        <span>${formatPaymentDate(bill.due_date)}</span>
+      </div>
+
+      <div class="bill-row">
+        <span>กำหนดใหม่</span>
+        <span>${formatPaymentDate(newDueDate)}</span>
+      </div>
+
+      <div class="bill-row" style="font-weight:600">
+        <span>ยอดต้องชำระ</span>
+        <span>${serviceFeeBaht.toLocaleString()} บาท</span>
+      </div>
+
+      <hr style="opacity:.3"/>
+
+      <div style="text-align:center;margin:20px 0">
+        <div style="color:#888">สแกนเพื่อชำระ</div>
+        ${
+          serviceFeeSatang > 0
+            ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
+            : `<div style="color:#aaa;margin-top:20px">ไม่มีค่าบริการ</div>`
+        }
+      </div>
+
+      <input type="file" id="slipFile" accept="image/*"/>
+      <button class="menu-btn" onclick="submitPawnPayment()">ดำเนินการต่อจ้า</button>
     </div>
   `);
 
-  if (serviceFeeBaht > 0) {
+  if (serviceFeeSatang > 0) {
     const waitForQRCode = () => {
       if (typeof QRCode === "undefined") {
         setTimeout(waitForQRCode, 100);
