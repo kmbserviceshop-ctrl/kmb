@@ -25,25 +25,26 @@ function crc16(payload) {
 /* =========================
 GENERATE PROMPTPAY QR
 ========================= */
-function generatePromptPayQR(baseQR, amount) {
-  if (!amount || amount <= 0) return baseQR;
+function generatePromptPayQR(baseQR, amountBaht) {
+  // amountBaht = "บาท" เท่านั้น
+  const amountStr = Number(amountBaht).toFixed(2); // เช่น "20.00"
 
-  // ลบ CRC เดิม
-  let qr = baseQR.replace(/6304[0-9A-F]{4}$/, "");
+  // EMV Tag 54 (Amount)
+  const amountField =
+    "54" +
+    amountStr.length.toString().padStart(2, "0") +
+    amountStr;
 
-  // ลบ field 54 (amount) ที่อยู่ท้าย payload เท่านั้น
-  qr = qr.replace(/54\d{2}\d+$/, "");
+  // ตัด CRC เดิม (4 ตัวท้าย)
+  const withoutCRC = baseQR.slice(0, -4);
 
-  // บาท → สตางค์
-  const satang = Math.round(Number(amount) * 100);
-  const amt = String(satang);
+  // รวม payload
+  const payloadWithoutCRC = withoutCRC + amountField;
 
-  const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
+  // คำนวณ CRC ใหม่
+  const crc = calculateCRC(payloadWithoutCRC + "6304");
 
-  const payload = `${qr}${field54}6304`;
-  const crc = crc16(payload);
-
-  return payload + crc;
+  return payloadWithoutCRC + "6304" + crc;
 }
 
 function openPayment(bill) {
@@ -91,7 +92,7 @@ function openPayment(bill) {
       <hr style="opacity:.3"/>
 
       <div style="text-align:center;margin:20px 0">
-        <div style="color:#888">สแกนเพื่อชำระ</div>
+        <div style="color:#888">สแกนเพื่อชำระค่าบริการQR</div>
         ${
           serviceFeeSatang > 0
             ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
@@ -100,7 +101,7 @@ function openPayment(bill) {
       </div>
 
       <input type="file" id="slipFile" accept="image/*"/>
-      <button class="menu-btn" onclick="submitPawnPayment()">ดำเนินการต่อจ้า</button>
+      <button class="menu-btn" onclick="submitPawnPayment()">ดำเนินการต่อ</button>
     </div>
   `);
 
