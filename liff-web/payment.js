@@ -54,7 +54,6 @@ function openPayment(bill) {
 
   const serviceFee = Number(bill?.service_fee ?? 0);
   const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFee);
-  const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   renderCard(`
     <div class="top-bar">
@@ -87,9 +86,10 @@ function openPayment(bill) {
 
       <div style="text-align:center;margin:20px 0">
         <div style="color:#888">สแกนเพื่อชำระ</div>
+
         ${
           serviceFee > 0
-            ? `<img src="${qrImg}" style="margin:10px auto;width:180px;height:180px"/>`
+            ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
             : `<div style="color:#aaa;margin-top:20px">ไม่มีค่าบริการ</div>`
         }
       </div>
@@ -105,6 +105,19 @@ function openPayment(bill) {
       </button>
     </div>
   `);
+
+  /* ====== สร้าง QR หลัง render ====== */
+  if (serviceFee > 0) {
+    const qrEl = document.getElementById("qrBox");
+    if (qrEl) {
+      qrEl.innerHTML = ""; // กันซ้ำ
+      new QRCode(qrEl, {
+        text: qrData,
+        width: 180,
+        height: 180,
+      });
+    }
+  }
 }
 
 function renderPawnPaymentPage({ bill, customer }) {
