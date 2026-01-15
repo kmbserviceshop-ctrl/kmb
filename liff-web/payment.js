@@ -201,18 +201,19 @@ async function submitPawnPayment() {
     }
 
     const res = await fetch(
-      "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
-          "Authorization": `Bearer ${supabaseToken}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+  "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey":
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
+      "Authorization": `Bearer ${supabaseToken}`,
+     "x-line-access-token": liff.getAccessToken(),
+    },
+    body: JSON.stringify(payload),
+  }
+);
 
     const data = await res.json();
     if (!res.ok) throw data;
