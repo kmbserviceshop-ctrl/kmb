@@ -28,15 +28,19 @@ GENERATE PROMPTPAY QR
 function generatePromptPayQR(baseQR, amount) {
   if (!amount || amount <= 0) return baseQR;
 
-  const cleanQR = baseQR.replace(/54\d{2}\d+6304[0-9A-F]{4}$/, "");
+  // ลบ CRC เดิม
+  let qr = baseQR.replace(/6304[0-9A-F]{4}$/, "");
 
-  // ✅ บาท → สตางค์ (คูณครั้งเดียว)
+  // ลบ field 54 (amount) ที่อยู่ท้าย payload เท่านั้น
+  qr = qr.replace(/54\d{2}\d+$/, "");
+
+  // บาท → สตางค์
   const satang = Math.round(Number(amount) * 100);
   const amt = String(satang);
 
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
 
-  const payload = `${cleanQR}${field54}6304`;
+  const payload = `${qr}${field54}6304`;
   const crc = crc16(payload);
 
   return payload + crc;
