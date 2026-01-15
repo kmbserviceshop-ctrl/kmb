@@ -315,16 +315,12 @@ function renderPawnBill(bill, index) {
 }
 
 function openPawnPayment(bill) {
-  // ส่งข้อมูลบิลไปให้ payment.js
-  if (typeof renderPawnPaymentPage !== "function") {
+  if (typeof openPayment !== "function") {
     showModal("ผิดพลาด", "ไม่พบหน้า payment");
     return;
   }
 
-  renderPawnPaymentPage({
-    bill,
-    customer: CURRENT_CUSTOMER,
-  });
+  openPayment(bill);
 }
 
 function openPawnPaymentByIndex(index) {
