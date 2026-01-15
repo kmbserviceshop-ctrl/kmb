@@ -173,7 +173,7 @@ SUBMIT PAYMENT (BACKEND)
 ========================= */
 async function submitPawnPayment() {
   if (!CURRENT_BILL) {
-    alert("ไม่พบข้อมูลบิล");
+    alert("ไม่พบข้อมูลบิลกรุณาลองใหม่");
     return;
   }
 
