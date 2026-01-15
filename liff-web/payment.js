@@ -28,11 +28,12 @@ GENERATE PROMPTPAY QR
 function generatePromptPayQR(baseQR, amountBaht) {
   if (!amountBaht || amountBaht <= 0) return baseQR;
 
-  const cleanQR = baseQR.replace(/6304[0-9A-F]{4}$/, "");
+  // ❗ ลบทั้ง amount (54) และ CRC (6304XXXX)
+  let cleanQR = baseQR
+    .replace(/54\d{2}\d+/, "")     // ลบ amount เดิม
+    .replace(/6304[0-9A-F]{4}$/, ""); // ลบ CRC เดิม
 
-  // ✅ แปลงบาท → สตางค์ที่นี่จุดเดียว
   const satang = Math.round(Number(amountBaht) * 100);
-
   const amt = String(satang);
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
 
