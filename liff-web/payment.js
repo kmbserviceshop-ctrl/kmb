@@ -145,8 +145,15 @@ async function submitPawnPayment() {
     return;
   }
 
+  // ✅ 1. ดึง access token ก่อน
+  const accessToken = liff.getAccessToken();
+  if (!accessToken) {
+    alert("ไม่พบ LINE access token กรุณาเปิดผ่าน LINE");
+    return;
+  }
+
   const pawnTransactionId = CURRENT_BILL.id;
-  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์ (ของจริง)
+  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -158,27 +165,24 @@ async function submitPawnPayment() {
   const payload = {
     pawn_transaction_id: pawnTransactionId,
     amount: amount,
-    slip_base64: slipBase64, // null ได้
+    slip_base64: slipBase64,
   };
 
   try {
     const res = await fetch(
-      "https://YOUR_PROJECT_ID.supabase.co/functions/v1/payment-request",
+      "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${liff.getAccessToken()}`,
+          Authorization: `Bearer ${accessToken}`, // ✅ 2. ใช้ token ที่เช็คแล้ว
         },
         body: JSON.stringify(payload),
       }
     );
 
     const data = await res.json();
-
-    if (!res.ok) {
-      throw data;
-    }
+    if (!res.ok) throw data;
 
     alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
     liff.closeWindow();
