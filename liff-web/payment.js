@@ -25,15 +25,15 @@ function crc16(payload) {
 /* =========================
 GENERATE PROMPTPAY QR
 ========================= */
-function generatePromptPayQR(baseQR, amount) {
-  if (!amount || amount <= 0) return baseQR;
+function generatePromptPayQR(baseQR, amountBaht) {
+  if (!amountBaht || amountBaht <= 0) return baseQR;
 
   const cleanQR = baseQR.replace(/6304[0-9A-F]{4}$/, "");
 
-  // ✅ บาท → สตางค์ (ถูกต้อง)
-  const satang = Math.round(Number(amount) * 100);
-  const amt = String(satang);
+  // ✅ แปลงบาท → สตางค์ที่นี่จุดเดียว
+  const satang = Math.round(Number(amountBaht) * 100);
 
+  const amt = String(satang);
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
 
   const payload = `${cleanQR}${field54}6304`;
