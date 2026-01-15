@@ -26,19 +26,26 @@ function crc16(payload) {
 GENERATE PROMPTPAY QR
 ========================= */
 function generatePromptPayQR(baseQR, amountBaht) {
-  const amountStr = Number(amountBaht).toFixed(2); // เช่น "20.00"
+  if (!amountBaht || amountBaht <= 0) return baseQR;
 
-  const amountField =
-    "54" +
-    amountStr.length.toString().padStart(2, "0") +
-    amountStr;
+  // แปลง บาท → สตางค์ (integer)
+  const satang = Math.round(Number(amountBaht) * 100);
+  const amt = String(satang);
 
-  const withoutCRC = baseQR.slice(0, -4);
-  const payloadWithoutCRC = withoutCRC + amountField;
+  // ตัด CRC เดิม
+  let qr = baseQR.replace(/6304[0-9A-F]{4}$/i, "");
 
-  const crc = crc16(payloadWithoutCRC + "6304");
+  // ตัด field 54 เดิม (ถ้ามี)
+  qr = qr.replace(/54\d{2}\d+$/, "");
 
-  return payloadWithoutCRC + "6304" + crc;
+  // สร้าง field 54 ใหม่
+  const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
+
+  // รวม payload + CRC
+  const payload = `${qr}${field54}6304`;
+  const crc = crc16(payload);
+
+  return payload + crc;
 }
 
 function openPayment(bill) {
