@@ -137,6 +137,38 @@ function formatPaymentDate(date) {
 }
 
 /* =========================
+AUTH (LINE → SUPABASE)
+========================= */
+async function getSupabaseTokenFromLine() {
+  const accessToken = liff.getAccessToken();
+  if (!accessToken) throw new Error("no_line_token");
+
+  const profile = await liff.getProfile();
+
+  const res = await fetch(
+    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/line-auth",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "YOUR_SUPABASE_ANON_KEY",
+      },
+      body: JSON.stringify({
+        lineUserId: profile.userId,
+        displayName: profile.displayName,
+        pictureUrl: profile.pictureUrl,
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) throw data;
+
+  localStorage.setItem("sb_access_token", data.access_token);
+  return data.access_token;
+}
+
+/* =========================
 SUBMIT PAYMENT (BACKEND)
 ========================= */
 async function submitPawnPayment() {
@@ -145,15 +177,8 @@ async function submitPawnPayment() {
     return;
   }
 
-  // ✅ ดึง LINE access token
-  const accessToken = liff.getAccessToken();
-  if (!accessToken) {
-    alert("ไม่พบ LINE access token กรุณาเปิดผ่าน LINE");
-    return;
-  }
-
   const pawnTransactionId = CURRENT_BILL.id;
-  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์ (ของจริง)
+  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -164,40 +189,39 @@ async function submitPawnPayment() {
 
   const payload = {
     pawn_transaction_id: pawnTransactionId,
-    amount: amount,
-    slip_base64: slipBase64, // null ได้
+    amount,
+    slip_base64: slipBase64,
   };
 
   try {
+    // 🔐 ดึง Supabase JWT (จาก LINE)
+    let supabaseToken = localStorage.getItem("sb_access_token");
+    if (!supabaseToken) {
+      supabaseToken = await getSupabaseTokenFromLine();
+    }
+
     const res = await fetch(
       "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-
-          // ✅ จำเป็นสำหรับ Supabase Edge Function
           "apikey":
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
-
-          // ✅ ส่ง LINE access token ไปให้ backend
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${supabaseToken}`,
         },
         body: JSON.stringify(payload),
       }
     );
 
     const data = await res.json();
-
-    if (!res.ok) {
-      throw data;
-    }
+    if (!res.ok) throw data;
 
     alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
     liff.closeWindow();
   } catch (err) {
     console.error("payment-request error:", err);
-    alert(err.error || err.message || "เกิดข้อผิดพลาด");
+    alert(err?.error || err?.message || "เกิดข้อผิดพลาด");
   }
 }
 
