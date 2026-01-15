@@ -1,6 +1,7 @@
 /* =========================
 CONFIG
 ========================= */
+let CURRENT_CUSTOMER = null;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
@@ -56,7 +57,7 @@ async function init() {
 
     status.status === "guest"
   ? showGuestForm()
-  : showMemberMenu(status.customer);
+  : (CURRENT_CUSTOMER = status.customer, showMemberMenu(status.customer));
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
@@ -214,70 +215,74 @@ function maskPhone(phone) {
 /* =========================
 MENU ACTIONS
 ========================= */
-function openMyBills() {
-  alert("📄 บิลของฉัน\n(บิลฝาก / บิลผ่อน)\nกำลังพัฒนา");
+function maskLast6(value) {
+  if (!value) return "-";
+  return "••••••" + value.slice(-6);
 }
 
-function openMyBills() {
+async function openMyBills() {
+  const res = await callFn("get_my_pawn_bills", {
+    customer_id: CURRENT_CUSTOMER.customer_id,
+  });
+
+  const bills = res.bills || [];
+
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="init()">←</button>
+      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
       <div class="top-title">บิลของฉัน</div>
     </div>
 
-    <!-- ฝากของ -->
     <div class="bill-section">
       <h4>📦 บิลขายฝาก</h4>
-
-      <div class="bill-card">
-        <div class="bill-row">
-          <span>เลขที่บิล</span>
-          <span>#PD-10234</span>
-        </div>
-        <div class="bill-row">
-          <span>วันที่</span>
-          <span>12/01/2026</span>
-        </div>
-        <div class="bill-row">
-          <span>สถานะ</span>
-          <span class="bill-status">ยังไม่ไถ่ถอน</span>
-        </div>
-      </div>
-
-      <div class="bill-card">
-        <div class="bill-row">
-          <span>เลขที่บิล</span>
-          <span>#PD-10188</span>
-        </div>
-        <div class="bill-row">
-          <span>วันที่</span>
-          <span>02/12/2025</span>
-        </div>
-        <div class="bill-row">
-          <span>สถานะ</span>
-          <span class="bill-status warning">ครบกำหนด</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ผ่อน -->
-    <div class="bill-section">
-      <h4>📱 บิลผ่อน</h4>
-
-      <div class="bill-card">
-        <div class="bill-row">
-          <span>เลขที่สัญญา</span>
-          <span>#INS-55621</span>
-        </div>
-        <div class="bill-row">
-          <span>งวดปัจจุบัน</span>
-          <span>3 / 12</span>
-        </div>
-        <div class="bill-row">
-          <span>สถานะ</span>
-          <span class="bill-status">ปกติ</span>
-        </div>
-      </div>
+      ${
+        bills.length === 0
+          ? `<p style="color:#888">ไม่มีรายการฝาก</p>`
+          : bills.map(renderPawnBill).join("")
+      }
     </div>
   `);
+}
+
+
+function renderPawnBill(bill) {
+  const item = bill.pawn_items || {};
+  const statusText =
+    bill.status === "normal" ? "ปกติ" : "เกินกำหนด";
+
+  const statusClass =
+    bill.status === "normal" ? "bill-status" : "bill-status warning";
+
+  return `
+    <div class="bill-card">
+      <div class="bill-row" style="font-weight:600; display:flex; justify-content:space-between;">
+        <span>เลขที่บิล ${bill.contract_no}</span>
+        <span class="${statusClass}">${statusText}</span>
+      </div>
+
+      <div class="bill-row">
+        <span>วันที่</span>
+        <span>${bill.deposit_date}</span>
+      </div>
+
+      <div style="margin:10px 0;font-weight:600">
+        ${item.brand || ""} ${item.model || ""}
+      </div>
+
+      <div class="bill-row">
+        <span>IMEI / SN</span>
+        <span>${maskLast6(item.imei || item.sn)}</span>
+      </div>
+
+      <div class="bill-row">
+        <span>จำนวนเงิน</span>
+        <span>${Number(bill.deposit_amount).toLocaleString()} บาท</span>
+      </div>
+
+      <div class="bill-row">
+        <span>ครบกำหนด</span>
+        <span>${bill.due_date}</span>
+      </div>
+    </div>
+  `;
 }
