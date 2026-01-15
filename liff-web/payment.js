@@ -26,23 +26,17 @@ function crc16(payload) {
 GENERATE PROMPTPAY QR
 ========================= */
 function generatePromptPayQR(baseQR, amountBaht) {
-  // amountBaht = "บาท" เท่านั้น
   const amountStr = Number(amountBaht).toFixed(2); // เช่น "20.00"
 
-  // EMV Tag 54 (Amount)
   const amountField =
     "54" +
     amountStr.length.toString().padStart(2, "0") +
     amountStr;
 
-  // ตัด CRC เดิม (4 ตัวท้าย)
   const withoutCRC = baseQR.slice(0, -4);
-
-  // รวม payload
   const payloadWithoutCRC = withoutCRC + amountField;
 
-  // คำนวณ CRC ใหม่
-  const crc = calculateCRC(payloadWithoutCRC + "6304");
+  const crc = crc16(payloadWithoutCRC + "6304");
 
   return payloadWithoutCRC + "6304" + crc;
 }
