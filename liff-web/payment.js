@@ -28,9 +28,10 @@ GENERATE PROMPTPAY QR
 function generatePromptPayQR(baseQR, amount) {
   if (!amount || amount <= 0) return baseQR;
 
-  const cleanQR = baseQR.replace(/6304[0-9A-F]{4}$/, "");
+  // 🔥 ลบ amount (54xx...) + CRC เดิมออกให้หมด
+  const cleanQR = baseQR.replace(/54\d{2}\d+6304[0-9A-F]{4}$/, "");
 
-  // ✅ บาท → สตางค์ (ถูกต้อง)
+  // ✅ บาท → สตางค์ (คูณครั้งเดียว)
   const satang = Math.round(Number(amount) * 100);
   const amt = String(satang);
 
