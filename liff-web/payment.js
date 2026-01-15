@@ -61,12 +61,13 @@ function openPayment(bill) {
   const serviceFeeBaht = serviceFeeSatang / 100;          // บาท (ไว้แสดงผล)
 
   // ❗ QR รับ "บาท" แล้วไปแปลงเป็นสตางค์ข้างใน
-  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
+  //const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
+  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeSatang);
 
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMyBills()">←</button>
-      <div class="top-title">ต่ออายุบิล / ชำระค่างวด</div>
+      <div class="top-title">ต่ออายุบิล / ชำระค่างวดTest</div>
     </div>
 
     <div class="section-card">
