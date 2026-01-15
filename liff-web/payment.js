@@ -145,7 +145,7 @@ async function submitPawnPayment() {
     return;
   }
 
-  // ✅ 1. ดึง access token ก่อน
+  // ✅ ดึง LINE access token
   const accessToken = liff.getAccessToken();
   if (!accessToken) {
     alert("ไม่พบ LINE access token กรุณาเปิดผ่าน LINE");
@@ -153,7 +153,7 @@ async function submitPawnPayment() {
   }
 
   const pawnTransactionId = CURRENT_BILL.id;
-  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์
+  const amount = Number(CURRENT_BILL.service_fee ?? 0); // สตางค์ (ของจริง)
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -165,34 +165,39 @@ async function submitPawnPayment() {
   const payload = {
     pawn_transaction_id: pawnTransactionId,
     amount: amount,
-    slip_base64: slipBase64,
+    slip_base64: slipBase64, // null ได้
   };
 
   try {
     const res = await fetch(
-  "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+      "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
 
-      // ✅ สำคัญมาก (เพิ่มบรรทัดนี้)
-      "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
+          // ✅ จำเป็นสำหรับ Supabase Edge Function
+          "apikey":
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ",
 
-      // อันนี้คงไว้ (ถูกแล้ว)
-      Authorization: `Bearer ${liff.getAccessToken()}`,
-    },
-    body: JSON.stringify(payload),
-  }
-);
+          // ✅ ส่ง LINE access token ไปให้ backend
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await res.json();
-    if (!res.ok) throw data;
+
+    if (!res.ok) {
+      throw data;
+    }
 
     alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
     liff.closeWindow();
   } catch (err) {
-    alert(err.error || "เกิดข้อผิดพลาด");
+    console.error("payment-request error:", err);
+    alert(err.error || err.message || "เกิดข้อผิดพลาด");
   }
 }
 
