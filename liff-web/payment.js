@@ -52,12 +52,12 @@ function openPayment(bill) {
 
   // 🔥 แยกหน่วยให้ชัด
   const serviceFeeBaht   = Number(bill?.service_fee ?? 0); // บาทจาก DB
-const serviceFeeSatang = serviceFeeBaht * 100;           // แปลงเป็นสตางค์
+  const serviceFeeSatang = Number(bill?.service_fee ?? 0);   // บาทจาก DB          
 
-const qrData = generatePromptPayQR(
+  const qrData = generatePromptPayQR(
   SHOP_PROMPTPAY_QR,
   serviceFeeBaht     // ✅ ส่ง “บาท” ตรง ๆ
-);
+  );
 
   renderCard(`
     <div class="top-bar">
