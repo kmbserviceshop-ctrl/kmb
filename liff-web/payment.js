@@ -58,11 +58,11 @@ function openPayment(bill) {
 
   // 🔥 แยกหน่วยให้ชัด
   const serviceFeeSatang = Number(bill?.service_fee ?? 0); // สตางค์ (ของจริง)
-  const serviceFeeBaht = serviceFeeSatang / 100;          // บาท (ไว้แสดงผล)
+  //const serviceFeeBaht = serviceFeeSatang / 100;          // บาท (ไว้แสดงผล)
+  const serviceFeeBaht = Number(bill?.service_fee ?? 0);          // บาท (ไว้แสดงผล)
 
   // ❗ QR รับ "บาท" แล้วไปแปลงเป็นสตางค์ข้างใน
-  //const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
-  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeSatang);
+  const qrData = generatePromptPayQR(SHOP_PROMPTPAY_QR, serviceFeeBaht);
 
   renderCard(`
     <div class="top-bar">
