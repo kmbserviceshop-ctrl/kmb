@@ -135,3 +135,65 @@ HELPER(TEST)
 function formatPaymentDate(date) {
   return new Date(date).toLocaleDateString("th-TH");
 }
+
+/* =========================
+SUBMIT PAYMENT (BACKEND)
+========================= */
+async function submitPawnPayment() {
+  if (!CURRENT_BILL) {
+    alert("ไม่พบบิล");
+    return;
+  }
+
+  const pawnTransactionId = CURRENT_BILL.id; // 🔥 ใช้ id นี้เป็นหลัก
+  const serviceFeeSatang = Number(CURRENT_BILL?.service_fee ?? 0);
+  const amountBaht = serviceFeeSatang / 100;
+
+  const fileInput = document.getElementById("slipFile");
+  let slipBase64 = null;
+
+  if (fileInput && fileInput.files.length > 0) {
+    slipBase64 = await fileToBase64(fileInput.files[0]);
+  }
+
+  const payload = {
+    pawn_transaction_id: pawnTransactionId,
+    amount: amountBaht,       // ✅ ส่ง “บาท”
+    slip_base64: slipBase64,  // null ได้
+  };
+
+  try {
+    const res = await fetch(
+      "https://<PROJECT>.supabase.co/functions/v1/payment-request",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${liff.getAccessToken()}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok) throw data;
+
+    alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
+    liff.closeWindow();
+  } catch (err) {
+    alert(err.message || "เกิดข้อผิดพลาด");
+  }
+}
+
+/* =========================
+FILE → BASE64
+========================= */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
