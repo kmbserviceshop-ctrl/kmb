@@ -51,37 +51,86 @@ async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
 
+    // 🔹 Debug mode (ไม่เปิดจาก LINE)
     if (!liff.isInClient()) {
-  renderCard(`
-    <div class="section-card">
-      <h3>⚠️ Debug Mode</h3>
-      <p>ไม่ได้เปิดจาก LINE</p>
-      <button class="primary-btn" onclick="showGuestForm()">
-        เข้าโหมดทดสอบ
-      </button>
-    </div>
-  `);
-  return;
-}
+      renderCard(`
+        <div class="section-card">
+          <h3>⚠️ Debug Mode</h3>
+          <p>ไม่ได้เปิดจาก LINE</p>
+          <button class="primary-btn" onclick="showGuestForm()">
+            เข้าโหมดทดสอบ
+          </button>
+        </div>
+      `);
+      return;
+    }
 
+    // 🔹 ยังไม่ login
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
     }
 
+    // 🔹 ได้ profile จาก LINE
     const profile = await liff.getProfile();
+
+    // 🔹 เช็คสถานะจาก backend
     const status = await callFn("check_line_status", {
       line_user_id: profile.userId,
     });
 
-    status.status === "guest"
-  ? showGuestForm()
-  : (CURRENT_CUSTOMER = status.customer, showMemberMenu(status.customer));
+    /* =========================
+       GUEST (ยังไม่ผูกบัญชี)
+    ========================= */
+    if (status.status === "guest") {
+      showGuestForm();
+      return;
+    }
+
+    /* =========================
+       MEMBER
+    ========================= */
+    CURRENT_CUSTOMER = status.customer;
+
+    const consentStatus =
+      status.customer?.consent_status || "pending";
+
+    /* =========================
+       REVOKED (ถอนความยินยอม)
+    ========================= */
+    if (consentStatus === "revoked") {
+      showModal(
+        "ไม่สามารถใช้งานได้",
+        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้"
+      );
+
+      const originalClose = closeModal;
+      closeModal = function () {
+        modal.style.display = "none";
+        closeModal = originalClose;
+        liff.closeWindow();
+      };
+      return;
+    }
+
+    /* =========================
+       PENDING (ยังไม่ให้ความยินยอม)
+    ========================= */
+    if (consentStatus === "pending") {
+      showConsentPage(CURRENT_CUSTOMER); // 👈 หน้า PDPA (C2)
+      return;
+    }
+
+    /* =========================
+       ACCEPTED (ใช้งานได้ปกติ)
+    ========================= */
+    showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
   }
 }
+
 init();
 
 /* =========================
@@ -253,7 +302,8 @@ async function verifyCustomer() {
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
   } finally {
-    sresetButton(btn, "ตรวจสอบข้อมูล");
+
+    resetButton(btn, "ตรวจสอบข้อมูล");
   }
 }
 
@@ -539,6 +589,16 @@ function openSettings() {
 
       <div class="settings-divider"></div>
 
+<div class="settings-item"
+     onclick="confirmRevokeConsent()">
+  <div class="settings-icon">⚠️</div>
+  <div class="settings-text">ถอนความยินยอมในการใช้ข้อมูล</div>
+</div>
+
+
+
+      <div class="settings-divider"></div>
+
       <!-- Logout -->
       <div class="settings-item"
            onclick="logout()">
@@ -548,4 +608,146 @@ function openSettings() {
 
     </div>
   `);
+}
+
+/* =========================
+PDPA CONSENT UI
+========================= */
+function showConsentPage() {
+  renderCard(`
+    <div class="top-bar">
+      <div class="top-title">ความเป็นส่วนตัว</div>
+    </div>
+
+    <div class="section-card">
+
+      <div class="menu-title">
+        การขอความยินยอมในการเก็บข้อมูลส่วนบุคคล
+      </div>
+
+      <div style="font-size:14px; color:#374151; line-height:1.6; margin-bottom:16px;">
+        KPOS จำเป็นต้องใช้ข้อมูลของท่านเพื่อให้บริการ เช่น
+        การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล และการติดต่อร้านค้า
+      </div>
+
+      <div style="font-size:14px; color:#374151; line-height:1.6; margin-bottom:16px;">
+        <strong>ข้อมูลที่จัดเก็บ</strong>
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li>ชื่อ – นามสกุล</li>
+          <li>เบอร์โทรศัพท์</li>
+          <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
+        </ul>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <input type="checkbox" id="consentCheck" />
+        <label for="consentCheck" style="font-size:14px;">
+          ข้าพเจ้ายินยอมให้ KPOS เก็บและใช้ข้อมูลส่วนบุคคล
+        </label>
+      </div>
+
+      <button
+        id="consentAcceptBtn"
+        class="menu-btn"
+        disabled
+        onclick="acceptConsent()"
+      >
+        ✅ ยินยอม
+      </button>
+
+      <button
+        class="menu-btn secondary"
+        style="margin-top:10px"
+        onclick="declineConsent()"
+      >
+        ❌ ไม่ยินยอม
+      </button>
+
+    </div>
+  `);
+
+  const checkbox = document.getElementById("consentCheck");
+  const btn = document.getElementById("consentAcceptBtn");
+
+  checkbox.addEventListener("change", () => {
+    btn.disabled = !checkbox.checked;
+  });
+}
+
+async function acceptConsent() {
+  try {
+    const profile = await liff.getProfile();
+
+    await callFn("accept_consent", {
+      line_user_id: profile.userId,
+    });
+
+    showModal("ขอบคุณ", "คุณได้ให้ความยินยอมเรียบร้อยแล้ว");
+
+    const originalClose = closeModal;
+    closeModal = function () {
+      modal.style.display = "none";
+      closeModal = originalClose;
+      showMemberMenu(CURRENT_CUSTOMER);
+    };
+
+  } catch (err) {
+    showModal("เกิดข้อผิดพลาด", err.message || "ไม่สามารถบันทึกความยินยอมได้");
+  }
+}
+
+function declineConsent() {
+  showModal(
+    "ไม่สามารถใช้งานได้",
+    "หากไม่ยินยอม ระบบจะไม่สามารถให้บริการได้"
+  );
+
+  const originalClose = closeModal;
+  closeModal = function () {
+    modal.style.display = "none";
+    closeModal = originalClose;
+    liff.closeWindow();
+  };
+}
+
+function confirmRevokeConsent() {
+  showModal(
+    "ถอนความยินยอม",
+    "หากคุณถอนความยินยอม\nคุณจะไม่สามารถใช้บริการ KPOS ได้อีก\n\nต้องการดำเนินการต่อหรือไม่?"
+  );
+
+  const originalClose = closeModal;
+  closeModal = function () {
+    modal.style.display = "none";
+    closeModal = originalClose;
+    revokeConsent();
+  };
+}
+
+async function revokeConsent() {
+  try {
+    const profile = await liff.getProfile();
+
+    await callFn("revoke_consent", {
+      line_user_id: profile.userId,
+    });
+
+    showModal(
+      "ถอนความยินยอมแล้ว",
+      "ระบบได้บันทึกการถอนความยินยอมของคุณเรียบร้อย"
+    );
+
+    const originalClose = closeModal;
+    closeModal = function () {
+      modal.style.display = "none";
+      closeModal = originalClose;
+      liff.closeWindow(); // ⛔ ปิดทันที
+    };
+
+  } catch (err) {
+    showModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถถอนความยินยอมได้"
+    );
+  }
 }
