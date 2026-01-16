@@ -308,28 +308,26 @@ function renderPawnBill(bill, index) {
         <span>${formatDate(bill.due_date)}</span>
       </div>
 
-      ${bill.is_checking_payment
-  ? `
-    <button
-      class="menu-btn secondary"
-      style="margin-top:10px"
-      onclick="showModal(
-        'กำลังตรวจสอบ',
-        'สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งเตือนภายใน 24 ชั่วโมง'
-      )"
-    >
-      ⏳ กำลังตรวจสอบ
-    </button>
-  `
-  : `
-    <button
-      class="menu-btn"
-      style="margin-top:10px"
-      onclick="openPawnPaymentByIndex(${index})"
-    >
-      💳 ชำระ / ต่อดอก
-    </button>
-  `
+      ${
+  bill.is_checking_payment
+    ? `
+      <button
+        class="menu-btn secondary"
+        style="margin-top:10px"
+        onclick="showCheckingPopup()"
+      >
+        ⏳ กำลังตรวจสอบ
+      </button>
+    `
+    : `
+      <button
+        class="menu-btn"
+        style="margin-top:10px"
+        onclick="openPawnPaymentByIndex(${index})"
+      >
+        💳 ชำระ / ต่อดอก
+      </button>
+    `
 }
 
 
