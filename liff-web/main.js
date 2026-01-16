@@ -144,7 +144,7 @@ function showGuestForm() {
 
       <button
   id="verifyBtn"
-  class="menu-btn"
+  class="primary-bt"
   onclick="verifyCustomer()"
 >
   ตรวจสอบข้อมูล
