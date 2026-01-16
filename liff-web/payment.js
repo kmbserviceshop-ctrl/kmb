@@ -103,7 +103,9 @@ function openPayment(bill) {
       </div>
 
       <input type="file" id="slipFile" accept="image/*"/>
-      <button class="menu-btn" onclick="submitPawnPayment()">ดำเนินการต่อ</button>
+      <button class="menu-btn" onclick="submitPawnPayment(this)">
+  💳 ดำเนินการต่อ
+</button>
     </div>
   `);
 
@@ -171,7 +173,12 @@ async function getSupabaseTokenFromLine() {
 /* =========================
 SUBMIT PAYMENT (BACKEND)
 ========================= */
-async function submitPawnPayment() {
+async function submitPawnPayment(btn) {
+  if (!btn) return;
+
+  // ✅ กันกดซ้ำ (สำคัญมาก)
+  if (btn.classList.contains("loading")) return;
+
   if (!CURRENT_BILL) {
     alert("ไม่พบข้อมูลบิล");
     return;
@@ -183,6 +190,9 @@ async function submitPawnPayment() {
     alert("ไม่พบ LINE access token");
     return;
   }
+
+  // 🔄 เริ่ม loading
+  setButtonLoading(btn, "กำลังส่งข้อมูล");
 
   const pawnTransactionId = CURRENT_BILL.id;
   const amount = Number(CURRENT_BILL.service_fee ?? 0);
@@ -208,10 +218,10 @@ async function submitPawnPayment() {
         headers: {
           "Content-Type": "application/json",
 
-          // ✅ Supabase auth (แบบ main.js)
+          // ✅ Supabase auth
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 
-          // ✅ LINE token (ที่ backend ต้องการ)
+          // ✅ LINE token
           "x-line-access-token": lineAccessToken,
         },
         body: JSON.stringify(payload),
@@ -223,9 +233,13 @@ async function submitPawnPayment() {
 
     alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
     liff.closeWindow();
+
   } catch (err) {
     console.error("payment-request error:", err);
     alert(err?.error || err?.message || "เกิดข้อผิดพลาด");
+
+    // 🔁 คืนปุ่มเมื่อ error
+    resetButton(btn, "💳 ดำเนินการต่อ");
   }
 }
 
