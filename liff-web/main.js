@@ -109,15 +109,14 @@ function showGuestForm() {
         </p>
       </div>
 
+      <!-- เลขบัตร / Passport -->
       <div style="margin-bottom:14px;">
         <label style="font-size:13px;color:#374151;">
-          เลขบัตรประชาชน
+          เลขบัตรประชาชน / Passport
         </label>
         <input
           id="id_card"
-          inputmode="numeric"
-          maxlength="13"
-          placeholder="กรอกเลขบัตรประชาชน"
+          placeholder="กรอกเลขบัตรประชาชน หรือ Passport"
           style="
             width:100%;
             height:44px;
@@ -130,7 +129,8 @@ function showGuestForm() {
         />
       </div>
 
-      <div style="margin-bottom:18px;">
+      <!-- เบอร์โทร -->
+      <div style="margin-bottom:14px;">
         <label style="font-size:13px;color:#374151;">
           เบอร์โทรศัพท์
         </label>
@@ -151,26 +151,43 @@ function showGuestForm() {
         />
       </div>
 
+      <!-- ยอมรับเงื่อนไข -->
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+        <input
+          type="checkbox"
+          id="acceptTerms"
+          style="margin-top:4px;"
+        />
+        <label for="acceptTerms" style="font-size:13px;color:#374151;line-height:1.4;">
+          ยอมรับเงื่อนไขการให้บริการ
+        </label>
+      </div>
+
+      <!-- ปุ่ม -->
       <button
         id="verifyBtn"
         class="primary-btn"
         onclick="verifyCustomer()"
+        disabled
       >
         ตรวจสอบข้อมูล
       </button>
 
     </div>
   `);
+
+  // เปิด/ปิดปุ่มตามการติ๊ก
+  const checkbox = document.getElementById("acceptTerms");
+  const btn = document.getElementById("verifyBtn");
+
+  checkbox.addEventListener("change", () => {
+    btn.disabled = !checkbox.checked;
+  });
 }
 
 /* =========================
 VERIFY CUSTOMER
 ========================= */
-const accept = document.getElementById("acceptTerms");
-if (!accept || !accept.checked) {
-  showModal("กรุณายอมรับเงื่อนไข", "กรุณายอมรับเงื่อนไขการให้บริการก่อนดำเนินการ");
-  return;
-}
 
 async function verifyCustomer() {
   const idCard = document.getElementById("id_card").value.trim();
@@ -187,7 +204,8 @@ async function verifyCustomer() {
     return;
   }
 
-  setButtonLoading(btn, "กำลังตรวจสอบ");
+  //setButtonLoading(btn, "กำลังตรวจสอบ");
+  resetButton(btn, "ตรวจสอบข้อมูล");
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -440,42 +458,4 @@ function openPawnPaymentByIndex(index) {
   }
 
   openPawnPayment(bill);
-}
-
-async function init() {
-  try {
-    console.log("INIT START");
-
-    await liff.init({ liffId: LIFF_ID });
-    console.log("LIFF INIT OK");
-
-    if (!liff.isInClient()) {
-      renderCard(`<h3>❌ กรุณาเปิดจาก LINE</h3>`);
-      return;
-    }
-
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
-
-    console.log("LOGGED IN");
-
-    const profile = await liff.getProfile();
-    console.log("PROFILE OK", profile);
-
-    const status = await callFn("check_line_status", {
-      line_user_id: profile.userId,
-    });
-
-    console.log("STATUS", status);
-
-    status.status === "guest"
-      ? showGuestForm()
-      : showMemberMenu(status.customer);
-
-  } catch (err) {
-    console.error(err);
-    showModal("เกิดข้อผิดพลาด", err.message);
-  }
 }
