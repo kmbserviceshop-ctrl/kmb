@@ -265,34 +265,64 @@ function showMemberMenu(customer) {
   const phone = maskPhone(customer.phone || "");
 
   renderCard(`
-    <div class="app-page">
+    <div class="app-page home-page">
 
-      <!-- Welcome Card -->
-      <div class="section-card">
-        <div class="member-header">
-          <h3>ยินดีต้อนรับ</h3>
-          <div class="member-name">คุณ ${name}</div>
-          <div class="member-phone">เบอร์: ${phone}</div>
+      <!-- Header -->
+      <div class="home-header">
+        <div>
+          <div class="home-title">หน้าหลัก</div>
+          <div class="home-sub">ยินดีต้อนรับ</div>
+        </div>
 
-          <button class="logout-btn" onclick="logout()">
-            ออกจากระบบ
-          </button>
+        <div class="home-avatar">
+          <span>👤</span>
         </div>
       </div>
 
-      <!-- Menu Card -->
+      <!-- Profile Card -->
       <div class="section-card">
-        <div class="menu-title">เมนูบริการ</div>
+        <div class="member-name">คุณ ${name}</div>
+        <div class="member-phone">เบอร์: ${phone}</div>
 
-        <button class="menu-btn" onclick="openMyBills(this)">
-  📄 บิลของฉัน
-</button>
-
-        <button class="menu-btn secondary" disabled>
-          🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
+        <button class="logout-btn" onclick="logout()">
+          ออกจากระบบ
         </button>
       </div>
 
+      <!-- Menu Grid -->
+      <div class="menu-grid">
+
+        <button class="menu-tile active" onclick="openMyBills(this)">
+          <div class="tile-icon">📄</div>
+          <div class="tile-text">บิลของฉัน</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">💳</div>
+          <div class="tile-text">ชำระเงิน</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📦</div>
+          <div class="tile-text">รายการอื่น</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">⚙️</div>
+          <div class="tile-text">ตั้งค่า</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📞</div>
+          <div class="tile-text">ติดต่อร้าน</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">🚧</div>
+          <div class="tile-text">เร็ว ๆ นี้</div>
+        </button>
+
+      </div>
     </div>
   `);
 }
