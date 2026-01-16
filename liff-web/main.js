@@ -503,31 +503,48 @@ function openSettings() {
       <div class="top-title">ตั้งค่า</div>
     </div>
 
-    <div class="section-card">
+    <div class="settings-card">
 
-      <div class="menu-title">การตั้งค่าทั่วไป</div>
+      <!-- การตั้งค่าทั่วไป -->
+      <div class="menu-title" style="padding: 12px 18px 6px;">
+        การตั้งค่าทั่วไป
+      </div>
 
-      <button class="menu-btn" onclick="showModal('เร็ว ๆ นี้','ตั้งค่าการแจ้งเตือน')">
-        🔔 ตั้งค่าการแจ้งเตือน
-      </button>
+      <div class="settings-item"
+           onclick="showModal('เร็ว ๆ นี้','ตั้งค่าการแจ้งเตือน')">
+        <div class="settings-icon">🔔</div>
+        <div class="settings-text">ตั้งค่าการแจ้งเตือน</div>
+        <div class="settings-arrow">›</div>
+      </div>
+      <div class="settings-divider"></div>
 
-      <button class="menu-btn" onclick="showModal('ความยินยอม','จัดการความยินยอมข้อมูล')">
-        👤 การจัดการความยินยอม
-      </button>
+      <div class="settings-item"
+           onclick="showModal('ความยินยอม','การจัดการความยินยอมข้อมูล')">
+        <div class="settings-icon">👤</div>
+        <div class="settings-text">การจัดการความยินยอม</div>
+        <div class="settings-arrow">›</div>
+      </div>
 
-      <div class="divider"></div>
+      <!-- ข้อกำหนด -->
+      <div class="menu-title" style="padding: 18px 18px 6px;">
+        ข้อกำหนดและความเป็นส่วนตัว
+      </div>
 
-      <div class="menu-title">ข้อกำหนดและความเป็นส่วนตัว</div>
+      <div class="settings-item"
+           onclick="showModal('ข้อกำหนดและเงื่อนไข','รายละเอียดข้อกำหนดการใช้งาน')">
+        <div class="settings-icon">📄</div>
+        <div class="settings-text">ข้อกำหนดและเงื่อนไข</div>
+        <div class="settings-arrow">›</div>
+      </div>
 
-      <button class="menu-btn" onclick="showModal('ข้อกำหนด','ข้อกำหนดและเงื่อนไขการใช้บริการ')">
-        📄 ข้อกำหนดและเงื่อนไข
-      </button>
+      <div class="settings-divider"></div>
 
-      <div class="divider"></div>
-
-      <button class="menu-btn secondary" onclick="logout()">
-        🚪 ออกจากระบบ
-      </button>
+      <!-- Logout -->
+      <div class="settings-item"
+           onclick="logout()">
+        <div class="settings-icon">🚪</div>
+        <div class="settings-text">ออกจากระบบ</div>
+      </div>
 
     </div>
   `);
