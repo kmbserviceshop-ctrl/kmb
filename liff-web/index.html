@@ -8,6 +8,10 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
+  * {
+  box-sizing: border-box;
+}
+
   <style>
   body {
     margin: 0;
@@ -200,18 +204,15 @@
   padding: 16px;
 }
 
-/* card ย่อย */
-.section-card {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 20px 18px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-  margin-bottom: 16px;
-}
 
 .section-card {
-  padding: 18px 18px;     /* จากเดิมที่อึดอัด */
+  width: 100%;
+  background: #ffffff;
+  max-width: 420px;
+  padding: 18px 18px;  
+  margin: 0 auto;   /* จัดกึ่งกลางจอ */
 }
+
 
 .member-header h3 {
   font-size: 18px;
