@@ -754,36 +754,33 @@ async function revokeConsent() {
 }
 
 function showConfirmModal(title, message, onConfirm) {
-  modalTitle.innerText = title;
-  modalMessage.innerText = message;
+  const modalContent = document.getElementById("modalContent");
 
-  modal.innerHTML = `
-    <div class="modal">
-      <h4>${title}</h4>
-      <p style="white-space:pre-line">${message}</p>
+  modalContent.innerHTML = `
+    <h4>${title}</h4>
+    <p style="white-space:pre-line">${message}</p>
 
-      <button class="primary-btn" id="confirmBtn">
-  ยืนยันทำรายการ
-</button>
+    <button class="primary-btn" id="confirmBtn">
+      ยืนยันทำรายการ
+    </button>
 
-<button
-  class="primary-btn secondary"
-  id="cancelBtn"
-  style="margin-top:8px"
->
-  ยกเลิกทำรายการ
-</button>
-    </div>
+    <button
+      class="primary-btn secondary-btn"
+      id="cancelBtn"
+      style="margin-top:8px"
+    >
+      ยกเลิกทำรายการ
+    </button>
   `;
 
   modal.style.display = "flex";
 
   document.getElementById("cancelBtn").onclick = () => {
-    modal.style.display = "none"; // ❌ ไม่แตะ backend
+    closeModal(); // ✅ ปิดถูกต้อง
   };
 
   document.getElementById("confirmBtn").onclick = () => {
-    modal.style.display = "none";
-    onConfirm(); // ✅ ค่อยไปแตะ backend
+    closeModal();
+    onConfirm();
   };
 }
