@@ -283,10 +283,6 @@ function showMemberMenu(customer) {
       <div class="section-card">
         <div class="member-name">คุณ ${name}</div>
         <div class="member-phone">เบอร์: ${phone}</div>
-
-        <button class="logout-btn" onclick="logout()">
-          ออกจากระบบ
-        </button>
       </div>
 
       <!-- Menu Grid -->
