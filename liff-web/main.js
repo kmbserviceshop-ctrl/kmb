@@ -105,7 +105,9 @@ function showGuestForm() {
       </div>
 
       <div style="margin-bottom:14px;">
-        <label style="font-size:13px;color:#374151;">เลขบัตรประชาชน</label>
+        <label style="font-size:13px;color:#374151;">
+          เลขบัตรประชาชน
+        </label>
         <input
           id="id_card"
           inputmode="numeric"
@@ -124,7 +126,9 @@ function showGuestForm() {
       </div>
 
       <div style="margin-bottom:18px;">
-        <label style="font-size:13px;color:#374151;">เบอร์โทรศัพท์</label>
+        <label style="font-size:13px;color:#374151;">
+          เบอร์โทรศัพท์
+        </label>
         <input
           id="phone"
           inputmode="numeric"
@@ -143,12 +147,12 @@ function showGuestForm() {
       </div>
 
       <button
-  id="verifyBtn"
-  class="primary-bt"
-  onclick="verifyCustomer()"
->
-  ตรวจสอบข้อมูล
-</button>
+        id="verifyBtn"
+        class="primary-btn"
+        onclick="verifyCustomer()"
+      >
+        ตรวจสอบข้อมูล
+      </button>
 
     </div>
   `);
