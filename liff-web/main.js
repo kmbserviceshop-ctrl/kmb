@@ -303,7 +303,7 @@ function showMemberMenu(customer) {
           <div class="tile-text">รายการอื่น</div>
         </button>
 
-        <button class="menu-tile disabled" disabled>
+        <button class="menu-tile" onclick="openSettings()">
   <div class="tile-icon">⚙️</div>
   <div class="tile-text">ตั้งค่า</div>
 </button>
