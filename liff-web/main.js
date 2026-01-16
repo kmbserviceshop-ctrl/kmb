@@ -304,9 +304,9 @@ function showMemberMenu(customer) {
         </button>
 
         <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">⚙️</div>
-          <div class="tile-text">ตั้งค่า</div>
-        </button>
+  <div class="tile-icon">⚙️</div>
+  <div class="tile-text">ตั้งค่า</div>
+</button>
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📞</div>
@@ -492,4 +492,43 @@ function openPawnPaymentByIndex(index) {
   }
 
   openPawnPayment(bill);
+}
+/* =========================
+Settings Page
+========================= */
+function openSettings() {
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
+      <div class="top-title">ตั้งค่า</div>
+    </div>
+
+    <div class="section-card">
+
+      <div class="menu-title">การตั้งค่าทั่วไป</div>
+
+      <button class="menu-btn" onclick="showModal('เร็ว ๆ นี้','ตั้งค่าการแจ้งเตือน')">
+        🔔 ตั้งค่าการแจ้งเตือน
+      </button>
+
+      <button class="menu-btn" onclick="showModal('ความยินยอม','จัดการความยินยอมข้อมูล')">
+        👤 การจัดการความยินยอม
+      </button>
+
+      <div class="divider"></div>
+
+      <div class="menu-title">ข้อกำหนดและความเป็นส่วนตัว</div>
+
+      <button class="menu-btn" onclick="showModal('ข้อกำหนด','ข้อกำหนดและเงื่อนไขการใช้บริการ')">
+        📄 ข้อกำหนดและเงื่อนไข
+      </button>
+
+      <div class="divider"></div>
+
+      <button class="menu-btn secondary" onclick="logout()">
+        🚪 ออกจากระบบ
+      </button>
+
+    </div>
+  `);
 }
