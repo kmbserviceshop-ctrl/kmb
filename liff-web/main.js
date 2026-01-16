@@ -204,8 +204,7 @@ async function verifyCustomer() {
     return;
   }
 
-  //setButtonLoading(btn, "กำลังตรวจสอบ");
-  resetButton(btn, "ตรวจสอบข้อมูล");
+  setButtonLoading(btn, "กำลังตรวจสอบ");
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -232,6 +231,7 @@ async function verifyCustomer() {
     if (bind.success) {
   showModal("สมัครสำเร็จ", "ยินดีต้อนรับสมาชิก KPOS");
 
+
   // 🔹 set customer ให้ session ปัจจุบัน
   CURRENT_CUSTOMER = {
     customer_id: result.customer_id,
@@ -253,7 +253,7 @@ async function verifyCustomer() {
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
   } finally {
-    setButtonLoading(btn, "กำลังตรวจสอบ");
+    sresetButton(btn, "ตรวจสอบข้อมูล");
   }
 }
 
@@ -284,9 +284,9 @@ function showMemberMenu(customer) {
       <div class="section-card">
         <div class="menu-title">เมนูบริการ</div>
 
-        <button class="menu-btn" onclick="openMyBills()">
-          📄 บิลของฉัน
-        </button>
+        <button class="menu-btn" onclick="openMyBills(this)">
+  📄 บิลของฉัน
+</button>
 
         <button class="menu-btn secondary" disabled>
           🚧 บริการอื่น ๆ (เร็ว ๆ นี้)
@@ -342,31 +342,39 @@ function maskLast6(value) {
   return "••••••" + value.slice(-6);
 }
 
-async function openMyBills() {
-  const res = await callFn("get_my_pawn_bills", {
-    customer_id: CURRENT_CUSTOMER.customer_id,
-  });
+async function openMyBills(btn) {
+  // ✅ เพิ่ม: loading บนปุ่ม
+  setButtonLoading(btn, "กำลังโหลด");
 
-  const bills = res.bills || [];
-  CURRENT_BILLS = bills;
+  try {
+    const res = await callFn("get_my_pawn_bills", {
+      customer_id: CURRENT_CUSTOMER.customer_id,
+    });
 
-  renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
-      <div class="top-title">บิลของฉัน</div>
-    </div>
+    const bills = res.bills || [];
+    CURRENT_BILLS = bills;
 
-    <div class="bill-section">
-      <h4>📦 บิลขายฝาก</h4>
-      ${
-        bills.length === 0
-          ? `<p style="color:#888">ไม่มีรายการฝาก</p>`
-          : bills.map((bill, i) => renderPawnBill(bill, i)).join("")
-      }
-    </div>
-  `);
+    renderCard(`
+      <div class="top-bar">
+        <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
+        <div class="top-title">บิลของฉัน</div>
+      </div>
+
+      <div class="bill-section">
+        <h4>📦 บิลขายฝาก</h4>
+        ${
+          bills.length === 0
+            ? `<p style="color:#888">ไม่มีรายการฝาก</p>`
+            : bills.map((bill, i) => renderPawnBill(bill, i)).join("")
+        }
+      </div>
+    `);
+
+  } catch (err) {
+    showModal("เกิดข้อผิดพลาด", err.message || "ไม่สามารถโหลดบิลได้");
+    resetButton(btn, "📄 บิลของฉัน");
+  }
 }
-
 
 function renderPawnBill(bill, index) {
   const item = bill.pawn_items || {};
