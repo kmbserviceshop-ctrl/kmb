@@ -308,7 +308,7 @@ function renderPawnBill(bill, index) {
         <span>${formatDate(bill.due_date)}</span>
       </div>
 
-      ${
+     ${
   bill.is_checking_payment
     ? `
       <button
@@ -325,7 +325,7 @@ function renderPawnBill(bill, index) {
         style="margin-top:10px"
         onclick="openPawnPaymentByIndex(${index})"
       >
-        💳 ชำระ / ต่อดอก
+        💳 ชำระค่างวด / ต่ออายุบิล
       </button>
     `
 }
