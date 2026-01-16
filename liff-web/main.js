@@ -104,15 +104,14 @@ function showGuestForm() {
         </p>
       </div>
 
+      <!-- เลขบัตร / Passport -->
       <div style="margin-bottom:14px;">
         <label style="font-size:13px;color:#374151;">
-          เลขบัตรประชาชน
+          เลขบัตรประชาชน / Passport
         </label>
         <input
           id="id_card"
-          inputmode="numeric"
-          maxlength="13"
-          placeholder="กรอกเลขบัตรประชาชน"
+          placeholder="กรอกเลขบัตรประชาชน หรือ Passport"
           style="
             width:100%;
             height:44px;
@@ -125,7 +124,8 @@ function showGuestForm() {
         />
       </div>
 
-      <div style="margin-bottom:18px;">
+      <!-- เบอร์โทร -->
+      <div style="margin-bottom:14px;">
         <label style="font-size:13px;color:#374151;">
           เบอร์โทรศัพท์
         </label>
@@ -146,21 +146,49 @@ function showGuestForm() {
         />
       </div>
 
+      <!-- ยอมรับเงื่อนไข -->
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+        <input
+          type="checkbox"
+          id="acceptTerms"
+          style="margin-top:4px;"
+        />
+        <label for="acceptTerms" style="font-size:13px;color:#374151;line-height:1.4;">
+          ยอมรับเงื่อนไขการให้บริการ
+        </label>
+      </div>
+
+      <!-- ปุ่ม -->
       <button
         id="verifyBtn"
         class="primary-btn"
         onclick="verifyCustomer()"
+        disabled
       >
         ตรวจสอบข้อมูล
       </button>
 
     </div>
   `);
+
+  // เปิด/ปิดปุ่มตามการติ๊ก
+  const checkbox = document.getElementById("acceptTerms");
+  const btn = document.getElementById("verifyBtn");
+
+  checkbox.addEventListener("change", () => {
+    btn.disabled = !checkbox.checked;
+  });
 }
 
 /* =========================
 VERIFY CUSTOMER
 ========================= */
+const accept = document.getElementById("acceptTerms");
+if (!accept || !accept.checked) {
+  showModal("กรุณายอมรับเงื่อนไข", "กรุณายอมรับเงื่อนไขการให้บริการก่อนดำเนินการ");
+  return;
+}
+
 async function verifyCustomer() {
   const idCard = document.getElementById("id_card").value.trim();
   const phone = document.getElementById("phone").value.trim();
