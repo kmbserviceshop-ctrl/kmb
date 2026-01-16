@@ -647,21 +647,21 @@ function showConsentPage() {
       </div>
 
       <button
-        id="consentAcceptBtn"
-        class="menu-btn"
-        disabled
-        onclick="acceptConsent()"
-      >
-        ✅ ยินยอม
-      </button>
+  id="consentAcceptBtn"
+  class="primary-btn"
+  disabled
+  onclick="acceptConsent()"
+>
+  ยินยอมและใช้งานต่อ
+</button>
 
-      <button
-        class="menu-btn secondary"
-        style="margin-top:10px"
-        onclick="declineConsent()"
-      >
-        ❌ ไม่ยินยอม
-      </button>
+<button
+  class="primary-btn secondary-btn"
+  style="margin-top:12px"
+  onclick="declineConsent()"
+>
+  ไม่ยินยอม
+</button>
 
     </div>
   `);
