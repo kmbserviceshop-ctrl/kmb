@@ -73,6 +73,13 @@ function renderCard(html) {
   document.getElementById("app").innerHTML = html;
 }
 
+function showCheckingPopup() {
+  showModal(
+    "กำลังตรวจสอบการทำรายการ",
+    "สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งภายใน 24 ชั่วโมง"
+  );
+}
+
 /* =========================
 GUEST FORM
 ========================= */
@@ -301,13 +308,29 @@ function renderPawnBill(bill, index) {
         <span>${formatDate(bill.due_date)}</span>
       </div>
 
-      <button
-  class="menu-btn"
-  style="margin-top:10px"
-  onclick="openPawnPaymentByIndex(${index})"
->
-  💳 ชำระ / ต่อดอก
-</button>
+      ${bill.is_checking_payment
+  ? `
+    <button
+      class="menu-btn secondary"
+      style="margin-top:10px"
+      onclick="showModal(
+        'กำลังตรวจสอบ',
+        'สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งเตือนภายใน 24 ชั่วโมง'
+      )"
+    >
+      ⏳ กำลังตรวจสอบ
+    </button>
+  `
+  : `
+    <button
+      class="menu-btn"
+      style="margin-top:10px"
+      onclick="openPawnPaymentByIndex(${index})"
+    >
+      💳 ชำระ / ต่อดอก
+    </button>
+  `
+}
 
 
     </div>
