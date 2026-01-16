@@ -31,6 +31,19 @@ async function callFn(path, payload) {
   return res.json();
 }
 
+function setButtonLoading(btn, text) {
+  btn.classList.add("loading");
+  btn.innerHTML = `
+    <span class="spinner"></span>
+    <span>${text}</span>
+  `;
+}
+
+function resetButton(btn, text) {
+  btn.classList.remove("loading");
+  btn.innerText = text;
+}
+
 /* =========================
 INIT
 ========================= */
@@ -80,20 +93,64 @@ function showCheckingPopup() {
   );
 }
 
-/* =========================
-GUEST FORM
-========================= */
 function showGuestForm() {
   renderCard(`
-    <h3>สมัครสมาชิก KPOS</h3>
+    <div class="section-card">
 
-    <label>เลขบัตรประชาชน</label>
-    <input id="id_card" />
+      <div style="text-align:center; margin-bottom:16px;">
+        <h3 style="margin:0;">สมัครสมาชิก KPOS</h3>
+        <p style="font-size:14px;color:#6b7280;margin-top:6px;">
+          กรุณากรอกข้อมูลเพื่อผูกบัญชีกับ LINE
+        </p>
+      </div>
 
-    <label>เบอร์โทร</label>
-    <input id="phone" inputmode="numeric" maxlength="10" />
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;color:#374151;">เลขบัตรประชาชน</label>
+        <input
+          id="id_card"
+          inputmode="numeric"
+          maxlength="13"
+          placeholder="กรอกเลขบัตรประชาชน"
+          style="
+            width:100%;
+            height:44px;
+            border-radius:10px;
+            border:1px solid #e5e7eb;
+            padding:0 12px;
+            font-size:15px;
+            margin-top:6px;
+          "
+        />
+      </div>
 
-    <button id="verifyBtn" onclick="verifyCustomer()">ตรวจสอบข้อมูล</button>
+      <div style="margin-bottom:18px;">
+        <label style="font-size:13px;color:#374151;">เบอร์โทรศัพท์</label>
+        <input
+          id="phone"
+          inputmode="numeric"
+          maxlength="10"
+          placeholder="กรอกเบอร์โทรศัพท์"
+          style="
+            width:100%;
+            height:44px;
+            border-radius:10px;
+            border:1px solid #e5e7eb;
+            padding:0 12px;
+            font-size:15px;
+            margin-top:6px;
+          "
+        />
+      </div>
+
+      <button
+  id="verifyBtn"
+  class="menu-btn"
+  onclick="verifyCustomer()"
+>
+  ตรวจสอบข้อมูล
+</button>
+
+    </div>
   `);
 }
 
@@ -115,8 +172,7 @@ async function verifyCustomer() {
     return;
   }
 
-  btn.disabled = true;
-  btn.innerText = "กำลังตรวจสอบ...";
+  setButtonLoading(btn, "กำลังตรวจสอบ");
 
   try {
     const result = await callFn("find_customer_for_line", {
@@ -140,15 +196,31 @@ async function verifyCustomer() {
       line_user_id: profile.userId,
     });
 
-    bind.success
-      ? showModal("สมัครสำเร็จ", "ยินดีต้อนรับสมาชิก KPOS")
-      : showModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
+    if (bind.success) {
+  showModal("สมัครสำเร็จ", "ยินดีต้อนรับสมาชิก KPOS");
+
+  // 🔹 set customer ให้ session ปัจจุบัน
+  CURRENT_CUSTOMER = {
+    customer_id: result.customer_id,
+    name: result.name,
+    phone: phone,
+  };
+
+  // 🔹 เด้งเข้า Home หลังจากกดตกลง
+  const originalClose = closeModal;
+  closeModal = function () {
+    modal.style.display = "none";
+    closeModal = originalClose;
+    showMemberMenu(CURRENT_CUSTOMER);
+  };
+} else {
+  showModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
+}
 
   } catch (err) {
     showModal("เกิดข้อผิดพลาด", err.message);
   } finally {
-    btn.disabled = false;
-    btn.innerText = "ตรวจสอบข้อมูล";
+    setButtonLoading(btn, "กำลังตรวจสอบ");
   }
 }
 
