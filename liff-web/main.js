@@ -763,16 +763,16 @@ function showConfirmModal(title, message, onConfirm) {
       <p style="white-space:pre-line">${message}</p>
 
       <button class="primary-btn" id="confirmBtn">
-        ยืนยันทำรายการ
-      </button>
+  ยืนยันทำรายการ
+</button>
 
-      <button
-        class="menu-btn secondary"
-        style="margin-top:8px"
-        id="cancelBtn"
-      >
-        ยกเลิกทำรายการ
-      </button>
+<button
+  class="primary-btn secondary"
+  id="cancelBtn"
+  style="margin-top:8px"
+>
+  ยกเลิกทำรายการ
+</button>
     </div>
   `;
 
