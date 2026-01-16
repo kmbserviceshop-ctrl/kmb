@@ -52,12 +52,17 @@ async function init() {
     await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isInClient()) {
-      renderCard(`
-        <h3>❌ กรุณาเปิดจาก LINE</h3>
-        <p>กรุณาเข้าใช้งานผ่าน Rich Menu</p>
-      `);
-      return;
-    }
+  renderCard(`
+    <div class="section-card">
+      <h3>⚠️ Debug Mode</h3>
+      <p>ไม่ได้เปิดจาก LINE</p>
+      <button class="primary-btn" onclick="showGuestForm()">
+        เข้าโหมดทดสอบ
+      </button>
+    </div>
+  `);
+  return;
+}
 
     if (!liff.isLoggedIn()) {
       liff.login();
@@ -457,4 +462,42 @@ function openPawnPaymentByIndex(index) {
   }
 
   openPawnPayment(bill);
+}
+
+async function init() {
+  try {
+    console.log("INIT START");
+
+    await liff.init({ liffId: LIFF_ID });
+    console.log("LIFF INIT OK");
+
+    if (!liff.isInClient()) {
+      renderCard(`<h3>❌ กรุณาเปิดจาก LINE</h3>`);
+      return;
+    }
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    console.log("LOGGED IN");
+
+    const profile = await liff.getProfile();
+    console.log("PROFILE OK", profile);
+
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    console.log("STATUS", status);
+
+    status.status === "guest"
+      ? showGuestForm()
+      : showMemberMenu(status.customer);
+
+  } catch (err) {
+    console.error(err);
+    showModal("เกิดข้อผิดพลาด", err.message);
+  }
 }
