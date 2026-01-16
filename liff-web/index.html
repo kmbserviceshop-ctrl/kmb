@@ -8,11 +8,11 @@
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-  * {
+  <style>
+    * {
   box-sizing: border-box;
 }
-
-  <style>
+  
   body {
     margin: 0;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -207,10 +207,11 @@
 
 .section-card {
   width: 100%;
+  max-width: 360px;   /* สำคัญ */
   background: #ffffff;
-  max-width: 420px;
-  padding: 18px 18px;  
-  margin: 0 auto;   /* จัดกึ่งกลางจอ */
+  padding: 20px 18px;
+  margin: 0 auto;
+  border-radius: 18px;
 }
 
 
