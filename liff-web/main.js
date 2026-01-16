@@ -386,6 +386,8 @@ function closeModal() {
   modal.style.display = "none";
 }
 
+
+
 /* =========================
 ACTIONS
 ========================= */
@@ -711,17 +713,16 @@ function declineConsent() {
 }
 
 function confirmRevokeConsent() {
-  showModal(
+  showConfirmModal(
     "ถอนความยินยอม",
-    "หากคุณถอนความยินยอม\nคุณจะไม่สามารถใช้บริการ KPOS ได้อีก\n\nต้องการดำเนินการต่อหรือไม่?"
-  );
+    `หากคุณถอนความยินยอม:
+• คุณจะไม่สามารถใช้บริการ KPOS ได้อีก
+• ไม่สามารถฝาก / ผ่อน / ดูบิล
+• การดำเนินการนี้ไม่สามารถย้อนกลับได้
 
-  const originalClose = closeModal;
-  closeModal = function () {
-    modal.style.display = "none";
-    closeModal = originalClose;
-    revokeConsent();
-  };
+ต้องการดำเนินการต่อหรือไม่?`,
+    revokeConsent // 👈 กดยืนยันเท่านั้นถึงเรียก
+  );
 }
 
 async function revokeConsent() {
@@ -750,4 +751,39 @@ async function revokeConsent() {
       err.message || "ไม่สามารถถอนความยินยอมได้"
     );
   }
+}
+
+function showConfirmModal(title, message, onConfirm) {
+  modalTitle.innerText = title;
+  modalMessage.innerText = message;
+
+  modal.innerHTML = `
+    <div class="modal">
+      <h4>${title}</h4>
+      <p style="white-space:pre-line">${message}</p>
+
+      <button class="primary-btn" id="confirmBtn">
+        ยืนยันทำรายการ
+      </button>
+
+      <button
+        class="menu-btn secondary"
+        style="margin-top:8px"
+        id="cancelBtn"
+      >
+        ยกเลิกทำรายการ
+      </button>
+    </div>
+  `;
+
+  modal.style.display = "flex";
+
+  document.getElementById("cancelBtn").onclick = () => {
+    modal.style.display = "none"; // ❌ ไม่แตะ backend
+  };
+
+  document.getElementById("confirmBtn").onclick = () => {
+    modal.style.display = "none";
+    onConfirm(); // ✅ ค่อยไปแตะ backend
+  };
 }
