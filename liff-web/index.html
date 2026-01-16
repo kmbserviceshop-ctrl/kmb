@@ -318,6 +318,53 @@
   margin-bottom: 10px;
 }
 
+/* ===== Settings List ===== */
+.settings-card {
+  width: 100%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 8px 0;
+  margin: 0 auto;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 18px;
+  font-size: 15px;
+  color: #111;
+
+  background: #fff;
+}
+
+.settings-item.disabled {
+  color: #9ca3af;
+}
+
+.settings-icon {
+  width: 24px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.settings-text {
+  flex: 1;
+}
+
+.settings-arrow {
+  color: #c7c7cc;
+  font-size: 18px;
+}
+
+.settings-divider {
+  height: 1px;
+  background: #eceef1;
+  margin-left: 56px; /* ให้เส้นไม่ชน icon */
+}
+
 /* ===== MODAL ===== */
 .modal-backdrop {
   position: fixed;
