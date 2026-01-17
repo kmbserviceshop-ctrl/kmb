@@ -102,8 +102,39 @@ function openPayment(bill) {
         }
       </div>
 
-      <input type="file" id="slipFile" accept="image/*"/>
-      <button class="primary-btn" onclick="submitPawnPayment(this)">
+      <!-- แนบสลิป -->
+<div style="margin-top:16px">
+  <input
+    type="file"
+    id="slipFile"
+    accept="image/*"
+    style="display:none"
+    onchange="onSlipSelected(this)"
+  />
+
+  <button
+    class="primary-btn secondary-btn"
+    type="button"
+    onclick="document.getElementById('slipFile').click()"
+    style="width:100%"
+  >
+    📎 แนบสลิปการชำระเงิน
+  </button>
+
+  <div
+    id="slipFilename"
+    style="margin-top:6px;font-size:13px;color:#6b7280;text-align:center"
+  >
+    ยังไม่ได้เลือกไฟล์
+  </div>
+</div>
+
+<!-- ปุ่มดำเนินการ -->
+<button
+  class="primary-btn"
+  style="margin-top:18px"
+  onclick="submitPawnPayment(this)"
+>
   💳 ดำเนินการต่อ
 </button>
 
@@ -273,4 +304,12 @@ function fileToBase64(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+function onSlipSelected(input) {
+  const label = document.getElementById("slipFilename");
+  if (!input.files || input.files.length === 0) {
+    label.innerText = "ยังไม่ได้เลือกไฟล์";
+    return;
+  }
+  label.innerText = `เลือกไฟล์แล้ว: ${input.files[0].name}`;
 }
