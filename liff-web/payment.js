@@ -103,9 +103,10 @@ function openPayment(bill) {
       </div>
 
       <input type="file" id="slipFile" accept="image/*"/>
-      <button class="menu-btn" onclick="submitPawnPayment(this)">
+      <button class="primary-btn" onclick="submitPawnPayment(this)">
   💳 ดำเนินการต่อ
 </button>
+
     </div>
   `);
 
@@ -181,26 +182,18 @@ SUBMIT PAYMENT (BACKEND)
 async function submitPawnPayment(btn) {
   if (!btn) return;
 
-  // ✅ กันกดซ้ำ (สำคัญมาก)
   if (btn.classList.contains("loading")) return;
 
   if (!CURRENT_BILL) {
-    alert("ไม่พบข้อมูลบิล");
+    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบข้อมูลบิล");
     return;
   }
 
-  // 🔥 LINE access token (ของจริง)
   const lineAccessToken = liff.getAccessToken();
   if (!lineAccessToken) {
-    alert("ไม่พบ LINE access token");
+    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบ LINE access token");
     return;
   }
-
-  // 🔄 เริ่ม loading
-  setButtonLoading(btn, "กำลังส่งข้อมูล");
-
-  const pawnTransactionId = CURRENT_BILL.id;
-  const amount = Number(CURRENT_BILL.service_fee ?? 0);
 
   const fileInput = document.getElementById("slipFile");
   let slipBase64 = null;
@@ -209,9 +202,21 @@ async function submitPawnPayment(btn) {
     slipBase64 = await fileToBase64(fileInput.files[0]);
   }
 
+  // ✅ เช็คสลิปก่อน
+  if (!slipBase64) {
+    showAlertModal(
+      "กรุณาแนบสลิป",
+      "กรุณาแนบหลักฐานการชำระเงินก่อนดำเนินการต่อ"
+    );
+    return;
+  }
+
+  // ✅ ค่อยเริ่ม loading หลังผ่านทุกเงื่อนไข
+  setButtonLoading(btn, "กำลังส่งข้อมูล");
+
   const payload = {
-    pawn_transaction_id: pawnTransactionId,
-    amount,
+    pawn_transaction_id: CURRENT_BILL.id,
+    amount: Number(CURRENT_BILL.service_fee ?? 0),
     slip_base64: slipBase64,
   };
 
@@ -222,11 +227,7 @@ async function submitPawnPayment(btn) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-
-          // ✅ Supabase auth
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-
-          // ✅ LINE token
           "x-line-access-token": lineAccessToken,
         },
         body: JSON.stringify(payload),
@@ -236,14 +237,27 @@ async function submitPawnPayment(btn) {
     const data = await res.json();
     if (!res.ok) throw data;
 
-    alert("รับแจ้งชำระเงินแล้ว รอร้านตรวจสอบ");
-    liff.closeWindow();
+    showAlertModal(
+      "รับแจ้งชำระเงินแล้ว",
+      "ระบบได้รับข้อมูลการชำระเงินเรียบร้อย\nรอร้านตรวจสอบ",
+      () => liff.closeWindow()
+    );
 
   } catch (err) {
-    console.error("payment-request error:", err);
-    alert(err?.error || err?.message || "เกิดข้อผิดพลาด");
+    const errorCode = err?.error || err?.message || "";
 
-    // 🔁 คืนปุ่มเมื่อ error
+    if (errorCode === "slip_required") {
+      showAlertModal(
+        "กรุณาแนบสลิป",
+        "กรุณาแนบหลักฐานการชำระเงินก่อนดำเนินการต่อ"
+      );
+    } else {
+      showAlertModal(
+        "เกิดข้อผิดพลาด",
+        errorCode || "ไม่สามารถดำเนินการได้"
+      );
+    }
+
     resetButton(btn, "💳 ดำเนินการต่อ");
   }
 }
