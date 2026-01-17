@@ -423,8 +423,9 @@ function maskLast6(value) {
 }
 
 async function openMyBills(btn) {
-  // ✅ เพิ่ม: loading บนปุ่ม
-  setButtonLoading(btn, "กำลังโหลด");
+  if (btn) {
+    setButtonLoading(btn, "กำลังโหลด");
+  }
 
   try {
     const res = await callFn("get_my_pawn_bills", {
