@@ -145,7 +145,7 @@ function showGuestForm() {
     <div class="section-card">
 
       <div style="text-align:center; margin-bottom:16px;">
-        <h3 style="margin:0;">สมัครสมาชิก KPOS</h3>
+        <h3 style="margin:0;">เชื่อมต่อบัญชี KPOS Connect</h3>
         <p style="font-size:14px;color:#6b7280;margin-top:6px;">
           กรุณากรอกข้อมูลเพื่อผูกบัญชีกับ LINE
         </p>
@@ -201,7 +201,7 @@ function showGuestForm() {
           style="margin-top:4px;"
         />
         <label for="acceptTerms" style="font-size:13px;color:#374151;line-height:1.4;">
-          ยอมรับเงื่อนไขการให้บริการ
+          ยอมรับเงื่อนไขการใช้งาน KPOS Connect
         </label>
       </div>
 
@@ -255,12 +255,12 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
+      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้าในระบบกรุณาติดต่อร้านเพื่อดำเนินการก่อนใช้งาน KPOS Connect");
       return;
     }
 
     if (result.status !== "active") {
-      showAlertModal("ไม่สามารถสมัครได้", result.message || "");
+      showAlertModal("ไม่สามารถสมัครได้ KPOS Connect ", result.message || "");
       return;
     }
 
@@ -280,8 +280,8 @@ async function verifyCustomer() {
 
       // ✅ modal + action หลังปิด
       showAlertModal(
-        "สมัครสำเร็จ",
-        "ยินดีต้อนรับสมาชิก KPOS",
+        "ดำเนินการสำเร็จ",
+        "ระบบได้เชื่อมต่อบัญชีกับ KPOS Connect เรียบร้อยแล้ว",
         () => showMemberMenu(CURRENT_CUSTOMER)
       );
     } else {
