@@ -66,8 +66,8 @@ function openPayment(bill) {
 
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="openMyBills()">←</button>
-      <div class="top-title">ต่ออายุบิล / ชำระค่างวด Test2</div>
+      <button class="back-btn" onclick="goBackToBills()">←</button>
+      <div class="top-title">ต่ออายุบิล / ชำระค่างวด </div>
     </div>
 
     <div class="section-card">
@@ -136,6 +136,11 @@ HELPER(TEST)
 ========================= */
 function formatPaymentDate(date) {
   return new Date(date).toLocaleDateString("th-TH");
+}
+
+function goBackToBills() {
+  // กลับไปหน้าบิล โดยไม่ผูกกับปุ่ม
+  openMyBills(null);
 }
 
 /* =========================
