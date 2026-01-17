@@ -255,12 +255,12 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้าในระบบกรุณาติดต่อร้านเพื่อดำเนินการก่อนใช้งาน KPOS Connect");
+      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลที่สามารถเชื่อมต่อกับ KPOS Connect ได้กรุณาติดต่อร้านเพื่อดำเนินการก่อนใช้งาน");
       return;
     }
 
     if (result.status !== "active") {
-      showAlertModal("ไม่สามารถสมัครได้ KPOS Connect ", result.message || "");
+      showAlertModal("ไม่สามารถเชื่อมต่อบัญชีได้", result.message || "");
       return;
     }
 
