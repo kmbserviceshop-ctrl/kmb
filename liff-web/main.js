@@ -44,6 +44,8 @@ function resetButton(btn, text) {
   btn.innerText = text;
 }
 
+
+
 /* =========================
 INIT
 ========================= */
@@ -99,17 +101,11 @@ async function init() {
        REVOKED (ถอนความยินยอม)
     ========================= */
     if (consentStatus === "revoked") {
-      showModal(
-        "ไม่สามารถใช้งานได้",
-        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้"
-      );
-
-      const originalClose = closeModal;
-      closeModal = function () {
-        modal.style.display = "none";
-        closeModal = originalClose;
-        liff.closeWindow();
-      };
+      showAlertModal(
+  "ไม่สามารถใช้งานได้",
+  "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
+  () => liff.closeWindow()
+  );
       return;
     }
 
@@ -127,7 +123,7 @@ async function init() {
     showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
-    showModal("เกิดข้อผิดพลาด", err.message);
+    showAlertModal("เกิดข้อผิดพลาด", err.message);
   }
 }
 
@@ -141,10 +137,7 @@ function renderCard(html) {
 }
 
 function showCheckingPopup() {
-  showModal(
-    "กำลังตรวจสอบการทำรายการ",
-    "สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งภายใน 24 ชั่วโมง"
-  );
+  showAlertModal("กำลังตรวจสอบการทำรายการ", "สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งภายใน 24 ชั่วโมง");
 }
 
 function showGuestForm() {
@@ -244,12 +237,12 @@ async function verifyCustomer() {
   const btn = document.getElementById("verifyBtn");
 
   if (!idCard || !phone) {
-    showModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
+    showAlertModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
   if (!/^\d{10}$/.test(phone)) {
-    showModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
+    showAlertModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
     return;
   }
 
@@ -262,12 +255,12 @@ async function verifyCustomer() {
     });
 
     if (!result.found) {
-      showModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
+      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
       return;
     }
 
     if (result.status !== "active") {
-      showModal("ไม่สามารถสมัครได้", result.message || "");
+      showAlertModal("ไม่สามารถสมัครได้", result.message || "");
       return;
     }
 
@@ -278,31 +271,26 @@ async function verifyCustomer() {
     });
 
     if (bind.success) {
-  showModal("สมัครสำเร็จ", "ยินดีต้อนรับสมาชิก KPOS");
+      // ✅ set customer ก่อน
+      CURRENT_CUSTOMER = {
+        customer_id: result.customer_id,
+        name: result.name,
+        phone: phone,
+      };
 
-
-  // 🔹 set customer ให้ session ปัจจุบัน
-  CURRENT_CUSTOMER = {
-    customer_id: result.customer_id,
-    name: result.name,
-    phone: phone,
-  };
-
-  // 🔹 เด้งเข้า Home หลังจากกดตกลง
-  const originalClose = closeModal;
-  closeModal = function () {
-    modal.style.display = "none";
-    closeModal = originalClose;
-    showMemberMenu(CURRENT_CUSTOMER);
-  };
-} else {
-  showModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
-}
+      // ✅ modal + action หลังปิด
+      showAlertModal(
+        "สมัครสำเร็จ",
+        "ยินดีต้อนรับสมาชิก KPOS",
+        () => showMemberMenu(CURRENT_CUSTOMER)
+      );
+    } else {
+      showAlertModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
+    }
 
   } catch (err) {
-    showModal("เกิดข้อผิดพลาด", err.message);
+    showAlertModal("เกิดข้อผิดพลาด", err.message);
   } finally {
-
     resetButton(btn, "ตรวจสอบข้อมูล");
   }
 }
@@ -374,11 +362,11 @@ function showMemberMenu(customer) {
 }
 
 /* =========================
-MODAL
+MODAL ใช้ทั้งระบบ
 ========================= */
-function showModal(title, message) {
-  modalTitle.innerText = title;
-  modalMessage.innerText = message;
+function openModal(html) {
+  const modalContent = document.getElementById("modalContent");
+  modalContent.innerHTML = html;
   modal.style.display = "flex";
 }
 
@@ -386,7 +374,21 @@ function closeModal() {
   modal.style.display = "none";
 }
 
+function showAlertModal(title, message, onClose) {
+  openModal(`
+    <h4>${title}</h4>
+    <p style="white-space:pre-line">${message}</p>
 
+    <button class="primary-btn" id="alertOkBtn">
+      ตกลง
+    </button>
+  `);
+
+  document.getElementById("alertOkBtn").onclick = () => {
+    closeModal();
+    if (typeof onClose === "function") onClose();
+  };
+}
 
 /* =========================
 ACTIONS
@@ -449,9 +451,12 @@ async function openMyBills(btn) {
     `);
 
   } catch (err) {
-    showModal("เกิดข้อผิดพลาด", err.message || "ไม่สามารถโหลดบิลได้");
-    resetButton(btn, "📄 บิลของฉัน");
-  }
+  showAlertModal(
+    "เกิดข้อผิดพลาด",
+    err.message || "ไม่สามารถโหลดบิลได้"
+  );
+  resetButton(btn, "📄 บิลของฉัน");
+}
 }
 
 function renderPawnBill(bill, index) {
@@ -528,7 +533,10 @@ function renderPawnBill(bill, index) {
 
 function openPawnPayment(bill) {
   if (typeof openPayment !== "function") {
-    showModal("ผิดพลาด", "ไม่พบหน้า payment");
+    showAlertModal(
+      "ผิดพลาด",
+      "ไม่พบหน้า payment"
+    );
     return;
   }
 
@@ -539,7 +547,10 @@ function openPawnPaymentByIndex(index) {
   const bill = CURRENT_BILLS[index];
 
   if (!bill) {
-    showModal("ผิดพลาด", "ไม่พบบิลที่เลือก");
+    showAlertModal(
+      "ผิดพลาด",
+      "ไม่พบบิลที่เลือก"
+    );
     return;
   }
 
@@ -684,32 +695,26 @@ async function acceptConsent() {
       line_user_id: profile.userId,
     });
 
-    showModal("ขอบคุณ", "คุณได้ให้ความยินยอมเรียบร้อยแล้ว");
+    showAlertModal(
+  "ขอบคุณ",
+  "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
+  () => showMemberMenu(CURRENT_CUSTOMER)
+);
 
-    const originalClose = closeModal;
-    closeModal = function () {
-      modal.style.display = "none";
-      closeModal = originalClose;
-      showMemberMenu(CURRENT_CUSTOMER);
-    };
-
-  } catch (err) {
-    showModal("เกิดข้อผิดพลาด", err.message || "ไม่สามารถบันทึกความยินยอมได้");
-  }
+ } catch (err) {
+  showAlertModal(
+    "เกิดข้อผิดพลาด",
+    err.message || "ไม่สามารถบันทึกความยินยอมได้"
+  );
+}
 }
 
 function declineConsent() {
-  showModal(
+  showAlertModal(
     "ไม่สามารถใช้งานได้",
-    "หากไม่ยินยอม ระบบจะไม่สามารถให้บริการได้"
+    "หากไม่ยินยอม ระบบจะไม่สามารถให้บริการได้",
+    () => liff.closeWindow()
   );
-
-  const originalClose = closeModal;
-  closeModal = function () {
-    modal.style.display = "none";
-    closeModal = originalClose;
-    liff.closeWindow();
-  };
 }
 
 function confirmRevokeConsent() {
@@ -733,20 +738,14 @@ async function revokeConsent() {
       line_user_id: profile.userId,
     });
 
-    showModal(
+    showAlertModal(
       "ถอนความยินยอมแล้ว",
-      "ระบบได้บันทึกการถอนความยินยอมของคุณเรียบร้อย"
+      "ระบบได้บันทึกการถอนความยินยอมของคุณเรียบร้อย",
+      () => liff.closeWindow()
     );
 
-    const originalClose = closeModal;
-    closeModal = function () {
-      modal.style.display = "none";
-      closeModal = originalClose;
-      liff.closeWindow(); // ⛔ ปิดทันที
-    };
-
   } catch (err) {
-    showModal(
+    showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถถอนความยินยอมได้"
     );
@@ -754,9 +753,7 @@ async function revokeConsent() {
 }
 
 function showConfirmModal(title, message, onConfirm) {
-  const modalContent = document.getElementById("modalContent");
-
-  modalContent.innerHTML = `
+  openModal(`
     <h4>${title}</h4>
     <p style="white-space:pre-line">${message}</p>
 
@@ -771,13 +768,9 @@ function showConfirmModal(title, message, onConfirm) {
     >
       ยกเลิกทำรายการ
     </button>
-  `;
+  `);
 
-  modal.style.display = "flex";
-
-  document.getElementById("cancelBtn").onclick = () => {
-    closeModal(); // ✅ ปิดถูกต้อง
-  };
+  document.getElementById("cancelBtn").onclick = closeModal;
 
   document.getElementById("confirmBtn").onclick = () => {
     closeModal();
