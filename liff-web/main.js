@@ -260,7 +260,7 @@ async function verifyCustomer() {
     }
 
     if (result.status !== "active") {
-      showAlertModal("ไม่สามารถเชื่อมต่อบัญชีได้", result.message || "");
+      showAlertModal("เชื่อมต่อบัญชีKPOS Connect ไม่สำเร็จ", result.message || "");
       return;
     }
 
@@ -285,7 +285,7 @@ async function verifyCustomer() {
         () => showMemberMenu(CURRENT_CUSTOMER)
       );
     } else {
-      showAlertModal("ไม่สำเร็จ", "ไม่สามารถสมัครได้");
+      showAlertModal("ไม่สำเร็จ", "เชื่อมต่อบัญชีสำเร็จ กรุณาติดต่อร้านค้า");
     }
 
   } catch (err) {
