@@ -857,7 +857,7 @@ async function acceptConsent() {
     CURRENT_CUSTOMER = {
       ...CURRENT_CUSTOMER,
       consent_status: "accepted",
-      consent_version: "2026-01",
+      
     };
 
     // 3️⃣ เข้าใช้งานต่อได้เลย ไม่เรียก init() ซ้ำ
@@ -1066,6 +1066,9 @@ function showConsentPage() {
 }
 
 function showTermsPage() {
+  const version =
+    CURRENT_CUSTOMER?.current_consent_version || "-";
+
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openSettings()">←</button>
@@ -1080,7 +1083,11 @@ function showTermsPage() {
         line-height:1.7;
       ">
 
-        <strong>ข้อกำหนดและเงื่อนไขการใช้งาน KPOS Connect</strong><br><br>
+        <strong>ข้อกำหนดและเงื่อนไขการใช้งาน KPOS Connect</strong><br>
+        <span style="color:#6b7280;font-size:12px;">
+          เวอร์ชันล่าสุด: ${version}
+        </span>
+        <br><br>
 
         การใช้งานระบบ KPOS Connect ถือว่าท่านยอมรับข้อกำหนดและเงื่อนไขดังต่อไปนี้<br><br>
 
