@@ -20,7 +20,7 @@ HELPER : API CALL
 
 async function callFn(path, payload) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
+  const timer = setTimeout(() => controller.abort(), 3000);
 
   try {
     const res = await fetch(`${FN_BASE}/${path}`, {
@@ -875,7 +875,7 @@ KPOS จะไม่เปิดเผยข้อมูลส่วนบุค
     if (scrolledToEnd) {
       btn.disabled = false; // สถานะ 2
     }
-  }, 10000);
+  }, 3000);
 
   btn.onclick = () => {
     // safety guard
