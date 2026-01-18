@@ -987,10 +987,18 @@ function showConfirmModal(title, message, onConfirm) {
     </button>
   `);
 
-  document.getElementById("cancelBtn").onclick = closeModal;
+  const confirmBtn = document.getElementById("confirmBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
 
-  document.getElementById("confirmBtn").onclick = () => {
-    closeModal();
+  cancelBtn.onclick = closeModal;
+
+  confirmBtn.onclick = () => {
+    // 🔒 lock + loading
+    setButtonLoading(confirmBtn, "กำลังดำเนินการ");
+    confirmBtn.disabled = true;
+    cancelBtn.disabled = true;
+
+    // เรียก action จริง
     onConfirm();
   };
 }
@@ -1029,7 +1037,7 @@ function showConsentPage() {
       <button
   class="menu-btn"
   style="margin-bottom:14px"
-  onclick="openConsentDetail(this)"
+  onclick="openConsentDetail()"
 >
   📄 อ่านนโยบายความเป็นส่วนตัว
 </button>
