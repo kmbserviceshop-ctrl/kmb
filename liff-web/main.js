@@ -818,10 +818,11 @@ function openConsentDetail() {
       return;
     }
 
-    // 🔄 UX: แสดง loading เหมือนปุ่มผูกบัญชี
+    // 🔄 UX: loading แบบเดียวกับปุ่มผูกบัญชี
     setButtonLoading(btn, "กำลังบันทึก");
+    btn.disabled = true; // ✅ ป้องกันการกดซ้ำ
 
-    // ⏱️ หน่วงสั้น ๆ เพื่อให้ผู้ใช้รับรู้สถานะ (ไม่เรียก backend)
+    // ⏱️ หน่วงสั้น ๆ เพื่อให้ผู้ใช้รับรู้สถานะ
     setTimeout(() => {
       // ✅ ผ่านจริง
       HAS_READ_PDPA = true;
@@ -835,7 +836,7 @@ function openConsentDetail() {
         checkbox.disabled = false;
         checkbox.checked = true;
 
-        // 🔑 ปลดล็อกปุ่มแบบตรง ๆ
+        // 🔑 ปลดล็อกปุ่มถัดไป
         const verifyBtn = document.getElementById("verifyBtn");
         const acceptBtn = document.getElementById("consentAcceptBtn");
 
@@ -874,10 +875,10 @@ async function acceptConsent() {
 
     // 2️⃣ ⭐ อัปเดต state ฝั่ง frontend ทันที (หัวใจของปัญหาที่เจอ)
     CURRENT_CUSTOMER = {
-      ...CURRENT_CUSTOMER,
-      consent_status: "accepted",
-      
-    };
+  ...CURRENT_CUSTOMER,
+  consent_status: "accepted",
+  consent_version: CURRENT_CUSTOMER.current_consent_version,
+};
 
     // 3️⃣ เข้าใช้งานต่อได้เลย ไม่เรียก init() ซ้ำ
     showAlertModal(
@@ -1016,12 +1017,12 @@ function showConsentPage() {
 
       <!-- อ่านนโยบาย -->
       <button
-        class="menu-btn"
-        style="margin-bottom:14px"
-        onclick="openConsentDetail()"
-      >
-        📄 อ่านนโยบายความเป็นส่วนตัว
-      </button>
+  class="menu-btn"
+  style="margin-bottom:14px"
+  onclick="openConsentDetail(this)"
+>
+  📄 อ่านนโยบายความเป็นส่วนตัว
+</button>
 
       <!-- checkbox -->
       <div style="display:flex; gap:10px; margin-bottom:20px;">
