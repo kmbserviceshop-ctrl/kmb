@@ -46,56 +46,6 @@ function resetButton(btn, text) {
   btn.innerText = text;
 }
 
-async function refreshCustomerStatus() {
-  try {
-    const profile = await liff.getProfile();
-
-    const status = await callFn("check_line_status", {
-      line_user_id: profile.userId,
-    });
-
-    if (status.status === "guest") {
-      showGuestForm();
-      return;
-    }
-
-    CURRENT_CUSTOMER = status.customer;
-
-    const {
-      consent_status,
-      consent_version,
-      current_consent_version,
-    } = status.customer || {};
-
-    // revoked → ปิดทันที
-    if (consent_status === "revoked") {
-      showAlertModal(
-        "ไม่สามารถใช้งานได้",
-        "คุณได้ถอนความยินยอมในการใช้ข้อมูล",
-        () => liff.closeWindow()
-      );
-      return;
-    }
-
-    // ต้อง consent ใหม่
-    if (
-      consent_status !== "accepted" ||
-      consent_version !== current_consent_version
-    ) {
-      showConsentPage(CURRENT_CUSTOMER);
-      return;
-    }
-
-    // ปกติ
-    showMemberMenu(CURRENT_CUSTOMER);
-
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถอัปเดตสถานะได้"
-    );
-  }
-}
 /* =========================
 REFRESH CUSTOMER STATUS
 ใช้หลัง acceptConsent เท่านั้น
@@ -138,12 +88,9 @@ async function refreshCustomerStatus() {
       consent_version !== current_consent_version;
 
     if (needConsent) {
-      showConsentPage(CURRENT_CUSTOMER);
+      showConsentPage();
       return;
     }
-
-    // 🟢 ผ่านครบ → เข้า Home
-    showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
     showAlertModal(
@@ -423,10 +370,11 @@ async function verifyCustomer() {
 
     // 4️⃣ หลังผูกสำเร็จ → ไปหน้า PDPA (บังคับยอมรับ)
     showAlertModal(
-      "เชื่อมต่อสำเร็จ",
-      "กรุณาอ่านและให้ความยินยอมในการใช้ข้อมูลส่วนบุคคลก่อนใช้งาน",
-      () => showConsentPage(CURRENT_CUSTOMER)
-    );
+  "เชื่อมต่อสำเร็จ",
+  "กรุณาอ่านและให้ความยินยอมในการใช้ข้อมูลส่วนบุคคลก่อนใช้งาน",
+  () => showConsentPage()
+);
+  
 
   } catch (err) {
     showAlertModal("เกิดข้อผิดพลาด", err.message);
@@ -729,7 +677,7 @@ function openSettings() {
 
       <!-- 👤 การจัดการความยินยอม (แก้จุดนี้) -->
       <div class="settings-item"
-           onclick="showConsentPage(CURRENT_CUSTOMER)">
+           onclick="showConsentPage()">
         <div class="settings-icon">👤</div>
         <div class="settings-text">การจัดการความยินยอม</div>
         <div class="settings-arrow">›</div>
@@ -870,89 +818,8 @@ function openConsentDetail() {
 }
 
 /* =========================
-PDPA CONSENT UI
+PDPA CONSENT ACTIONS
 ========================= */
-function showConsentPage() {
-  // 🔒 reset state ทุกครั้ง
-  HAS_READ_PDPA = false;
-  READ_TIMER_PASSED = false;
-
-  renderCard(`
-    <div class="top-bar">
-      <div class="top-title">ความเป็นส่วนตัว</div>
-    </div>
-
-    <div class="section-card">
-
-      <div class="menu-title">
-        การขอความยินยอมในการเก็บข้อมูลส่วนบุคคล
-      </div>
-
-      <div style="font-size:14px; color:#374151; line-height:1.6; margin-bottom:16px;">
-        KPOS จำเป็นต้องใช้ข้อมูลของท่านเพื่อให้บริการ เช่น
-        การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล และการติดต่อร้านค้า
-      </div>
-
-      <!-- 🔎 ปุ่มอ่านนโยบาย -->
-      <button
-        class="menu-btn"
-        style="margin-bottom:14px"
-        onclick="openConsentDetail()"
-      >
-        📄 อ่านนโยบายความเป็นส่วนตัว
-      </button>
-
-      <!-- checkbox (ล็อกไว้ก่อน) -->
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <input type="checkbox" id="consentCheck" disabled />
-        <label
-          for="consentCheck"
-          style="font-size:14px; color:#9ca3af; cursor:pointer;"
-          onclick="openConsentDetail()"
-        >
-          ข้าพเจ้ายินยอมให้ KPOS เก็บและใช้ข้อมูลส่วนบุคคล
-        </label>
-      </div>
-
-      <button
-        id="consentAcceptBtn"
-        class="primary-btn"
-        disabled
-        onclick="acceptConsent()"
-      >
-        ยินยอมและใช้งานต่อ
-      </button>
-
-      <button
-        class="primary-btn secondary-btn"
-        style="margin-top:12px"
-        onclick="declineConsent()"
-      >
-        ไม่ยินยอม
-      </button>
-
-    </div>
-  `);
-
-  const checkbox = document.getElementById("consentCheck");
-  const btn = document.getElementById("consentAcceptBtn");
-
-  checkbox.addEventListener("change", () => {
-    // ❌ ยังไม่ผ่านขั้นอ่านจริง
-    if (!HAS_READ_PDPA) {
-      checkbox.checked = false;
-
-      showAlertModal(
-        "กรุณาอ่านนโยบายก่อน",
-        "กรุณากดอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วนก่อนจึงจะสามารถยินยอมได้"
-      );
-      return;
-    }
-
-    // ✅ ผ่านแล้ว → เปิดปุ่ม
-    btn.disabled = !checkbox.checked;
-  });
-}
 
 async function acceptConsent() {
   // 🔒 GUARD: ต้องอ่าน PDPA + ต้องติ๊ก checkbox ก่อนเท่านั้น
