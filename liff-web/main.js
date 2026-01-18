@@ -92,6 +92,8 @@ async function refreshCustomerStatus() {
       return;
     }
 
+    showMemberMenu(CURRENT_CUSTOMER);
+
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
@@ -778,7 +780,12 @@ function openConsentDetail() {
       ท่านสามารถถอนความยินยอมได้ภายหลังในเมนูตั้งค่า
     </div>
 
-    <button class="primary-btn" id="consentReadDoneBtn" disabled>
+    <!-- สถานะ 1: ยังไม่ครบ -->
+    <button
+      class="primary-btn"
+      id="consentReadDoneBtn"
+      disabled
+    >
       อ่านและเข้าใจแล้ว
     </button>
 
@@ -796,38 +803,42 @@ function openConsentDetail() {
 
   let scrolledToEnd = false;
 
-  // ✅ บังคับ scroll ถึงท้าย
+  // ✅ ต้องเลื่อนถึงท้าย
   box.addEventListener("scroll", () => {
     const nearBottom =
       box.scrollTop + box.clientHeight >= box.scrollHeight - 5;
-    if (nearBottom) scrolledToEnd = true;
+
+    if (nearBottom) {
+      scrolledToEnd = true;
+
+      // ถ้าเวลาครบแล้ว → สถานะ 2: พร้อมกด
+      if (READ_TIMER_PASSED) {
+        btn.disabled = false;
+      }
+    }
   });
 
-  // ⏱️ เวลาอ่านขั้นต่ำ
+  // ⏱️ เวลาอ่านขั้นต่ำ (ใช้ค่าเดิมตามที่คุณบอกว่าดีแล้ว)
   setTimeout(() => {
     READ_TIMER_PASSED = true;
-    if (scrolledToEnd) btn.disabled = false;
+
+    if (scrolledToEnd) {
+      btn.disabled = false; // สถานะ 2
+    }
   }, 10000);
 
   btn.onclick = () => {
-    if (!READ_TIMER_PASSED || !scrolledToEnd) {
-      showAlertModal(
-        "กรุณาอ่านให้ครบถ้วน",
-        "กรุณาเลื่อนอ่านนโยบายให้ครบและใช้เวลาอ่านก่อน"
-      );
-      return;
-    }
+    // safety guard
+    if (!READ_TIMER_PASSED || !scrolledToEnd) return;
 
-    // 🔄 UX: loading แบบเดียวกับปุ่มผูกบัญชี
+    // 🔄 สถานะ 3: กำลังทำงาน
     setButtonLoading(btn, "กำลังบันทึก");
-    btn.disabled = true; // ✅ ป้องกันการกดซ้ำ
+    btn.disabled = true;
 
-    // ⏱️ หน่วงสั้น ๆ เพื่อให้ผู้ใช้รับรู้สถานะ
     setTimeout(() => {
-      // ✅ ผ่านจริง
+      // ✅ ยอมรับว่าอ่านแล้ว
       HAS_READ_PDPA = true;
 
-      // รองรับทั้งหน้า guest และหน้า consent
       const checkbox =
         document.getElementById("consentCheck") ||
         document.getElementById("acceptTerms");
@@ -836,7 +847,6 @@ function openConsentDetail() {
         checkbox.disabled = false;
         checkbox.checked = true;
 
-        // 🔑 ปลดล็อกปุ่มถัดไป
         const verifyBtn = document.getElementById("verifyBtn");
         const acceptBtn = document.getElementById("consentAcceptBtn");
 
