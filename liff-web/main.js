@@ -630,20 +630,36 @@ function openSettings() {
 }
 
 function openConsentDetail() {
+  // 🔁 reset ทุกครั้งที่เปิด
+  READ_TIMER_PASSED = false;
+
   openModal(`
     <h4>นโยบายความเป็นส่วนตัว</h4>
 
-    <div style="font-size:13px; color:#374151; line-height:1.6; text-align:left; max-height:240px; overflow:auto;">
+    <div
+      id="consentScrollBox"
+      style="
+        font-size:13px;
+        color:#374151;
+        line-height:1.6;
+        text-align:left;
+        max-height:240px;
+        overflow:auto;
+        border:1px solid #e5e7eb;
+        padding:10px;
+        border-radius:8px;
+      "
+    >
       KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน<br><br>
 
-      ข้อมูลที่จัดเก็บ:
+      <strong>ข้อมูลที่จัดเก็บ:</strong>
       <ul style="padding-left:18px;">
         <li>ชื่อ – นามสกุล</li>
         <li>เบอร์โทรศัพท์</li>
         <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
       </ul>
 
-      วัตถุประสงค์ในการใช้ข้อมูล:
+      <strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong>
       <ul style="padding-left:18px;">
         <li>ให้บริการขายฝาก / ผ่อนสินค้า</li>
         <li>แจ้งเตือนสถานะบิล</li>
@@ -653,17 +669,31 @@ function openConsentDetail() {
       ท่านสามารถถอนความยินยอมได้ภายหลังในเมนูตั้งค่า
     </div>
 
-    <button class="primary-btn" id="consentReadDoneBtn">
+    <button class="primary-btn" id="consentReadDoneBtn" disabled>
       อ่านและเข้าใจแล้ว
     </button>
   `);
 
-  document.getElementById("consentReadDoneBtn").onclick = () => {
-    HAS_READ_PDPA = true;
+  // ⏱️ บังคับเวลาอ่านขั้นต่ำ (เช่น 10 วินาที)
+  setTimeout(() => {
+    READ_TIMER_PASSED = true;
+    const btn = document.getElementById("consentReadDoneBtn");
+    if (btn) btn.disabled = false;
+  }, 10000); // ปรับเวลาได้ (ms)
 
+  document.getElementById("consentReadDoneBtn").onclick = () => {
+    if (!READ_TIMER_PASSED) {
+      showAlertModal(
+        "กรุณาอ่านให้ครบถ้วน",
+        "โปรดใช้เวลาอ่านนโยบายความเป็นส่วนตัวก่อน"
+      );
+      return;
+    }
+
+    HAS_READ_PDPA = true;
     closeModal();
 
-    // 🔓 เปิด checkbox หลังอ่าน
+    // 🔓 เปิด checkbox หลังผ่านจริง
     const checkbox = document.getElementById("consentCheck");
     if (checkbox) checkbox.disabled = false;
   };
@@ -673,7 +703,9 @@ function openConsentDetail() {
 PDPA CONSENT UI
 ========================= */
 function showConsentPage() {
-  HAS_READ_PDPA = false; // ❗ reset ทุกครั้งที่เข้า
+  // 🔒 reset state ทุกครั้ง
+  HAS_READ_PDPA = false;
+  READ_TIMER_PASSED = false;
 
   renderCard(`
     <div class="top-bar">
@@ -691,7 +723,7 @@ function showConsentPage() {
         การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล และการติดต่อร้านค้า
       </div>
 
-      <!-- 🔎 ปุ่มอ่านเงื่อนไข -->
+      <!-- 🔎 ปุ่มอ่านนโยบาย -->
       <button
         class="menu-btn"
         style="margin-bottom:14px"
@@ -700,10 +732,14 @@ function showConsentPage() {
         📄 อ่านนโยบายความเป็นส่วนตัว
       </button>
 
-      <!-- checkbox -->
+      <!-- checkbox (ล็อกไว้ก่อน) -->
       <div style="display:flex; gap:10px; margin-bottom:20px;">
         <input type="checkbox" id="consentCheck" disabled />
-        <label for="consentCheck" style="font-size:14px;">
+        <label
+          for="consentCheck"
+          style="font-size:14px; color:#9ca3af; cursor:pointer;"
+          onclick="openConsentDetail()"
+        >
           ข้าพเจ้ายินยอมให้ KPOS เก็บและใช้ข้อมูลส่วนบุคคล
         </label>
       </div>
@@ -732,11 +768,34 @@ function showConsentPage() {
   const btn = document.getElementById("consentAcceptBtn");
 
   checkbox.addEventListener("change", () => {
+    // ❌ ยังไม่ผ่านขั้นอ่านจริง
+    if (!HAS_READ_PDPA) {
+      checkbox.checked = false;
+
+      showAlertModal(
+        "กรุณาอ่านนโยบายก่อน",
+        "กรุณากดอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วนก่อนจึงจะสามารถยินยอมได้"
+      );
+      return;
+    }
+
+    // ✅ ผ่านแล้ว → เปิดปุ่ม
     btn.disabled = !checkbox.checked;
   });
 }
 
 async function acceptConsent() {
+  // 🔒 GUARD: ต้องอ่าน PDPA + ต้องติ๊ก checkbox ก่อนเท่านั้น
+  const checkbox = document.getElementById("consentCheck");
+
+  if (!checkbox || !checkbox.checked || !HAS_READ_PDPA) {
+    showAlertModal(
+      "ไม่สามารถดำเนินการได้",
+      "กรุณาอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วน\nและให้ความยินยอมก่อนใช้งาน"
+    );
+    return;
+  }
+
   try {
     const profile = await liff.getProfile();
 
@@ -745,17 +804,17 @@ async function acceptConsent() {
     });
 
     showAlertModal(
-  "ขอบคุณ",
-  "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
-  () => showMemberMenu(CURRENT_CUSTOMER)
-);
+      "ขอบคุณ",
+      "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
+      () => showMemberMenu(CURRENT_CUSTOMER)
+    );
 
- } catch (err) {
-  showAlertModal(
-    "เกิดข้อผิดพลาด",
-    err.message || "ไม่สามารถบันทึกความยินยอมได้"
-  );
-}
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถบันทึกความยินยอมได้"
+    );
+  }
 }
 
 function declineConsent() {
