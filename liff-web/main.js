@@ -175,7 +175,7 @@ async function init() {
       consent_version !== current_consent_version;
 
     if (needConsent) {
-      showConsentPage(CURRENT_CUSTOMER);
+      showConsentPage();
       return;
     }
 
