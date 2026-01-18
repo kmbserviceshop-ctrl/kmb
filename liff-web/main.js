@@ -729,7 +729,7 @@ function openSettings() {
 
       <!-- 🚪 Logout -->
       <div class="settings-item"
-           onclick="logout()">
+           onclick="confirmLogout()">
         <div class="settings-icon">🚪</div>
         <div class="settings-text">ออกจากระบบ</div>
       </div>
@@ -779,16 +779,16 @@ function openConsentDetail() {
     </div>
 
     <button class="primary-btn" id="consentReadDoneBtn" disabled>
-  อ่านและเข้าใจแล้ว
-</button>
+      อ่านและเข้าใจแล้ว
+    </button>
 
-<button
-  class="secondary-btn"
-  style="margin-top:8px"
-  onclick="closeModal()"
->
-  ปิด
-</button>
+    <button
+      class="secondary-btn"
+      style="margin-top:8px"
+      onclick="closeModal()"
+    >
+      ปิด
+    </button>
   `);
 
   const box = document.getElementById("consentScrollBox");
@@ -796,7 +796,7 @@ function openConsentDetail() {
 
   let scrolledToEnd = false;
 
-  // ✅ บังคับ scroll ถึงท้าย + เวลา
+  // ✅ บังคับ scroll ถึงท้าย
   box.addEventListener("scroll", () => {
     const nearBottom =
       box.scrollTop + box.clientHeight >= box.scrollHeight - 5;
@@ -809,7 +809,7 @@ function openConsentDetail() {
     if (scrolledToEnd) btn.disabled = false;
   }, 10000);
 
-  document.getElementById("consentReadDoneBtn").onclick = () => {
+  btn.onclick = () => {
     if (!READ_TIMER_PASSED || !scrolledToEnd) {
       showAlertModal(
         "กรุณาอ่านให้ครบถ้วน",
@@ -818,27 +818,33 @@ function openConsentDetail() {
       return;
     }
 
-    // ✅ ผ่านจริง
-    HAS_READ_PDPA = true;
+    // 🔄 UX: แสดง loading เหมือนปุ่มผูกบัญชี
+    setButtonLoading(btn, "กำลังบันทึก");
 
-    // รองรับทั้งหน้า guest และหน้า consent
-    const checkbox =
-      document.getElementById("consentCheck") ||
-      document.getElementById("acceptTerms");
+    // ⏱️ หน่วงสั้น ๆ เพื่อให้ผู้ใช้รับรู้สถานะ (ไม่เรียก backend)
+    setTimeout(() => {
+      // ✅ ผ่านจริง
+      HAS_READ_PDPA = true;
 
-    if (checkbox) {
-      checkbox.disabled = false;
-      checkbox.checked = true;
+      // รองรับทั้งหน้า guest และหน้า consent
+      const checkbox =
+        document.getElementById("consentCheck") ||
+        document.getElementById("acceptTerms");
 
-      // 🔑 ปลดล็อกปุ่มแบบตรง ๆ (ไม่พึ่ง change event)
-      const verifyBtn = document.getElementById("verifyBtn");
-      const acceptBtn = document.getElementById("consentAcceptBtn");
+      if (checkbox) {
+        checkbox.disabled = false;
+        checkbox.checked = true;
 
-      if (verifyBtn) verifyBtn.disabled = false;
-      if (acceptBtn) acceptBtn.disabled = false;
-    }
+        // 🔑 ปลดล็อกปุ่มแบบตรง ๆ
+        const verifyBtn = document.getElementById("verifyBtn");
+        const acceptBtn = document.getElementById("consentAcceptBtn");
 
-    closeModal();
+        if (verifyBtn) verifyBtn.disabled = false;
+        if (acceptBtn) acceptBtn.disabled = false;
+      }
+
+      closeModal();
+    }, 600);
   };
 }
 
@@ -1134,4 +1140,42 @@ function showTermsPage() {
 
     </div>
   `);
+}
+/* =========================
+PDPA Logout
+========================= */
+
+function confirmLogout() {
+  showConfirmModal(
+    "ออกจากระบบ",
+    `คุณต้องการออกจากระบบใช่หรือไม่?
+
+• คุณจะต้องเปิด KPOS Connect ใหม่จาก LINE
+• การออกจากระบบไม่กระทบข้อมูลหรือความยินยอม`,
+    doLogout
+  );
+}
+
+function doLogout() {
+  try {
+    // 🔥 clear frontend state
+    CURRENT_CUSTOMER = null;
+    CURRENT_BILLS = [];
+    HAS_READ_PDPA = false;
+    READ_TIMER_PASSED = false;
+
+    // 🔑 best effort logout
+    try {
+      liff.logout();
+    } catch (e) {}
+
+    // 🚪 ปิด LIFF (สำคัญสุด)
+    liff.closeWindow();
+
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      "ไม่สามารถออกจากระบบได้"
+    );
+  }
 }
