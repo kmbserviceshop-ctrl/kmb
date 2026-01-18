@@ -864,15 +864,22 @@ PDPA CONSENT ACTIONS
 ========================= */
 
 async function acceptConsent() {
-  // 🔒 GUARD: ต้องอ่าน PDPA + ต้องติ๊ก checkbox ก่อนเท่านั้น
+  const btn = document.getElementById("consentAcceptBtn");
   const checkbox = document.getElementById("consentCheck");
 
+  // 🔒 GUARD: ต้องอ่าน + ต้องติ๊กก่อน
   if (!checkbox || !checkbox.checked || !HAS_READ_PDPA) {
     showAlertModal(
       "ไม่สามารถดำเนินการได้",
       "กรุณาอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วน\nและให้ความยินยอมก่อนใช้งาน"
     );
     return;
+  }
+
+  // 🔄 UX: loading + lock (มาตรฐานเดียวกับทั้งแอพ)
+  if (btn) {
+    setButtonLoading(btn, "กำลังบันทึก");
+    btn.disabled = true;
   }
 
   try {
@@ -883,28 +890,33 @@ async function acceptConsent() {
       line_user_id: profile.userId,
     });
 
-    // 2️⃣ ⭐ อัปเดต state ฝั่ง frontend ทันที (หัวใจของปัญหาที่เจอ)
+    // 2️⃣ ⭐ update state ฝั่ง frontend ทันที
     CURRENT_CUSTOMER = {
-  ...CURRENT_CUSTOMER,
-  consent_status: "accepted",
-  consent_version: CURRENT_CUSTOMER.current_consent_version,
-};
+      ...CURRENT_CUSTOMER,
+      consent_status: "accepted",
+      consent_version: CURRENT_CUSTOMER.current_consent_version,
+    };
 
-    // 3️⃣ เข้าใช้งานต่อได้เลย ไม่เรียก init() ซ้ำ
+    // 3️⃣ แจ้งผล + refresh สถานะ
     showAlertModal(
-  "ขอบคุณ",
-  "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
-  () => refreshCustomerStatus()
-);
+      "ขอบคุณ",
+      "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
+      () => refreshCustomerStatus()
+    );
 
   } catch (err) {
+    // ❌ error → แจ้ง + คืนปุ่ม
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถบันทึกความยินยอมได้"
     );
+
+    if (btn) {
+      resetButton(btn, "ยินยอมและใช้งานต่อ");
+      btn.disabled = false;
+    }
   }
 }
-
 function declineConsent() {
   showAlertModal(
     "ไม่สามารถใช้งานได้",
