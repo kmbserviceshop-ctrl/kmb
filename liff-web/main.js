@@ -762,8 +762,16 @@ function openConsentDetail() {
     </div>
 
     <button class="primary-btn" id="consentReadDoneBtn" disabled>
-      อ่านและเข้าใจแล้ว
-    </button>
+  อ่านและเข้าใจแล้ว
+</button>
+
+<button
+  class="secondary-btn"
+  style="margin-top:8px"
+  onclick="closeModal()"
+>
+  ปิด
+</button>
   `);
 
   const box = document.getElementById("consentScrollBox");
