@@ -5,6 +5,7 @@ let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
 let HAS_READ_PDPA = false;
 let READ_TIMER_PASSED = false;
+let FROM_PDPA_READ = false;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
@@ -824,10 +825,13 @@ KPOS ให้ความสำคัญสูงสุดกับการค
   }, 4000);
 
   btn.onclick = () => {
-    if (!READ_TIMER_PASSED || !scrolledToEnd) return;
-    HAS_READ_PDPA = true;
-    showConsentPage();
-  };
+  if (!READ_TIMER_PASSED || !scrolledToEnd) return;
+
+  HAS_READ_PDPA = true;
+  FROM_PDPA_READ = true; // ⭐ บอกว่ามาจากการอ่านจริง
+
+  showConsentPage();
+};
 }
 
 /* =========================
@@ -990,11 +994,16 @@ function showConsentPage() {
 
   // 🔎 reset เฉพาะกรณีที่ยังไม่เคย accepted
   if (
-    !CURRENT_CUSTOMER ||
-    CURRENT_CUSTOMER.consent_status !== "accepted"
-  ) {
-    HAS_READ_PDPA = false;
-    READ_TIMER_PASSED = false;
+  (!CURRENT_CUSTOMER ||
+   CURRENT_CUSTOMER.consent_status !== "accepted") &&
+  !FROM_PDPA_READ
+) {
+  HAS_READ_PDPA = false;
+  READ_TIMER_PASSED = false;
+}
+
+// reset flag หลังใช้
+FROM_PDPA_READ = false;
   }
 
   const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
