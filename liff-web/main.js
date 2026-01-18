@@ -462,6 +462,12 @@ function closeModal() {
   modal.style.display = "none";
 }
 
+const modalEl = document.getElementById("modal");
+
+modalEl.onclick = (e) => {
+  if (e.target === modalEl) closeModal();
+};
+
 function showAlertModal(title, message, onClose) {
   openModal(`
     <h4>${title}</h4>
