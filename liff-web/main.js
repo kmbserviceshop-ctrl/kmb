@@ -3,6 +3,7 @@ CONFIG
 ========================= */
 let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
+HAS_READ_PDPA = false;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
@@ -626,10 +627,52 @@ function openSettings() {
   `);
 }
 
+function openConsentDetail() {
+  openModal(`
+    <h4>นโยบายความเป็นส่วนตัว</h4>
+
+    <div style="font-size:13px; color:#374151; line-height:1.6; text-align:left; max-height:240px; overflow:auto;">
+      KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน<br><br>
+
+      ข้อมูลที่จัดเก็บ:
+      <ul style="padding-left:18px;">
+        <li>ชื่อ – นามสกุล</li>
+        <li>เบอร์โทรศัพท์</li>
+        <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
+      </ul>
+
+      วัตถุประสงค์ในการใช้ข้อมูล:
+      <ul style="padding-left:18px;">
+        <li>ให้บริการขายฝาก / ผ่อนสินค้า</li>
+        <li>แจ้งเตือนสถานะบิล</li>
+        <li>ติดต่อร้านค้า</li>
+      </ul>
+
+      ท่านสามารถถอนความยินยอมได้ภายหลังในเมนูตั้งค่า
+    </div>
+
+    <button class="primary-btn" id="consentReadDoneBtn">
+      อ่านและเข้าใจแล้ว
+    </button>
+  `);
+
+  document.getElementById("consentReadDoneBtn").onclick = () => {
+    HAS_READ_PDPA = true;
+
+    closeModal();
+
+    // 🔓 เปิด checkbox หลังอ่าน
+    const checkbox = document.getElementById("consentCheck");
+    if (checkbox) checkbox.disabled = false;
+  };
+}
+
 /* =========================
 PDPA CONSENT UI
 ========================= */
 function showConsentPage() {
+  HAS_READ_PDPA = false; // ❗ reset ทุกครั้งที่เข้า
+
   renderCard(`
     <div class="top-bar">
       <div class="top-title">ความเป็นส่วนตัว</div>
@@ -646,38 +689,39 @@ function showConsentPage() {
         การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล และการติดต่อร้านค้า
       </div>
 
-      <div style="font-size:14px; color:#374151; line-height:1.6; margin-bottom:16px;">
-        <strong>ข้อมูลที่จัดเก็บ</strong>
-        <ul style="padding-left:18px; margin-top:8px;">
-          <li>ชื่อ – นามสกุล</li>
-          <li>เบอร์โทรศัพท์</li>
-          <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
-        </ul>
-      </div>
+      <!-- 🔎 ปุ่มอ่านเงื่อนไข -->
+      <button
+        class="menu-btn"
+        style="margin-bottom:14px"
+        onclick="openConsentDetail()"
+      >
+        📄 อ่านนโยบายความเป็นส่วนตัว
+      </button>
 
+      <!-- checkbox -->
       <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <input type="checkbox" id="consentCheck" />
+        <input type="checkbox" id="consentCheck" disabled />
         <label for="consentCheck" style="font-size:14px;">
           ข้าพเจ้ายินยอมให้ KPOS เก็บและใช้ข้อมูลส่วนบุคคล
         </label>
       </div>
 
       <button
-  id="consentAcceptBtn"
-  class="primary-btn"
-  disabled
-  onclick="acceptConsent()"
->
-  ยินยอมและใช้งานต่อ
-</button>
+        id="consentAcceptBtn"
+        class="primary-btn"
+        disabled
+        onclick="acceptConsent()"
+      >
+        ยินยอมและใช้งานต่อ
+      </button>
 
-<button
-  class="primary-btn secondary-btn"
-  style="margin-top:12px"
-  onclick="declineConsent()"
->
-  ไม่ยินยอม
-</button>
+      <button
+        class="primary-btn secondary-btn"
+        style="margin-top:12px"
+        onclick="declineConsent()"
+      >
+        ไม่ยินยอม
+      </button>
 
     </div>
   `);
