@@ -1010,7 +1010,9 @@ function showConsentPage() {
 
   const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
 
-  // 🔎 reset เฉพาะกรณี "ยังไม่ accepted" และ "ไม่ได้มาจากหน้าอ่าน"
+  // 🔎 reset state เฉพาะกรณี
+  // - ยังไม่ accepted
+  // - และไม่ได้เพิ่งกลับมาจากหน้าอ่านนโยบาย
   if (!isAccepted && !FROM_PDPA_READ) {
     HAS_READ_PDPA = false;
     READ_TIMER_PASSED = false;
@@ -1018,33 +1020,6 @@ function showConsentPage() {
 
   // reset flag หลังใช้
   FROM_PDPA_READ = false;
-
-  renderCard(`
-    ...
-  `);
-
-  if (isAccepted) return;
-
-  const checkbox = document.getElementById("consentCheck");
-  const btn = document.getElementById("consentAcceptBtn");
-
-  if (!checkbox || !btn) return;
-
-  checkbox.addEventListener("change", () => {
-    if (!HAS_READ_PDPA) {
-      checkbox.checked = false;
-      showAlertModal(
-        "กรุณาอ่านนโยบายก่อน",
-        "กรุณากดอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วนก่อนจึงจะสามารถยินยอมได้"
-      );
-      return;
-    }
-
-    btn.disabled = !checkbox.checked;
-  });
-}
-
-  const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
 
   renderCard(`
     <div class="top-bar">
@@ -1065,12 +1040,12 @@ function showConsentPage() {
 
       <!-- อ่านนโยบาย -->
       <button
-  class="menu-btn"
-  style="margin-bottom:14px"
-  onclick="openConsentDetail()"
->
-  📄 อ่านนโยบายความเป็นส่วนตัว
-</button>
+        class="menu-btn"
+        style="margin-bottom:14px"
+        onclick="openConsentDetail()"
+      >
+        📄 อ่านนโยบายความเป็นส่วนตัว
+      </button>
 
       <!-- checkbox -->
       <div style="display:flex; gap:10px; margin-bottom:20px;">
@@ -1118,7 +1093,7 @@ function showConsentPage() {
     </div>
   `);
 
-  // 🔒 guard เฉพาะตอนยังไม่ accepted
+  // 🔒 ถ้า accepted แล้ว ไม่ต้อง bind event ใด ๆ เพิ่ม
   if (isAccepted) return;
 
   const checkbox = document.getElementById("consentCheck");
@@ -1138,7 +1113,7 @@ function showConsentPage() {
 
     btn.disabled = !checkbox.checked;
   });
-//}
+}
 
 function showTermsPage() {
   const version =
