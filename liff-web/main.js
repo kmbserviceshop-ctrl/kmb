@@ -135,6 +135,18 @@ async function init() {
     });
 
     /* =========================
+       FIX 2: REVOKED (BLOCK HARD)
+    ========================= */
+    if (status.status === "revoked") {
+      showAlertModal(
+        "ไม่สามารถใช้งานได้",
+        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
+        () => liff.closeWindow()
+      );
+      return;
+    }
+
+    /* =========================
        GUEST (ยังไม่ผูกบัญชี)
     ========================= */
     if (status.status === "guest") {
@@ -154,7 +166,7 @@ async function init() {
     } = status.customer || {};
 
     /* =========================
-       REVOKED
+       REVOKED (safety net)
     ========================= */
     if (consent_status === "revoked") {
       showAlertModal(
@@ -191,6 +203,7 @@ async function init() {
     );
   }
 }
+
 init();
 
 /* =========================
