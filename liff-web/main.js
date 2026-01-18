@@ -1008,19 +1008,41 @@ function showConfirmModal(title, message, onConfirm) {
 
 function showConsentPage() {
 
-  // 🔎 reset เฉพาะกรณีที่ยังไม่เคย accepted
-  if (
-  (!CURRENT_CUSTOMER ||
-   CURRENT_CUSTOMER.consent_status !== "accepted") &&
-  !FROM_PDPA_READ
-) {
-  HAS_READ_PDPA = false;
-  READ_TIMER_PASSED = false;
-}
+  const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
 
-// reset flag หลังใช้
-FROM_PDPA_READ = false;
+  // 🔎 reset เฉพาะกรณี "ยังไม่ accepted" และ "ไม่ได้มาจากหน้าอ่าน"
+  if (!isAccepted && !FROM_PDPA_READ) {
+    HAS_READ_PDPA = false;
+    READ_TIMER_PASSED = false;
   }
+
+  // reset flag หลังใช้
+  FROM_PDPA_READ = false;
+
+  renderCard(`
+    ...
+  `);
+
+  if (isAccepted) return;
+
+  const checkbox = document.getElementById("consentCheck");
+  const btn = document.getElementById("consentAcceptBtn");
+
+  if (!checkbox || !btn) return;
+
+  checkbox.addEventListener("change", () => {
+    if (!HAS_READ_PDPA) {
+      checkbox.checked = false;
+      showAlertModal(
+        "กรุณาอ่านนโยบายก่อน",
+        "กรุณากดอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วนก่อนจึงจะสามารถยินยอมได้"
+      );
+      return;
+    }
+
+    btn.disabled = !checkbox.checked;
+  });
+}
 
   const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
 
@@ -1116,7 +1138,7 @@ FROM_PDPA_READ = false;
 
     btn.disabled = !checkbox.checked;
   });
-}
+//}
 
 function showTermsPage() {
   const version =
