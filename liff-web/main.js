@@ -17,21 +17,37 @@ const SUPABASE_ANON_KEY =
 /* =========================
 HELPER : API CALL
 ========================= */
-async function callFn(path, payload) {
-  const res = await fetch(`${FN_BASE}/${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify(payload),
-  });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text);
+async function callFn(path, payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch(`${FN_BASE}/${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    return await res.json();
+  } catch (err) {
+    // ⭐ สำคัญ: แปลง abort ให้เป็น error อ่านง่าย
+    if (err.name === "AbortError") {
+      throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  return res.json();
 }
 
 function setButtonLoading(btn, text) {
