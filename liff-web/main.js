@@ -4,7 +4,6 @@ CONFIG
 let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
 let HAS_READ_PDPA = false;
-let HAS_SCROLLED_TO_END = false;
 let READ_TIMER_PASSED = false;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
@@ -47,6 +46,112 @@ function resetButton(btn, text) {
   btn.innerText = text;
 }
 
+async function refreshCustomerStatus() {
+  try {
+    const profile = await liff.getProfile();
+
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    if (status.status === "guest") {
+      showGuestForm();
+      return;
+    }
+
+    CURRENT_CUSTOMER = status.customer;
+
+    const {
+      consent_status,
+      consent_version,
+      current_consent_version,
+    } = status.customer || {};
+
+    // revoked → ปิดทันที
+    if (consent_status === "revoked") {
+      showAlertModal(
+        "ไม่สามารถใช้งานได้",
+        "คุณได้ถอนความยินยอมในการใช้ข้อมูล",
+        () => liff.closeWindow()
+      );
+      return;
+    }
+
+    // ต้อง consent ใหม่
+    if (
+      consent_status !== "accepted" ||
+      consent_version !== current_consent_version
+    ) {
+      showConsentPage(CURRENT_CUSTOMER);
+      return;
+    }
+
+    // ปกติ
+    showMemberMenu(CURRENT_CUSTOMER);
+
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถอัปเดตสถานะได้"
+    );
+  }
+}
+/* =========================
+REFRESH CUSTOMER STATUS
+ใช้หลัง acceptConsent เท่านั้น
+========================= */
+async function refreshCustomerStatus() {
+  try {
+    const profile = await liff.getProfile();
+
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    // ❌ ถ้า somehow กลายเป็น guest
+    if (status.status !== "member") {
+      showGuestForm();
+      return;
+    }
+
+    CURRENT_CUSTOMER = status.customer;
+
+    const {
+      consent_status,
+      consent_version,
+      current_consent_version,
+    } = status.customer || {};
+
+    // 🔴 ถอนความยินยอม
+    if (consent_status === "revoked") {
+      showAlertModal(
+        "ไม่สามารถใช้งานได้",
+        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
+        () => liff.closeWindow()
+      );
+      return;
+    }
+
+    // 🟡 ยังไม่ยอมรับ / version ใหม่
+    const needConsent =
+      consent_status !== "accepted" ||
+      consent_version !== current_consent_version;
+
+    if (needConsent) {
+      showConsentPage(CURRENT_CUSTOMER);
+      return;
+    }
+
+    // 🟢 ผ่านครบ → เข้า Home
+    showMemberMenu(CURRENT_CUSTOMER);
+
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถอัปเดตสถานะได้"
+    );
+  }
+}
 /* =========================
 INIT
 ========================= */
@@ -871,10 +976,10 @@ async function acceptConsent() {
 
     // 3️⃣ เข้าใช้งานต่อได้เลย ไม่เรียก init() ซ้ำ
     showAlertModal(
-      "ขอบคุณ",
-      "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
-      () => showMemberMenu(CURRENT_CUSTOMER)
-    );
+  "ขอบคุณ",
+  "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
+  () => refreshCustomerStatus()
+);
 
   } catch (err) {
     showAlertModal(
@@ -909,13 +1014,25 @@ async function revokeConsent() {
   try {
     const profile = await liff.getProfile();
 
+    // 1️⃣ เรียก backend ถอนความยินยอม
     await callFn("revoke_consent", {
       line_user_id: profile.userId,
     });
 
+    // 2️⃣ 🔥 เคลียร์ state ฝั่ง frontend ให้ขาด
+    CURRENT_CUSTOMER = {
+      ...CURRENT_CUSTOMER,
+      consent_status: "revoked",
+      consent_version: null,
+    };
+
+    HAS_READ_PDPA = false;
+    READ_TIMER_PASSED = false;
+
+    // 3️⃣ แจ้งผู้ใช้ + ปิด LIFF
     showAlertModal(
       "ถอนความยินยอมแล้ว",
-      "ระบบได้บันทึกการถอนความยินยอมของคุณเรียบร้อย",
+      "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
       () => liff.closeWindow()
     );
 
