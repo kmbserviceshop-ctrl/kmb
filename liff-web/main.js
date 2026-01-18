@@ -3,7 +3,9 @@ CONFIG
 ========================= */
 let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
-HAS_READ_PDPA = false;
+let HAS_READ_PDPA = false;
+let HAS_SCROLLED_TO_END = false;
+let READ_TIMER_PASSED = false;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
