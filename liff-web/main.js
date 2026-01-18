@@ -918,7 +918,7 @@ async function revokeConsent() {
       line_user_id: profile.userId,
     });
 
-    // 2️⃣ 🔥 เคลียร์ state ฝั่ง frontend ให้ขาด
+    // 2️⃣ 🔥 อัปเดต state ฝั่ง frontend (คงโครงเดิม)
     CURRENT_CUSTOMER = {
       ...CURRENT_CUSTOMER,
       consent_status: "revoked",
@@ -928,11 +928,18 @@ async function revokeConsent() {
     HAS_READ_PDPA = false;
     READ_TIMER_PASSED = false;
 
-    // 3️⃣ แจ้งผู้ใช้ + ปิด LIFF
+    // 3️⃣ แจ้งผู้ใช้ + logout + ปิด LIFF
     showAlertModal(
       "ถอนความยินยอมแล้ว",
       "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
-      () => liff.closeWindow()
+      () => {
+        try {
+          liff.logout(); // 🔑 FIX 3: ตัด LINE session
+        } catch (e) {
+          // ป้องกัน error กรณี environment บางแบบ
+        }
+        liff.closeWindow(); // 🚪 ปิด LIFF
+      }
     );
 
   } catch (err) {
