@@ -945,3 +945,110 @@ function showConfirmModal(title, message, onConfirm) {
     onConfirm();
   };
 }
+
+function showConsentPage() {
+
+  // 🔎 reset เฉพาะกรณีที่ยังไม่เคย accepted
+  if (
+    !CURRENT_CUSTOMER ||
+    CURRENT_CUSTOMER.consent_status !== "accepted"
+  ) {
+    HAS_READ_PDPA = false;
+    READ_TIMER_PASSED = false;
+  }
+
+  const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
+
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
+      <div class="top-title">ความเป็นส่วนตัว</div>
+    </div>
+
+    <div class="section-card">
+
+      <div class="menu-title">
+        การขอความยินยอมในการเก็บข้อมูลส่วนบุคคล
+      </div>
+
+      <div style="font-size:14px; color:#374151; line-height:1.6; margin-bottom:16px;">
+        KPOS จำเป็นต้องใช้ข้อมูลของท่านเพื่อให้บริการ เช่น
+        การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล และการติดต่อร้านค้า
+      </div>
+
+      <!-- อ่านนโยบาย -->
+      <button
+        class="menu-btn"
+        style="margin-bottom:14px"
+        onclick="openConsentDetail()"
+      >
+        📄 อ่านนโยบายความเป็นส่วนตัว
+      </button>
+
+      <!-- checkbox -->
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <input
+          type="checkbox"
+          id="consentCheck"
+          ${isAccepted ? "checked disabled" : HAS_READ_PDPA ? "" : "disabled"}
+        />
+        <label
+          for="consentCheck"
+          style="font-size:14px; color:#374151; cursor:pointer;"
+          ${!isAccepted ? `onclick="openConsentDetail()"` : ""}
+        >
+          ข้าพเจ้ายินยอมให้ KPOS เก็บและใช้ข้อมูลส่วนบุคคล
+        </label>
+      </div>
+
+      ${
+        isAccepted
+          ? `
+            <div style="color:#16a34a; font-size:14px; margin-bottom:12px;">
+              ✔️ คุณได้ให้ความยินยอมแล้ว
+            </div>
+          `
+          : `
+            <button
+              id="consentAcceptBtn"
+              class="primary-btn"
+              ${HAS_READ_PDPA ? "" : "disabled"}
+              onclick="acceptConsent()"
+            >
+              ยินยอมและใช้งานต่อ
+            </button>
+
+            <button
+              class="primary-btn secondary-btn"
+              style="margin-top:12px"
+              onclick="declineConsent()"
+            >
+              ไม่ยินยอม
+            </button>
+          `
+      }
+
+    </div>
+  `);
+
+  // 🔒 guard เฉพาะตอนยังไม่ accepted
+  if (isAccepted) return;
+
+  const checkbox = document.getElementById("consentCheck");
+  const btn = document.getElementById("consentAcceptBtn");
+
+  if (!checkbox || !btn) return;
+
+  checkbox.addEventListener("change", () => {
+    if (!HAS_READ_PDPA) {
+      checkbox.checked = false;
+      showAlertModal(
+        "กรุณาอ่านนโยบายก่อน",
+        "กรุณากดอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วนก่อนจึงจะสามารถยินยอมได้"
+      );
+      return;
+    }
+
+    btn.disabled = !checkbox.checked;
+  });
+}
