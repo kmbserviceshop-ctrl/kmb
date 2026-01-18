@@ -754,28 +754,29 @@ function openConsentDetail() {
   <div
     id="consentScrollBox"
     style="
-      font-size:14px;
+      font-size:13px;
       color:#374151;
       line-height:1.7;
-      max-height:60vh;
+      max-height:65vh;
       overflow:auto;
       border:1px solid #e5e7eb;
-      padding:14px;
-      border-radius:10px;
+      padding:12px;
+      border-radius:8px;
     "
   >
 
 <strong>นโยบายการคุ้มครองข้อมูลส่วนบุคคล (Privacy Policy)</strong><br><br>
 
-KPOS ให้ความสำคัญสูงสุดกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
-การเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลจะดำเนินการตามกฎหมายอย่างเคร่งครัด<br><br>
+KPOS ให้ความสำคัญสูงสุดกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน  
+การเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลจะดำเนินการตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลอย่างเคร่งครัด<br><br>
 
-<strong>1. ข้อมูลที่เก็บรวบรวม</strong>
+<strong>1. ประเภทข้อมูลส่วนบุคคลที่เก็บรวบรวม</strong>
 <ul>
   <li>ชื่อ – นามสกุล</li>
   <li>หมายเลขโทรศัพท์</li>
-  <li>ข้อมูลบัตรประชาชนหรือ Passport (เท่าที่จำเป็น)</li>
+  <li>ข้อมูลบัตรประชาชน หรือ Passport (เท่าที่จำเป็น)</li>
   <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
+  <li>ข้อมูลการใช้งานระบบ KPOS Connect</li>
 </ul>
 
 <strong>2. วัตถุประสงค์ในการใช้ข้อมูล</strong>
@@ -820,13 +821,12 @@ KPOS ให้ความสำคัญสูงสุดกับการค
   setTimeout(() => {
     READ_TIMER_PASSED = true;
     if (scrolledToEnd) btn.disabled = false;
-  }, 10000);
+  }, 4000);
 
   btn.onclick = () => {
     if (!READ_TIMER_PASSED || !scrolledToEnd) return;
-
     HAS_READ_PDPA = true;
-    showConsentPage(); // กลับหน้าหลัก consent → flow เดินต่อ
+    showConsentPage();
   };
 }
 
