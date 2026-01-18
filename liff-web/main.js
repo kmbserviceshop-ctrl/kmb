@@ -745,63 +745,96 @@ function openConsentDetail() {
   READ_TIMER_PASSED = false;
 
   openModal(`
-    <h4>นโยบายความเป็นส่วนตัว</h4>
+<h4>นโยบายความเป็นส่วนตัว</h4>
 
-    <div
-      id="consentScrollBox"
-      style="
-        font-size:13px;
-        color:#374151;
-        line-height:1.6;
-        text-align:left;
-        max-height:240px;
-        overflow:auto;
-        border:1px solid #e5e7eb;
-        padding:10px;
-        border-radius:8px;
-      "
-    >
-      KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน<br><br>
+<div
+  id="consentScrollBox"
+  style="
+    font-size:13px;
+    color:#374151;
+    line-height:1.7;
+    text-align:left;
+    max-height:240px;
+    overflow:auto;
+    border:1px solid #e5e7eb;
+    padding:12px;
+    border-radius:8px;
+  "
+>
 
-      <strong>ข้อมูลที่จัดเก็บ:</strong>
-      <ul style="padding-left:18px;">
-        <li>ชื่อ – นามสกุล</li>
-        <li>เบอร์โทรศัพท์</li>
-        <li>ข้อมูลสัญญาและประวัติการทำรายการ</li>
-      </ul>
+<strong>นโยบายการคุ้มครองข้อมูลส่วนบุคคล (Privacy Policy)</strong><br><br>
 
-      <strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong>
-      <ul style="padding-left:18px;">
-        <li>ให้บริการขายฝาก / ผ่อนสินค้า</li>
-        <li>แจ้งเตือนสถานะบิล</li>
-        <li>ติดต่อร้านค้า</li>
-      </ul>
+KPOS ให้ความสำคัญสูงสุดกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน  
+การเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลจะดำเนินการตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลที่เกี่ยวข้องอย่างเคร่งครัด<br><br>
 
-      ท่านสามารถถอนความยินยอมได้ภายหลังในเมนูตั้งค่า
-    </div>
+<strong>1. ประเภทข้อมูลส่วนบุคคลที่เก็บรวบรวม</strong>
+<ul style="padding-left:18px;">
+  <li>ชื่อ – นามสกุล</li>
+  <li>หมายเลขโทรศัพท์</li>
+  <li>ข้อมูลบัตรประชาชน หรือ Passport (เฉพาะที่จำเป็นต่อการยืนยันตัวตน)</li>
+  <li>ข้อมูลสัญญา ประวัติการทำรายการขายฝากหรือผ่อนสินค้า</li>
+  <li>ข้อมูลการใช้งานระบบ KPOS Connect</li>
+</ul>
 
-    <!-- สถานะ 1: ยังไม่ครบ -->
-    <button
-      class="primary-btn"
-      id="consentReadDoneBtn"
-      disabled
-    >
-      อ่านและเข้าใจแล้ว
-    </button>
+<strong>2. วัตถุประสงค์ในการเก็บและใช้ข้อมูล</strong>
+<ul style="padding-left:18px;">
+  <li>เพื่อให้บริการขายฝาก ผ่อนสินค้า และบริการอื่นที่เกี่ยวข้อง</li>
+  <li>เพื่อยืนยันตัวตนและป้องกันการแอบอ้างหรือทุจริต</li>
+  <li>เพื่อแจ้งเตือนสถานะบิล กำหนดชำระ และข้อมูลสำคัญ</li>
+  <li>เพื่อการติดต่อประสานงานระหว่างลูกค้าและร้านค้า</li>
+  <li>เพื่อปรับปรุงคุณภาพและความปลอดภัยของระบบ</li>
+</ul>
 
-    <button
-      class="secondary-btn"
-      style="margin-top:8px"
-      onclick="closeModal()"
-    >
-      ปิด
-    </button>
+<strong>3. การเปิดเผยข้อมูล</strong><br>
+KPOS จะไม่เปิดเผยข้อมูลส่วนบุคคลของท่านแก่บุคคลภายนอก  
+เว้นแต่เป็นกรณีที่จำเป็นตามกฎหมาย หรือได้รับความยินยอมจากท่านโดยชัดแจ้ง<br><br>
+
+<strong>4. ระยะเวลาในการจัดเก็บข้อมูล</strong><br>
+ข้อมูลส่วนบุคคลจะถูกจัดเก็บตลอดระยะเวลาที่ท่านยังใช้บริการ  
+หรือเท่าที่จำเป็นตามวัตถุประสงค์และข้อกำหนดทางกฎหมาย<br><br>
+
+<strong>5. สิทธิของเจ้าของข้อมูล</strong>
+<ul style="padding-left:18px;">
+  <li>สิทธิในการเข้าถึงและขอสำเนาข้อมูล</li>
+  <li>สิทธิในการแก้ไขข้อมูลให้ถูกต้อง</li>
+  <li>สิทธิในการถอนความยินยอมได้ตลอดเวลา</li>
+  <li>สิทธิในการขอให้ลบหรือระงับการใช้ข้อมูล</li>
+</ul>
+
+<strong>6. การถอนความยินยอม</strong><br>
+ท่านสามารถถอนความยินยอมได้ภายหลังผ่านเมนูตั้งค่า  
+อย่างไรก็ตาม การถอนความยินยอมอาจส่งผลให้ไม่สามารถใช้บริการ KPOS Connect ได้<br><br>
+
+หากท่านได้อ่านและเข้าใจนโยบายฉบับนี้แล้ว  
+กรุณาเลื่อนอ่านให้ครบถ้วนก่อนกดยืนยัน
+</div>
+
+<!-- สถานะ 1: ยังไม่ครบ -->
+<button
+  class="primary-btn"
+  id="consentReadDoneBtn"
+  disabled
+>
+  อ่านและเข้าใจแล้ว
+</button>
+
+<button
+  class="secondary-btn"
+  style="margin-top:8px"
+  onclick="closeModal()"
+>
+  ปิด
+</button>
   `);
 
   const box = document.getElementById("consentScrollBox");
   const btn = document.getElementById("consentReadDoneBtn");
 
-  let scrolledToEnd = false;
+  // ✅ reset ปุ่มให้กลับเป็นสถานะ 1 เสมอ
+  resetButton(btn, "อ่านและเข้าใจแล้ว");
+  btn.disabled = true;
+
+  let scrolledToEnd = false; // reset ใหม่ทุกครั้ง
 
   // ✅ ต้องเลื่อนถึงท้าย
   box.addEventListener("scroll", () => {
@@ -811,14 +844,14 @@ function openConsentDetail() {
     if (nearBottom) {
       scrolledToEnd = true;
 
-      // ถ้าเวลาครบแล้ว → สถานะ 2: พร้อมกด
+      // สถานะ 2: พร้อมกด
       if (READ_TIMER_PASSED) {
         btn.disabled = false;
       }
     }
   });
 
-  // ⏱️ เวลาอ่านขั้นต่ำ (ใช้ค่าเดิมตามที่คุณบอกว่าดีแล้ว)
+  // ⏱️ เวลาอ่านขั้นต่ำ 10 วินาที
   setTimeout(() => {
     READ_TIMER_PASSED = true;
 
@@ -836,7 +869,7 @@ function openConsentDetail() {
     btn.disabled = true;
 
     setTimeout(() => {
-      // ✅ ยอมรับว่าอ่านแล้ว
+      // ✅ ยืนยันว่าอ่านแล้ว
       HAS_READ_PDPA = true;
 
       const checkbox =
@@ -858,7 +891,6 @@ function openConsentDetail() {
     }, 600);
   };
 }
-
 /* =========================
 PDPA CONSENT ACTIONS
 ========================= */
