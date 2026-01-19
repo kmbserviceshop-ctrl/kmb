@@ -33,66 +33,6 @@ ENTRY POINT
 /**
  * Guest Home – UI เหมือน Member 100% แต่ปิดสิทธิ์
  */
-function openGuestHomePage() {
-  ENTRY_CONTEXT = "guest";
-
-  renderCard(`
-    <div class="app-page home-page">
-
-      <!-- Header -->
-      <div class="home-header member-header">
-        <div>
-          <div class="member-name">Guest</div>
-          <div class="member-level">สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ</div>
-        </div>
-        <div class="header-actions">
-          <span class="bell-icon">🔔</span>
-        </div>
-      </div>
-
-      <!-- Points Card (Mock) -->
-      <div class="points-card">
-        <div class="points-left">
-          <div class="points-value">0 Points</div>
-          <div class="points-sub">Redeem your points now!</div>
-        </div>
-        <button class="points-action disabled" disabled>
-          Redeem
-        </button>
-      </div>
-
-      <!-- Menu Grid -->
-      <div class="menu-grid">
-
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📄</div>
-          <div class="tile-text">บิลของฉัน</div>
-        </button>
-
-        <button class="menu-tile active" onclick="openMobilePackagePage()">
-          <div class="tile-icon">📶</div>
-          <div class="tile-text">เติมแพ็กเกจ</div>
-        </button>
-
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📦</div>
-          <div class="tile-text">รายการอื่น</div>
-        </button>
-
-      </div>
-
-      <!-- History (Mock) -->
-      <div class="section-card">
-        <div class="menu-title">ประวัติ/บิลของฉัน</div>
-        <div class="empty-state">
-          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
-        </div>
-      </div>
-
-    </div>
-  `);
-}
-
 async function loadMyPackageRequests() {
   const container = document.getElementById("guestPhoneList");
   if (!container) return;
