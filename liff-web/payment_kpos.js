@@ -4,13 +4,16 @@ PAYMENT KPOS (CORE)
 ========================= */
 
 /**
- * CURRENT_PAYMENT
- * {
- *   title,
- *   amount_satang,
- *   description_html,
- *   onSubmit,
- *   onBack
+ * config = {
+ *   service: string,
+ *   reference_id: string,
+ *   title: string,
+ *   amount_satang: number,
+ *   service_fee_satang?: number,
+ *   meta?: object,
+ *   description_html: string,
+ *   onSubmit: async function(payload),
+ *   onBack: function()
  * }
  */
 let CURRENT_PAYMENT = null;
@@ -76,18 +79,22 @@ function openKposPayment(config) {
 
   CURRENT_PAYMENT = config;
 
-  const amountSatang = Number(config.amount_satang ?? 0);
-  const serviceFeeSatang = Number(config.service_fee_satang ?? 0);
+const amountSatang = Number(config.amount_satang ?? 0);
+const serviceFeeSatang = Number(config.service_fee_satang ?? 0);
 
-  const amountBaht = amountSatang / 100;
-  const serviceFeeBaht = serviceFeeSatang / 100;
-  const totalBaht = (amountSatang + serviceFeeSatang) / 100;
-  const totalBahtQR = (amountSatang + serviceFeeSatang) / 10000;
+// ✅ รวมยอดเป็น "สตางค์" ก่อน (ข้อมูลจริง)
+const totalSatang = amountSatang + serviceFeeSatang;
 
-  const qrData =
-    totalBaht > 0
-      ? generatePromptPayQR(SHOP_PROMPTPAY_QR, totalBahtQR)
-      : null;
+// ✅ แปลงเป็น "บาท" เพียงครั้งเดียว
+const amountBaht = amountSatang / 100;
+const serviceFeeBaht = serviceFeeSatang / 100;
+const totalBaht = totalSatang / 100;
+
+// ✅ ส่ง "บาท" เข้า QR generator เท่านั้น
+const qrData =
+  totalSatang > 0
+    ? generatePromptPayQR(SHOP_PROMPTPAY_QR, totalBaht)
+    : null;
 
   renderCard(`
     <div class="top-bar">
