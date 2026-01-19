@@ -114,7 +114,11 @@ async function loadMyPackageRequests() {
   if (!container) return;
 
   try {
+    console.log("LIFF exists:", typeof liff !== "undefined");
+    console.log("LIFF in client:", liff?.isInClient?.());
+
     const profile = await liff.getProfile();
+    console.log("LIFF profile:", profile);
 
     const result = await callFn("get_my_mobile_package_requests", {
       line_user_id: profile.userId,
@@ -133,6 +137,8 @@ async function loadMyPackageRequests() {
 
     container.innerHTML = list.map(renderMyRequestCard).join("");
   } catch (err) {
+    console.error("loadMyPackageRequests error:", err);
+
     container.innerHTML = `
       <div style="font-size:13px;color:#ef4444">
         ไม่สามารถโหลดรายการคำขอได้
