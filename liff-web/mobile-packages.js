@@ -52,31 +52,30 @@ function openGuestHomePage() {
         </div>
       </div>
 
-      <!-- Profile Card (Guest style like member) -->
-      <div class="section-card">
-        <div class="member-name">Guest</div>
-        <div class="member-phone">
+      <!-- Hero Card (แทน Points ของ Member) -->
+      <div class="section-card" style="margin-top:12px">
+        <div style="font-size:15px;font-weight:600">
+          Guest
+        </div>
+        <div style="font-size:13px;color:#6b7280;margin-top:4px;line-height:1.5">
           หากต้องการใช้บริการเต็มรูปแบบ<br/>
           กรุณาสมัครสมาชิกก่อนใช้งาน
         </div>
       </div>
 
-      <!-- Menu Grid -->
-      <div class="menu-grid">
+      <!-- Menu Grid (ตำแหน่งเดียวกับ Member) -->
+      <div class="menu-grid" style="margin-top:14px">
 
-        <!-- บิลของฉัน : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
-        <!-- เติมแพ็กเกจ : เปิด -->
         <button class="menu-tile active" onclick="openMobilePackagePage()">
           <div class="tile-icon">📶</div>
           <div class="tile-text">เติมแพ็กเกจ</div>
         </button>
 
-        <!-- รายการอื่น : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
           <div class="tile-text">รายการอื่น</div>
@@ -84,10 +83,11 @@ function openGuestHomePage() {
 
       </div>
 
-      <!-- รายการคำขอ -->
+      <!-- รายการคำขอ (ตำแหน่งเดียวกับ History ของ Member) -->
       <div class="section-card" style="margin-top:16px">
         <div class="menu-title">
-          รายการคำขอ <span style="font-size:12px;color:#ef4444">(ผู้ล็อกอินเท่านั้น)</span>
+          รายการคำขอ
+          <span style="font-size:12px;color:#ef4444">(ผู้ล็อกอินเท่านั้น)</span>
         </div>
 
         <div id="guestPhoneList" style="margin-top:10px">
@@ -100,7 +100,6 @@ function openGuestHomePage() {
     </div>
   `);
 
-  // ❗ ยังเรียกเหมือนเดิม (ไม่แก้ flow)
   loadMyPackageRequests();
 }
 
