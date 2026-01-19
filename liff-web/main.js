@@ -192,23 +192,69 @@ function handleRichMenuEntry() {
 
   switch (entry) {
     case "topup":
-      enterTopupFromRichMenu();
+      initTopupEntry(); // 👈 ใช้ตัวนี้
       return true;
-
-    // 🔜 เผื่ออนาคต
-    // case "installment":
-    //   enterInstallmentFromRichMenu();
-    //   return true;
-
-    // case "contact":
-    //   enterContactFromRichMenu();
-    //   return true;
 
     default:
       return false;
   }
 }
+async function initTopupEntry() {
+  try {
+    // 1️⃣ init LIFF
+    await liff.init({ liffId: LIFF_ID });
 
+    // 2️⃣ เปิดนอก LINE → ถือเป็น guest
+    if (!liff.isInClient()) {
+      ENTRY_CONTEXT = "guest";
+      openGuestHomePage();
+      return;
+    }
+
+    // 3️⃣ ยังไม่ login → ให้ LINE login
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    // 4️⃣ ดึง LINE profile
+    const profile = await liff.getProfile();
+
+    // 5️⃣ เช็คสถานะกับ backend (ตัวเดิม)
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    /**
+     * ✅ MEMBER
+     * - ผูกบัญชีแล้ว
+     * - แสดงหน้าเดิม แต่ใช้ข้อมูล member
+     */
+    if (status.status === "member" && status.customer) {
+      ENTRY_CONTEXT = "member";
+      CURRENT_CUSTOMER = status.customer;
+
+      // เปิดหน้า topup เดิม (ไม่เปลี่ยน layout)
+      openGuestHomePage(); // ใช้ UI เดียวกัน
+      loadMyPackageRequests(); // โหลดข้อมูลของ member
+      return;
+    }
+
+    /**
+     * 🟡 GUEST / REVOKED / NOT FOUND
+     * - ไม่ redirect
+     * - ไม่แสดงหน้าผูกบัญชี
+     * - ใช้ guest UI
+     */
+    ENTRY_CONTEXT = "guest";
+    openGuestHomePage();
+
+  } catch (err) {
+    console.error("initTopupEntry error:", err);
+    ENTRY_CONTEXT = "guest";
+    openGuestHomePage();
+  }
+}
 /* =========================
 INIT
 ========================= */
