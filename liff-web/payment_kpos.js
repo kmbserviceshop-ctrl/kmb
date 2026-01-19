@@ -82,10 +82,11 @@ function openKposPayment(config) {
   const amountBaht = amountSatang / 100;
   const serviceFeeBaht = serviceFeeSatang / 100;
   const totalBaht = (amountSatang + serviceFeeSatang) / 100;
+  const totalBahtQR = (amountSatang + serviceFeeSatang) / 10;
 
   const qrData =
     totalBaht > 0
-      ? generatePromptPayQR(SHOP_PROMPTPAY_QR, totalBaht)
+      ? generatePromptPayQR(SHOP_PROMPTPAY_QR, totalBahtQR)
       : null;
 
   renderCard(`
