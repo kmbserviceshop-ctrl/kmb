@@ -1267,6 +1267,8 @@ function doLogout() {
 MOBILE PACKAGE ACTIONS
 ========================= */
 function openTopupMenu() {
+  ENTRY_CONTEXT = "member"; // ⭐⭐ เพิ่มบรรทัดนี้ ⭐⭐
+
   if (typeof openMobilePackagePage !== "function") {
     showAlertModal(
       "ยังไม่พร้อมใช้งาน",
