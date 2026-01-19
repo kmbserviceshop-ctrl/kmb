@@ -253,6 +253,73 @@ async function submitKposPayment(btn) {
   }
 }
 
+/**
+ * SUBMIT TOPUP PAYMENT (STANDARD)
+ * ใช้ payload กลางจาก KPOS Payment
+ */
+async function submitTopupPayment(payload) {
+  if (!payload) {
+    throw new Error("missing_payload");
+  }
+
+  const {
+    service,
+    reference_id,
+    amount_satang,
+    meta,
+    slip_base64,
+  } = payload;
+
+  // 🔒 validate ขั้นต่ำ
+  if (service !== "topup") {
+    throw new Error("invalid_service");
+  }
+
+  if (!reference_id) {
+    throw new Error("missing_reference_id");
+  }
+
+  if (!amount_satang || amount_satang <= 0) {
+    throw new Error("invalid_amount");
+  }
+
+  if (!slip_base64) {
+    throw new Error("slip_required");
+  }
+
+  const lineAccessToken = liff.getAccessToken();
+  if (!lineAccessToken) {
+    throw new Error("no_line_access_token");
+  }
+
+  const body = {
+    topup_request_id: reference_id, // ⭐ map ชัด
+    amount: amount_satang,          // สตางค์
+    slip_base64,
+    meta: meta || {},
+  };
+
+  const res = await fetch(
+    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/topup-payment-request",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "x-line-access-token": lineAccessToken,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw data;
+  }
+
+  return data;
+}
+
 /* =========================
 BACK
 ========================= */
