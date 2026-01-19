@@ -22,50 +22,49 @@ function goBackSmart() {
   if (ENTRY_CONTEXT === "member") {
     showMemberMenu(CURRENT_CUSTOMER);
   } else {
-    openGuestHomePage();
+    openTopupHomePage();
   }
 }
 
 /**
- * Guest Home
- * ใช้ Member UI ทั้งก้อน แทนค่าด้วย Guest (ตำแหน่ง / สี / layout เหมือนกัน 100%)
+ * Topup Home
+ * ใช้ Member UI ทั้งก้อน แทนค่าด้วย Guest / Member
  */
-function openGuestHomePage() {
+function openTopupHomePage() {
 
   const isMember =
-  ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
+    ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
 
-const displayName = isMember
-  ? CURRENT_CUSTOMER.name
-  : "Guest";
+  const displayName = isMember
+    ? CURRENT_CUSTOMER.name
+    : "Guest";
 
-const displaySub = isMember
-  ? "ยินดีต้อนรับ"
-  : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ";
-  
+  const displaySub = isMember
+    ? "ยินดีต้อนรับ"
+    : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ";
 
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header : รูป + ชื่อ (ใช้ร่วม Guest / Member) -->
-<div class="home-header">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="home-avatar">👤</div>
+      <!-- Header : รูป + ชื่อ -->
+      <div class="home-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="home-avatar">👤</div>
 
-    <div>
-      <div style="font-size:16px;font-weight:600">
-        ${displayName}
+          <div>
+            <div style="font-size:16px;font-weight:600">
+              ${displayName}
+            </div>
+            <div style="font-size:13px;color:#6b7280">
+              ${displaySub}
+            </div>
+          </div>
+        </div>
+
+        <div class="home-avatar">🔔</div>
       </div>
-      <div style="font-size:13px;color:#6b7280">
-        ${displaySub}
-      </div>
-    </div>
-  </div>
 
-  <div class="home-avatar">🔔</div>
-</div>
-
-      <!-- Points Card : โครงเดียวกับ Member -->
+      <!-- Points Card -->
       <div style="
         margin-top:12px;
         background:linear-gradient(135deg,#111827,#000);
@@ -118,19 +117,25 @@ const displaySub = isMember
       </div>
 
       <!-- History -->
-<div class="section-card" style="margin-top:20px">
-  <div class="menu-title">ประวัติ/บิลของฉัน</div>
+      <div class="section-card" style="margin-top:20px">
+        <div class="menu-title">ประวัติ/บิลของฉัน</div>
 
-  <!-- เส้นคั่น แบบเดียวกับ Member -->
-  <div class="divider"></div>
+        <div class="divider"></div>
 
-  <div style="font-size:13px;color:#9ca3af">
-    เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
-  </div>
-</div>
+        <div style="font-size:13px;color:#9ca3af">
+          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
+        </div>
+      </div>
 
     </div>
   `);
+}
+
+/**
+ * alias เดิม กันโค้ดเก่าพัง
+ */
+function openGuestHomePage() {
+  openTopupHomePage();
 }
 
 async function loadMyPackageRequests() {
@@ -138,11 +143,7 @@ async function loadMyPackageRequests() {
   if (!container) return;
 
   try {
-    console.log("LIFF exists:", typeof liff !== "undefined");
-    console.log("LIFF in client:", liff?.isInClient?.());
-
     const profile = await liff.getProfile();
-    console.log("LIFF profile:", profile);
 
     const result = await callFn("get_my_mobile_package_requests", {
       line_user_id: profile.userId,
@@ -161,8 +162,6 @@ async function loadMyPackageRequests() {
 
     container.innerHTML = list.map(renderMyRequestCard).join("");
   } catch (err) {
-    console.error("loadMyPackageRequests error:", err);
-
     container.innerHTML = `
       <div style="font-size:13px;color:#ef4444">
         ไม่สามารถโหลดรายการคำขอได้
@@ -172,7 +171,7 @@ async function loadMyPackageRequests() {
 }
 
 /* =========================
-RENDER REQUEST CARD (เพิ่มเท่านั้น)
+RENDER REQUEST CARD
 ========================= */
 
 function renderMyRequestCard(req) {
@@ -363,7 +362,7 @@ async function confirmRequestPackageReview() {
   }
 
   try {
-    const profile = await liff.getProfile(); // ⭐ ใช้ LINE จริงใน guest flow
+    const profile = await liff.getProfile();
 
     await callFn("request_mobile_package_review", {
       phone: CURRENT_PHONE,
