@@ -36,53 +36,50 @@ function openGuestHomePage() {
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header (เหมือน Member) -->
+      <!-- Header : รูป + ชื่อ (เหมือน Member) -->
       <div class="home-header">
-        <div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="home-avatar">👤</div>
+          <div style="font-size:16px;font-weight:600">
+            Guest
+          </div>
+        </div>
         <div class="home-avatar">🔔</div>
       </div>
 
-      <!-- Points Card (โครงเดียวกับ Member) -->
-      <div class="points-card" style="
-        background:#ffffff;
+      <!-- Points Card : โครงเดียวกับ Member -->
+      <div style="
+        margin-top:12px;
+        background:linear-gradient(135deg,#111827,#000);
+        color:#fff;
         border-radius:18px;
         padding:18px;
         display:flex;
         justify-content:space-between;
         align-items:center;
-        box-shadow:0 8px 20px rgba(0,0,0,0.06);
       ">
         <div>
-          <div style="font-size:20px;font-weight:700;color:#263238">
-            Guest
-          </div>
-          <div style="font-size:13px;color:#607280;margin-top:4px">
-            สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ
-          </div>
-        </div>
-
-        <div style="text-align:right">
-          <div style="font-size:18px;font-weight:700;color:#263238">
+          <div style="font-size:22px;font-weight:700">
             0 Points
           </div>
-          <div style="font-size:12px;color:#607280;margin-top:2px">
+          <div style="font-size:13px;opacity:.8;margin-top:4px">
             Redeem your points now!
           </div>
-          <button disabled style="
-            margin-top:6px;
-            padding:6px 14px;
-            border-radius:999px;
-            border:none;
-            background:#E7E9EC;
-            color:#9ca3af;
-            font-size:13px;
-          ">
-            Redeem
-          </button>
         </div>
+
+        <button disabled style="
+          background:#1f2937;
+          color:#9ca3af;
+          border:none;
+          border-radius:999px;
+          padding:8px 18px;
+          font-size:13px;
+        ">
+          Redeem
+        </button>
       </div>
 
-      <!-- Menu Grid (ตำแหน่งเดียวกับ Member) -->
+      <!-- Menu Grid -->
       <div class="menu-grid" style="margin-top:18px">
 
         <button class="menu-tile disabled" disabled>
@@ -102,11 +99,9 @@ function openGuestHomePage() {
 
       </div>
 
-      <!-- History (ตำแหน่งเดียวกับ Member) -->
+      <!-- History -->
       <div class="section-card" style="margin-top:20px">
-        <div class="menu-title">
-          ประวัติ/บิลของฉัน
-        </div>
+        <div class="menu-title">ประวัติ/บิลของฉัน</div>
         <div style="font-size:13px;color:#9ca3af">
           เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
         </div>
