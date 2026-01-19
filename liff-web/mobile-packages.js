@@ -39,11 +39,17 @@ function openGuestHomePage() {
       <!-- Header : รูป + ชื่อ (เหมือน Member) -->
       <div class="home-header">
         <div style="display:flex;align-items:center;gap:10px">
-          <div class="home-avatar">👤</div>
-          <div style="font-size:16px;font-weight:600">
-            Guest
-          </div>
-        </div>
+  <div class="home-avatar">👤</div>
+
+  <div>
+    <div style="font-size:16px;font-weight:600">
+      Guest
+    </div>
+    <div style="font-size:13px;color:#6b7280">
+      สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ
+    </div>
+  </div>
+</div>
         <div class="home-avatar">🔔</div>
       </div>
 
@@ -100,12 +106,16 @@ function openGuestHomePage() {
       </div>
 
       <!-- History -->
-      <div class="section-card" style="margin-top:20px">
-        <div class="menu-title">ประวัติ/บิลของฉัน</div>
-        <div style="font-size:13px;color:#9ca3af">
-          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
-        </div>
-      </div>
+<div class="section-card" style="margin-top:20px">
+  <div class="menu-title">ประวัติ/บิลของฉัน</div>
+
+  <!-- เส้นคั่น แบบเดียวกับ Member -->
+  <div class="divider"></div>
+
+  <div style="font-size:13px;color:#9ca3af">
+    เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
+  </div>
+</div>
 
     </div>
   `);
