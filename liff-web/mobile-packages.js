@@ -119,18 +119,24 @@ function openTopupHomePage() {
       <!-- History -->
       <div class="section-card" style="margin-top:20px">
         <div class="menu-title">ประวัติ/บิลของฉัน</div>
-
         <div class="divider"></div>
 
-        <div style="font-size:13px;color:#9ca3af">
-          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
+        <div
+          id="guestPhoneList"
+          style="font-size:13px;color:#9ca3af"
+        >
+          กำลังโหลดข้อมูล...
         </div>
       </div>
 
     </div>
   `);
-}
 
+  // ✅ โหลดประวัติเฉพาะ member หลัง DOM ถูกสร้างแล้ว
+  if (ENTRY_CONTEXT === "member") {
+    loadMyPackageRequests();
+  }
+}
 /**
  * alias เดิม กันโค้ดเก่าพัง
  */
