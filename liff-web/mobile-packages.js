@@ -31,27 +31,39 @@ function goBackSmart() {
  * ใช้ Member UI ทั้งก้อน แทนค่าด้วย Guest (ตำแหน่ง / สี / layout เหมือนกัน 100%)
  */
 function openGuestHomePage() {
-  ENTRY_CONTEXT = "guest";
+
+  const isMember =
+  ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
+
+const displayName = isMember
+  ? CURRENT_CUSTOMER.name
+  : "Guest";
+
+const displaySub = isMember
+  ? "ยินดีต้อนรับ"
+  : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ";
+  
 
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header : รูป + ชื่อ (เหมือน Member) -->
-      <div class="home-header">
-        <div style="display:flex;align-items:center;gap:10px">
-  <div class="home-avatar">👤</div>
+      <!-- Header : รูป + ชื่อ (ใช้ร่วม Guest / Member) -->
+<div class="home-header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="home-avatar">👤</div>
 
-  <div>
-    <div style="font-size:16px;font-weight:600">
-      Guest
-    </div>
-    <div style="font-size:13px;color:#6b7280">
-      สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ
+    <div>
+      <div style="font-size:16px;font-weight:600">
+        ${displayName}
+      </div>
+      <div style="font-size:13px;color:#6b7280">
+        ${displaySub}
+      </div>
     </div>
   </div>
+
+  <div class="home-avatar">🔔</div>
 </div>
-        <div class="home-avatar">🔔</div>
-      </div>
 
       <!-- Points Card : โครงเดียวกับ Member -->
       <div style="
