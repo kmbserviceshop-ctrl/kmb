@@ -120,6 +120,96 @@ async function refreshCustomerStatus() {
   }
 }
 /* =========================
+RichMenu
+ทดลองอยู่
+========================= */
+/**
+ * ENTRY จาก Rich Menu : เติมแพ็กเกจเน็ต
+ * - ไม่กระทบ flow หลัก KPOS Connect
+ * - guest ใช้ flow เติมแพ็กเกจขาจร
+ * - member ใช้ flow member เดิม
+ */
+async function enterTopupFromRichMenu() {
+  // ค่า default: เข้าทาง guest
+  ENTRY_CONTEXT = "guest";
+
+  try {
+    // ป้องกันกรณีเปิดนอก LINE
+    if (!liff.isInClient()) {
+      openGuestHomePage();
+      return;
+    }
+
+    // ถ้ายังไม่ login → ให้ LINE จัดการ
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    const profile = await liff.getProfile();
+
+    // เช็คสถานะจาก backend (ตัวเดียวกับระบบหลัก)
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    /**
+     * MEMBER
+     * - ผูกบัญชีแล้ว
+     * - ใช้หน้า member เดิม 100%
+     */
+    if (status.status === "member") {
+      ENTRY_CONTEXT = "member";
+      CURRENT_CUSTOMER = status.customer;
+
+      showMemberMenu(CURRENT_CUSTOMER);
+      return;
+    }
+
+    /**
+     * GUEST / อื่น ๆ
+     * - ยังไม่ผูก
+     * - revoked
+     * - ไม่พบข้อมูล
+     * → ใช้ flow เติมแพ็กเกจลูกค้าขาจร
+     */
+    openGuestHomePage();
+
+  } catch (err) {
+    // fallback ปลอดภัย
+    console.error("enterTopupFromRichMenu error:", err);
+    openGuestHomePage();
+  }
+}
+/**
+ * ตรวจ entry จาก Rich Menu
+ */
+function handleRichMenuEntry() {
+  const params = new URLSearchParams(window.location.search);
+  const entry = params.get("entry");
+
+  if (!entry) return false;
+
+  switch (entry) {
+    case "topup":
+      enterTopupFromRichMenu();
+      return true;
+
+    // 🔜 เผื่ออนาคต
+    // case "installment":
+    //   enterInstallmentFromRichMenu();
+    //   return true;
+
+    // case "contact":
+    //   enterContactFromRichMenu();
+    //   return true;
+
+    default:
+      return false;
+  }
+}
+
+/* =========================
 INIT
 ========================= */
 async function init() {
@@ -224,7 +314,11 @@ async function init() {
   }
 }
 
-init();
+//init();เดิมก่อนแก้
+// ถ้ามาจาก Rich Menu → ใช้ flow เฉพาะ
+if (!handleRichMenuEntry()) {
+  init(); // เข้า flow ปกติ KPOS Connect
+}
 
 /* =========================
 UI HELPERS
