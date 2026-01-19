@@ -546,7 +546,7 @@ function showMemberMenu(customer) {
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
-        <button class="menu-tile" onclick="openTopupMenu()">
+        <button class="menu-tile" onclick="openGuestHomePage()">
   <div class="tile-icon">📶</div>
   <div class="tile-text">เติมแพ็กเกจ</div>
 </button>
