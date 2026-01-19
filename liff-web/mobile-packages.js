@@ -437,10 +437,78 @@ function confirmPackage(pkg) {
 }
 
 function openPackagePayment() {
-  showAlertModal(
-    "ขั้นตอนถัดไป",
-    "จะแสดง QR ชำระเงิน\nและรอร้านเติมแพ็กเกจให้ลูกค้า"
+  if (!CURRENT_MOBILE_PACKAGE || !CURRENT_PHONE) {
+    showAlertModal("เกิดข้อผิดพลาด", "ข้อมูลแพ็กเกจไม่ครบ");
+    return;
+  }
+
+  openKposPayment({
+    title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
+    amount_satang: Number(CURRENT_MOBILE_PACKAGE.price) * 100,
+
+    description_html: `
+      <div class="bill-row">
+        <span>เบอร์โทรศัพท์</span>
+        <span>${CURRENT_PHONE}</span>
+      </div>
+      <div class="bill-row">
+        <span>แพ็กเกจ</span>
+        <span>${CURRENT_MOBILE_PACKAGE.package_name}</span>
+      </div>
+      <div class="bill-row">
+        <span>ระยะเวลา</span>
+        <span>${CURRENT_MOBILE_PACKAGE.duration_days} วัน</span>
+      </div>
+    `,
+
+    onSubmit: submitTopupPayment,
+    onBack: openTopupHomePage,
+  });
+}
+
+async function submitTopupPayment(payload) {
+  /**
+   * payload = {
+   *   amount_satang,
+   *   slip_base64
+   * }
+   */
+
+  const lineAccessToken = liff.getAccessToken();
+  if (!lineAccessToken) {
+    throw new Error("no_line_access_token");
+  }
+
+  const profile = await liff.getProfile();
+
+  const body = {
+    phone: CURRENT_PHONE,
+    package_id: CURRENT_MOBILE_PACKAGE.id,
+    amount: payload.amount_satang,      // สตางค์
+    slip_base64: payload.slip_base64,
+    line_user_id: profile.userId,
+  };
+
+  const res = await fetch(
+    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/topup-payment-request",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "x-line-access-token": lineAccessToken,
+      },
+      body: JSON.stringify(body),
+    }
   );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error || "topup_payment_failed");
+  }
+
+  // ✔ สำเร็จ
+  return true;
 }
 
 /* =========================
