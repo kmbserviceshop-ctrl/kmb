@@ -98,7 +98,7 @@ function openGuestHomePage() {
 
       <!-- เบอร์ที่เคยใช้ -->
       <div class="section-card" style="margin-top:16px">
-        <div class="menu-title">เบอร์ที่เคยใช้</div>
+        <div class="menu-title">รายการคำขอ</div>
         <div id="guestPhoneList" style="margin-top:10px">
           <div style="font-size:13px;color:#9ca3af">
             กำลังโหลดรายการ...
@@ -109,34 +109,36 @@ function openGuestHomePage() {
     </div>
   `);
 
-  loadGuestPhoneList();
+  loadMyPackageRequests();
 }
 
-async function loadGuestPhoneList() {
+async function loadMyPackageRequests() {
   const container = document.getElementById("guestPhoneList");
   if (!container) return;
 
   try {
-    const result = await callFn("get_guest_mobile_packages", {
-      line_user_id: CURRENT_CUSTOMER?.line_user_id || null,
+    const profile = await liff.getProfile();
+
+    const result = await callFn("get_my_mobile_package_requests", {
+      line_user_id: profile.userId,
     });
 
-    const list = result?.packages || [];
+    const list = result?.requests || [];
 
     if (list.length === 0) {
       container.innerHTML = `
         <div style="font-size:13px;color:#9ca3af">
-          ยังไม่มีเบอร์ที่เคยทำรายการ
+          ยังไม่มีคำขอที่ส่งไว้
         </div>
       `;
       return;
     }
 
-    container.innerHTML = list.map(renderGuestPhoneCard).join("");
+    container.innerHTML = list.map(renderMyRequestCard).join("");
   } catch (err) {
     container.innerHTML = `
       <div style="font-size:13px;color:#ef4444">
-        ไม่สามารถโหลดข้อมูลได้
+        ไม่สามารถโหลดรายการคำขอได้
       </div>
     `;
   }
