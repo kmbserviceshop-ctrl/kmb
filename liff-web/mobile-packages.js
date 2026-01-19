@@ -52,7 +52,7 @@ STEP 1 : SEARCH PACKAGE
 ========================= */
 
 /**
- * ร้านกรอกเบอร์ → เช็คว่ามีแพ็กที่เคยบันทึกไว้หรือไม่
+ * ร้านกรอกเบอร์ → เช็คแพ็กเกจที่ร้านเคยบันทึกไว้
  */
 async function searchMobilePackage(btn) {
   const phone = document.getElementById("topupPhone")?.value?.trim();
@@ -66,23 +66,25 @@ async function searchMobilePackage(btn) {
   setButtonLoading(btn, "กำลังตรวจสอบ");
 
   try {
-    // TODO: ต่อ backend function
-    // const result = await callFn("get_mobile_package_by_phone", { phone });
+    // 🔗 เรียก backend จริง
+    const result = await callFn(
+      "get_mobile_packages_by_phone",
+      { phone }
+    );
 
-    // MOCK ชั่วคราว
-    const result = {
-      found: false,
-      packages: [],
-    };
+    const packages = result.packages || [];
 
-    if (!result.found) {
+    if (packages.length === 0) {
       renderNoPackageFound(phone);
     } else {
-      renderPackageList(result.packages);
+      renderPackageList(packages);
     }
 
   } catch (err) {
-    showAlertModal("เกิดข้อผิดพลาด", err.message || "ไม่สามารถตรวจสอบข้อมูลได้");
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถตรวจสอบข้อมูลได้"
+    );
   } finally {
     resetButton(btn, "🔍 ตรวจสอบแพ็กเกจ");
   }
@@ -92,6 +94,10 @@ async function searchMobilePackage(btn) {
 UI STATES
 ========================= */
 
+/**
+ * ไม่พบแพ็กเกจ → แจ้งให้ติดต่อร้าน
+ * (ลูกค้าไม่สามารถบันทึกเอง)
+ */
 function renderNoPackageFound(phone) {
   renderCard(`
     <div class="top-bar">
@@ -102,25 +108,33 @@ function renderNoPackageFound(phone) {
     <div class="section-card">
       <p style="font-size:14px;color:#374151;line-height:1.6">
         เบอร์ <strong>${phone}</strong><br/>
-        ยังไม่เคยมีการบันทึกแพ็กเกจไว้ในระบบ
+        ยังไม่มีแพ็กเกจที่ร้านบันทึกไว้ในระบบ
       </p>
 
+      <div style="font-size:13px;color:#6b7280;margin-top:10px">
+        กรุณาแจ้งพนักงานร้าน<br/>
+        เพื่อบันทึกแพ็กเกจก่อนทำรายการ
+      </div>
+
       <button
-        class="primary-btn secondary-btn"
+        class="secondary-btn"
         style="margin-top:16px"
-        onclick="openManualPackageForm()"
+        onclick="openMobilePackagePage()"
       >
-        ➕ บันทึกแพ็กเกจใหม่
+        ← กลับไปตรวจสอบใหม่
       </button>
     </div>
   `);
 }
 
+/**
+ * แสดงรายการแพ็กเกจที่ร้านเคยบันทึก
+ */
 function renderPackageList(packages) {
   const items = packages.map((pkg) => `
     <div
       class="bill-card"
-      onclick="confirmPackage('${pkg.id}')"
+      onclick="confirmPackage(${JSON.stringify(pkg).replace(/"/g, '&quot;')})"
       style="cursor:pointer"
     >
       <div style="font-weight:600">${pkg.package_name}</div>
@@ -149,13 +163,15 @@ function renderPackageList(packages) {
 STEP 2 : CONFIRM
 ========================= */
 
-function confirmPackage(packageId) {
-  // TODO: ดึง package detail จาก list / backend
-  CURRENT_MOBILE_PACKAGE = { id: packageId };
+/**
+ * ลูกค้ายืนยันแพ็กเกจที่ใช้อยู่
+ */
+function confirmPackage(pkg) {
+  CURRENT_MOBILE_PACKAGE = pkg;
 
   showAlertModal(
     "ยืนยันการเติมแพ็กเกจ",
-    "กรุณายืนยันว่าเป็นแพ็กเกจที่ลูกค้าใช้งานอยู่",
+    `กรุณายืนยันแพ็กเกจที่ใช้งานอยู่\n\n${pkg.package_name}\n${pkg.price} บาท`,
     () => openPackagePayment()
   );
 }
@@ -164,41 +180,34 @@ function confirmPackage(packageId) {
 STEP 3 : PAYMENT
 ========================= */
 
+/**
+ * ขั้นถัดไป (จะ reuse payment.js)
+ */
 function openPackagePayment() {
-  // reuse payment flow เดิมในอนาคต
   showAlertModal(
     "ขั้นตอนถัดไป",
-    "จะแสดง QR ชำระเงิน และรอร้านเติมแพ็กเกจ",
+    "จะแสดง QR ชำระเงิน\nและรอร้านเติมแพ็กเกจให้ลูกค้า"
   );
 }
 
 /* =========================
-MANUAL INPUT (ร้านกรอกเอง)
+MANUAL INPUT (ร้านเท่านั้น)
 ========================= */
 
+/**
+ * กันไม่ให้ลูกค้าเรียกฟังก์ชันนี้
+ * (เผื่อมีคนยิง JS ตรง)
+ */
 function openManualPackageForm() {
-  renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="openMobilePackagePage()">←</button>
-      <div class="top-title">บันทึกแพ็กเกจ</div>
-    </div>
-
-    <div class="section-card">
-      <input placeholder="ชื่อแพ็กเกจ" />
-      <input placeholder="รายละเอียดแพ็กเกจ" style="margin-top:10px" />
-      <input placeholder="ราคา (บาท)" type="number" style="margin-top:10px" />
-
-      <button
-        class="primary-btn"
-        style="margin-top:14px"
-        onclick="saveManualPackage()"
-      >
-        💾 บันทึกแพ็กเกจ
-      </button>
-    </div>
-  `);
+  showAlertModal(
+    "ไม่สามารถทำรายการได้",
+    "การบันทึกแพ็กเกจทำได้เฉพาะพนักงานร้านเท่านั้น"
+  );
 }
 
 function saveManualPackage() {
-  showAlertModal("ยังไม่เปิดใช้งาน", "ฟังก์ชันนี้จะทำในขั้นถัดไป");
+  showAlertModal(
+    "ไม่สามารถทำรายการได้",
+    "การบันทึกแพ็กเกจทำได้เฉพาะพนักงานร้านเท่านั้น"
+  );
 }
