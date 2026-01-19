@@ -125,10 +125,28 @@ INIT
 ========================= */
 async function init() {
   try {
+    // ✅ 1. ตรวจ entry จาก URL ก่อน
+    const params = new URLSearchParams(window.location.search);
+    const entry = params.get("entry");
+
+    if (entry === "topup") {
+      ENTRY_CONTEXT = "member"; // ใช้ logic member/guest ภายใน topup
+    }
+
     await liff.init({ liffId: LIFF_ID });
 
-    // 🔹 Debug mode (ไม่เปิดจาก LINE)
+    /* =========================
+       DEBUG MODE (ไม่เปิดจาก LINE)
+       ========================= */
     if (!liff.isInClient()) {
+
+      // ⭐ ถ้าเข้า topup โดยตรง
+      if (entry === "topup") {
+        openTopupHomePage();
+        return;
+      }
+
+      // ❗ behavior เดิม
       renderCard(`
         <div class="section-card">
           <h3>⚠️ Debug Mode</h3>
@@ -141,23 +159,23 @@ async function init() {
       return;
     }
 
-    // 🔹 ยังไม่ login
+    /* =========================
+       LOGIN
+       ========================= */
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
     }
 
-    // 🔹 LINE profile
     const profile = await liff.getProfile();
 
-    // 🔹 backend status
     const status = await callFn("check_line_status", {
       line_user_id: profile.userId,
     });
 
     /* =========================
-       FIX 2: REVOKED (BLOCK HARD)
-    ========================= */
+       REVOKED (BLOCK HARD)
+       ========================= */
     if (status.status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
@@ -168,16 +186,23 @@ async function init() {
     }
 
     /* =========================
-       GUEST (ยังไม่ผูกบัญชี)
-    ========================= */
+       GUEST
+       ========================= */
     if (status.status === "guest") {
+
+      // ⭐ guest + topup
+      if (entry === "topup") {
+        openTopupHomePage();
+        return;
+      }
+
       showGuestForm();
       return;
     }
 
     /* =========================
        MEMBER
-    ========================= */
+       ========================= */
     CURRENT_CUSTOMER = status.customer;
 
     const {
@@ -186,9 +211,6 @@ async function init() {
       current_consent_version,
     } = status.customer || {};
 
-    /* =========================
-       REVOKED (safety net)
-    ========================= */
     if (consent_status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
@@ -198,11 +220,6 @@ async function init() {
       return;
     }
 
-    /* =========================
-       NEED CONSENT
-       - ยังไม่เคยยอมรับ
-       - หรือ version ไม่ตรง
-    ========================= */
     const needConsent =
       consent_status !== "accepted" ||
       consent_version !== current_consent_version;
@@ -212,15 +229,20 @@ async function init() {
       return;
     }
 
-    /* =========================
-       ACCEPTED & VERSION OK
-    ========================= */
+    // ⭐ member + topup
+    if (entry === "topup") {
+      openTopupHomePage();
+      return;
+    }
+
+    // ⭐ member + installment เพิ่มตรงนี้
+
     showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถเริ่มระบบได้"
+      err.message || "ไม่สามารถเริ่มระบบได้ณขณะนี้กรุณาทำรายการภายหลัง"
     );
   }
 }
