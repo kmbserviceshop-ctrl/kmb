@@ -105,17 +105,17 @@ function openTopupHomePage() {
       <div class="menu-grid" style="margin-top:18px">
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
-          <div class="tile-text">บิลของฉัน</div>
+          <div class="tile-text">MyBille</div>
         </button>
 
         <button class="menu-tile active" onclick="openMobilePackagePage()">
           <div class="tile-icon">📶</div>
-          <div class="tile-text">เติมแพ็กเกจ</div>
+          <div class="tile-text">ต่อแพ็กเน็ต</div>
         </button>
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
-          <div class="tile-text">รายการอื่น</div>
+          <div class="tile-text">UpSpeed Net</div>
         </button>
       </div>
 
