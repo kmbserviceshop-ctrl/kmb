@@ -100,7 +100,7 @@ UI STATES
 function renderNoPackageFound(phone) {
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="openMobilePackagePage()">←</button>
+      <button class="back-btn" onclick="openMobilePackagePage()">← กลับ</button>
       <div class="top-title">ไม่พบข้อมูลแพ็กเกจ</div>
     </div>
 
@@ -126,19 +126,19 @@ function renderNoPackageFound(phone) {
 
       <!-- ปุ่มรอง -->
       <button
-        class="secondary-btn"
-        style="margin-top:10px"
-        onclick="openMobilePackagePage()"
-      >
-        ← กลับไปตรวจสอบใหม่
-      </button>
+  class="menu-btn secondary"
+  style="margin-top:12px"
+  onclick="openMobilePackagePage()"
+>
+  ← กลับไปตรวจสอบใหม่
+</button>
     </div>
   `);
 }
 function openPackageRequestConsent() {
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">←</button>
+      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">← กลับ</button>
       <div class="top-title">ขอความยินยอม</div>
     </div>
 
@@ -173,12 +173,12 @@ function openPackageRequestConsent() {
       </button>
 
       <button
-        class="secondary-btn"
-        style="margin-top:10px"
-        onclick="renderNoPackageFound(CURRENT_PHONE)"
-      >
-        ยกเลิก
-      </button>
+  class="menu-btn secondary"
+  style="margin-top:10px"
+  onclick="renderNoPackageFound(CURRENT_PHONE)"
+>
+  ยกเลิก
+</button>
     </div>
   `);
 }
@@ -230,7 +230,7 @@ function renderPackageList(packages) {
 
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="openMobilePackagePage()">←</button>
+      <button class="back-btn" onclick="openMobilePackagePage()">← กลับ</button>
       <div class="top-title">เลือกแพ็กเกจ</div>
     </div>
 
