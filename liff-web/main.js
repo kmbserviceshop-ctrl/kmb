@@ -1371,5 +1371,6 @@ function openTopupMenu() {
     return;
   }
 
-  openMobilePackagePage();
+  //openMobilePackagePage();
+  penGuestHomePage();
 }
