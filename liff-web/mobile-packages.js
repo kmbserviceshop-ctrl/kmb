@@ -61,19 +61,16 @@ function openGuestHomePage() {
       <!-- Menu Grid -->
       <div class="menu-grid">
 
-        <!-- ❌ บิล : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
-        <!-- ✅ เติมแพ็กเกจ : เปิด -->
         <button class="menu-tile active" onclick="openMobilePackagePage()">
           <div class="tile-icon">📶</div>
           <div class="tile-text">เติมแพ็กเกจ</div>
         </button>
 
-        <!-- ❌ อื่น ๆ : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
           <div class="tile-text">รายการอื่น</div>
@@ -96,7 +93,7 @@ function openGuestHomePage() {
 
       </div>
 
-      <!-- เบอร์ที่เคยใช้ -->
+      <!-- รายการคำขอ -->
       <div class="section-card" style="margin-top:16px">
         <div class="menu-title">รายการคำขอ</div>
         <div id="guestPhoneList" style="margin-top:10px">
@@ -144,9 +141,42 @@ async function loadMyPackageRequests() {
   }
 }
 
-/**
- * เปิดหน้า "เติมแพ็กเกจเน็ต"
- */
+/* =========================
+RENDER REQUEST CARD (เพิ่มเท่านั้น)
+========================= */
+
+function renderMyRequestCard(req) {
+  const statusMap = {
+    pending: { text: "รอร้านตรวจสอบ", color: "#f59e0b" },
+    approved: { text: "อนุมัติแล้ว", color: "#16a34a" },
+    rejected: { text: "ไม่ผ่านการอนุมัติ", color: "#dc2626" },
+  };
+
+  const status = statusMap[req.status] || {
+    text: req.status,
+    color: "#6b7280",
+  };
+
+  return `
+    <div class="bill-card">
+      <div style="display:flex;justify-content:space-between">
+        <div style="font-weight:600">${req.phone}</div>
+        <div style="font-size:12px;color:${status.color}">
+          ${status.text}
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:#6b7280;margin-top:6px">
+        ส่งคำขอเมื่อ ${new Date(req.created_at).toLocaleDateString("th-TH")}
+      </div>
+    </div>
+  `;
+}
+
+/* =========================
+OPEN TOPUP FLOW
+========================= */
+
 function openMobilePackagePage() {
   CURRENT_MOBILE_PACKAGE = null;
   CURRENT_PHONE = null;
@@ -176,42 +206,6 @@ function openMobilePackagePage() {
       </button>
     </div>
   `);
-}
-
-/* =========================
-UI HELPERS
-========================= */
-
-function maskPhone(phone) {
-  if (!phone || phone.length < 9) return phone;
-  return phone.replace(/^(\d{3})\d{4}(\d{2})$/, "$1-×××-$2");
-}
-
-function renderGuestPhoneCard(pkg) {
-  return `
-    <div
-      class="bill-card"
-      style="cursor:pointer"
-      onclick="renderPackageList([${JSON.stringify(pkg).replace(/"/g, '&quot;')}])"
-    >
-      <div style="display:flex;justify-content:space-between">
-        <div style="font-weight:600">
-          ${maskPhone(pkg.phone)}
-        </div>
-        <div style="font-size:12px;color:#2563eb">
-          ${pkg.limit_type || ""}
-        </div>
-      </div>
-
-      <div style="font-size:13px;color:#6b7280;margin-top:4px">
-        Package ${pkg.price} บาท (${pkg.duration_days} วัน)
-      </div>
-
-      <div style="font-size:13px;color:#374151;margin-top:2px">
-        ${pkg.package_detail || ""}
-      </div>
-    </div>
-  `;
 }
 
 /* =========================
@@ -343,8 +337,8 @@ async function confirmRequestPackageReview() {
 
     await callFn("request_mobile_package_review", {
       phone: CURRENT_PHONE,
-      line_user_id: profile.userId,   // ✅ แก้จุดเดียวที่ผิด
-      customer_id: null,              // guest ต้องเป็น null
+      line_user_id: profile.userId,
+      customer_id: null,
     });
 
     showAlertModal(
