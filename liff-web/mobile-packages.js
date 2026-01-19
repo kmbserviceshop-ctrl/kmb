@@ -31,8 +31,7 @@ ENTRY POINT
 ========================= */
 
 /**
- * หน้า Home สำหรับลูกค้าขาจร
- * UI ต้องเหมือน member แต่จำกัดสิทธิ์
+ * Guest Home – UI เหมือน Member 100% แต่ปิดสิทธิ์
  */
 function openGuestHomePage() {
   ENTRY_CONTEXT = "guest";
@@ -40,29 +39,30 @@ function openGuestHomePage() {
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header (เหมือน Member) -->
-      <div class="home-header">
-        <div></div>
-        <div class="home-avatar">
-          <span>👤</span>
+      <!-- Header -->
+      <div class="home-header member-header">
+        <div>
+          <div class="member-name">Guest</div>
+          <div class="member-level">สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ</div>
+        </div>
+        <div class="header-actions">
+          <span class="bell-icon">🔔</span>
         </div>
       </div>
 
-      <!-- Hero / Points Card (โครงเดียวกับ Member) -->
-      <div class="points-card disabled">
+      <!-- Points Card (Mock) -->
+      <div class="points-card">
         <div class="points-left">
-          <div class="points-value">Guest</div>
-          <div class="points-sub">
-            สมัครสมาชิกเพื่อใช้งานฟีเจอร์เต็มรูปแบบ
-          </div>
+          <div class="points-value">0 Points</div>
+          <div class="points-sub">Redeem your points now!</div>
         </div>
-        <div class="points-action disabled">
-          —
-        </div>
+        <button class="points-action disabled" disabled>
+          Redeem
+        </button>
       </div>
 
-      <!-- Menu Grid (ตำแหน่งเดียวกับ Member) -->
-      <div class="menu-grid" style="margin-top:16px">
+      <!-- Menu Grid -->
+      <div class="menu-grid">
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
@@ -81,24 +81,16 @@ function openGuestHomePage() {
 
       </div>
 
-      <!-- History / Requests (ตำแหน่งเดียวกับ Member) -->
-      <div class="section-card" style="margin-top:18px">
-        <div class="menu-title">
-          รายการคำขอ
-          <span style="font-size:12px;color:#ef4444">(ผู้ล็อกอินเท่านั้น)</span>
-        </div>
-
-        <div id="guestPhoneList" style="margin-top:10px">
-          <div style="font-size:13px;color:#9ca3af">
-            กำลังโหลดรายการ...
-          </div>
+      <!-- History (Mock) -->
+      <div class="section-card">
+        <div class="menu-title">ประวัติ/บิลของฉัน</div>
+        <div class="empty-state">
+          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
         </div>
       </div>
 
     </div>
   `);
-
-  loadMyPackageRequests();
 }
 
 async function loadMyPackageRequests() {
