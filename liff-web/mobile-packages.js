@@ -302,10 +302,12 @@ async function confirmRequestPackageReview() {
   }
 
   try {
+    const profile = await liff.getProfile(); // ⭐ ใช้ LINE จริงใน guest flow
+
     await callFn("request_mobile_package_review", {
       phone: CURRENT_PHONE,
-      line_user_id: CURRENT_CUSTOMER?.line_user_id || null,
-      customer_id: CURRENT_CUSTOMER?.customer_id || null,
+      line_user_id: profile.userId,   // ✅ แก้จุดเดียวที่ผิด
+      customer_id: null,              // guest ต้องเป็น null
     });
 
     showAlertModal(
