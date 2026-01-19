@@ -119,142 +119,7 @@ async function refreshCustomerStatus() {
     );
   }
 }
-/* =========================
-RichMenu
-ทดลองอยู่
-========================= */
-/**
- * ENTRY จาก Rich Menu : เติมแพ็กเกจเน็ต
- * - ไม่กระทบ flow หลัก KPOS Connect
- * - guest ใช้ flow เติมแพ็กเกจขาจร
- * - member ใช้ flow member เดิม
- */
-async function enterTopupFromRichMenu() {
-  // ค่า default: เข้าทาง guest
-  ENTRY_CONTEXT = "guest";
 
-  try {
-    // ป้องกันกรณีเปิดนอก LINE
-    if (!liff.isInClient()) {
-      openGuestHomePage();
-      return;
-    }
-
-    // ถ้ายังไม่ login → ให้ LINE จัดการ
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
-
-    const profile = await liff.getProfile();
-
-    // เช็คสถานะจาก backend (ตัวเดียวกับระบบหลัก)
-    const status = await callFn("check_line_status", {
-      line_user_id: profile.userId,
-    });
-
-    /**
-     * MEMBER
-     * - ผูกบัญชีแล้ว
-     * - ใช้หน้า member เดิม 100%
-     */
-   if (status.status === "member") {
-  ENTRY_CONTEXT = "member";
-  CURRENT_CUSTOMER = status.customer;
-
-  openTopupMenu(); // ✅ เข้าหน้าหลักเติมเน็ต (ภาพ 3)
-  return;
-}
-
-    /**
-     * GUEST / อื่น ๆ
-     * - ยังไม่ผูก
-     * - revoked
-     * - ไม่พบข้อมูล
-     * → ใช้ flow เติมแพ็กเกจลูกค้าขาจร
-     */
-    openGuestHomePage();
-
-  } catch (err) {
-    // fallback ปลอดภัย
-    console.error("enterTopupFromRichMenu error:", err);
-    openGuestHomePage();
-  }
-}
-/**
- * ตรวจ entry จาก Rich Menu
- */
-function handleRichMenuEntry() {
-  const params = new URLSearchParams(window.location.search);
-  const entry = params.get("entry");
-
-  if (!entry) return false;
-
-  switch (entry) {
-    case "topup":
-      initTopupEntry(); // 👈 ใช้ตัวนี้
-      return true;
-
-    default:
-      return false;
-  }
-}
-async function initTopupEntry() {
-  try {
-    // 1️⃣ init LIFF
-    await liff.init({ liffId: LIFF_ID });
-
-    // 2️⃣ เปิดนอก LINE → ถือเป็น guest
-    if (!liff.isInClient()) {
-      ENTRY_CONTEXT = "guest";
-      openGuestHomePage();
-      return;
-    }
-
-    // 3️⃣ ยังไม่ login → ให้ LINE login
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
-
-    // 4️⃣ ดึง LINE profile
-    const profile = await liff.getProfile();
-
-    // 5️⃣ เช็คสถานะกับ backend (ตัวเดิม)
-    const status = await callFn("check_line_status", {
-      line_user_id: profile.userId,
-    });
-
-    /**
-     * ✅ MEMBER
-     * - ผูกบัญชีแล้ว
-     * - แสดงหน้าเดิม แต่ใช้ข้อมูล member
-     */
-    if (status.status === "member" && status.customer) {
-      ENTRY_CONTEXT = "member";
-      CURRENT_CUSTOMER = status.customer;
-
-      // เปิดหน้า topup เดิม (ไม่เปลี่ยน layout)
-      openGuestHomePage(); // ใช้ UI เดียวกัน
-      loadMyPackageRequests(); // โหลดข้อมูลของ member
-      return;
-    }
-
-    /**
-     * 🟡 GUEST / REVOKED / NOT FOUND
-     * - ไม่ redirect
-     * - ไม่แสดงหน้าผูกบัญชี
-     * - ใช้ guest UI
-     */
-    ENTRY_CONTEXT = "guest";
-    openGuestHomePage();
-
-  } catch (err) {
-    console.error("initTopupEntry error:", err);
-    ENTRY_CONTEXT = "guest";
-    openGuestHomePage();
-  }
-}
 /* =========================
 INIT
 ========================= */
@@ -360,11 +225,8 @@ async function init() {
   }
 }
 
-//init();เดิมก่อนแก้
-// ถ้ามาจาก Rich Menu → ใช้ flow เฉพาะ
-if (!handleRichMenuEntry()) {
-  init(); // เข้า flow ปกติ KPOS Connect
-}
+init();
+
 
 /* =========================
 UI HELPERS
@@ -592,7 +454,7 @@ function showMemberMenu(customer) {
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
-        <button class="menu-tile" onclick="openGuestHomePage()">
+        <button class="menu-tile" onclick="openTopupMenu()">
   <div class="tile-icon">📶</div>
   <div class="tile-text">เติมแพ็กเกจ</div>
 </button>
@@ -1407,16 +1269,7 @@ function doLogout() {
 MOBILE PACKAGE ACTIONS
 ========================= */
 function openTopupMenu() {
-  ENTRY_CONTEXT = "member"; // ⭐⭐ เพิ่มบรรทัดนี้ ⭐⭐
+  ENTRY_CONTEXT = "member"; // ⭐ สำคัญ: ระบุว่าเข้าจาก Member
 
-  if (typeof openMobilePackagePage !== "function") {
-    showAlertModal(
-      "ยังไม่พร้อมใช้งาน",
-      "ระบบเติมแพ็กเกจจะเปิดให้ใช้งานเร็ว ๆ นี้"
-    );
-    return;
-  }
-
-  openMobilePackagePage();
- 
+  openGuestHomePage(); // 👉 Topup Home (ใช้ UI เดียวกับ Guest)
 }
