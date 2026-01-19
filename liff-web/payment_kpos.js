@@ -66,7 +66,8 @@ function openKposPayment(config) {
   /**
    * config = {
    *   title: string,
-   *   amount_satang: number,
+   *   amount_satang: number,        // ยอดทำรายการ (สตางค์)
+   *   service_fee_satang?: number,  // ค่าบริการ (สตางค์)
    *   description_html: string,
    *   onSubmit: async function(payload),
    *   onBack: function()
@@ -76,11 +77,15 @@ function openKposPayment(config) {
   CURRENT_PAYMENT = config;
 
   const amountSatang = Number(config.amount_satang ?? 0);
+  const serviceFeeSatang = Number(config.service_fee_satang ?? 0);
+
   const amountBaht = amountSatang / 100;
+  const serviceFeeBaht = serviceFeeSatang / 100;
+  const totalBaht = (amountSatang + serviceFeeSatang) / 100;
 
   const qrData =
-    amountSatang > 0
-      ? generatePromptPayQR(SHOP_PROMPTPAY_QR, amountBaht)
+    totalBaht > 0
+      ? generatePromptPayQR(SHOP_PROMPTPAY_QR, totalBaht)
       : null;
 
   renderCard(`
@@ -95,17 +100,45 @@ function openKposPayment(config) {
 
       <hr/>
 
-      <div class="bill-row" style="font-weight:600">
-        <span>ยอดต้องชำระ</span>
-        <span>${amountBaht.toLocaleString()} บาท</span>
+      <!-- Summary -->
+      <div style="margin-top:12px">
+
+        <div class="bill-row">
+          <span>ยอดทำรายการ</span>
+          <span>${amountBaht.toFixed(2)} บาท</span>
+        </div>
+
+        <div class="bill-row">
+          <span>ค่าบริการ</span>
+          <span>${serviceFeeBaht.toFixed(2)} บาท</span>
+        </div>
+
+        <hr style="margin:10px 0;opacity:.3"/>
+
+        <div class="bill-row" style="font-weight:600">
+          <span>ยอดรวม</span>
+          <span>${totalBaht.toFixed(2)} บาท</span>
+        </div>
+
+      </div>
+
+      <!-- Total Pay -->
+      <div style="text-align:center;margin:16px 0 8px">
+        <div style="font-size:13px;color:#9ca3af">
+          ยอดต้องชำระ
+        </div>
+        <div style="font-size:26px;font-weight:700">
+          ${totalBaht.toFixed(2)} บาท
+        </div>
       </div>
 
       <hr style="opacity:.3"/>
 
+      <!-- QR -->
       <div style="text-align:center;margin:20px 0">
         <div style="color:#888">สแกนเพื่อชำระเงิน (QR PromptPay)</div>
         ${
-          amountSatang > 0
+          totalBaht > 0
             ? `<div id="qrBox" style="margin:10px auto;width:180px;height:180px"></div>`
             : `<div style="color:#aaa;margin-top:20px">ไม่มียอดชำระ</div>`
         }
@@ -150,7 +183,7 @@ function openKposPayment(config) {
   `);
 
   // render QR
-  if (amountSatang > 0) {
+  if (totalBaht > 0) {
     const waitForQRCode = () => {
       if (typeof QRCode === "undefined") {
         setTimeout(waitForQRCode, 100);
