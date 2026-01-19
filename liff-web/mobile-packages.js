@@ -8,13 +8,107 @@ MOBILE PACKAGES (TOPUP)
 let CURRENT_MOBILE_PACKAGE = null;
 let CURRENT_PHONE = null;
 
+/**
+ * context การเข้า flow
+ * guest | member
+ */
+let ENTRY_CONTEXT = "guest";
+
+/* =========================
+NAVIGATION HELPERS
+========================= */
+
+function goBackSmart() {
+  if (ENTRY_CONTEXT === "member") {
+    showMemberMenu(CURRENT_CUSTOMER);
+  } else {
+    openGuestHomePage();
+  }
+}
+
 /* =========================
 ENTRY POINT
 ========================= */
 
 /**
+ * หน้า Home สำหรับลูกค้าขาจร
+ */
+function openGuestHomePage() {
+  ENTRY_CONTEXT = "guest";
+
+  renderCard(`
+    <div class="top-bar">
+      <div class="top-title">KPOS Connect</div>
+    </div>
+
+    <div class="section-card">
+      <div style="font-size:18px;font-weight:600">
+        ยินดีต้อนรับ
+      </div>
+      <div style="font-size:14px;color:#6b7280;margin-top:6px">
+        กรุณาเลือกทำรายการ
+      </div>
+    </div>
+
+    <div class="section-card">
+      <button class="primary-btn" onclick="openMobilePackagePage()">
+        ➕ เพิ่มเบอร์ใหม่ (ตรวจสอบแพ็กเกจ)
+      </button>
+
+      <button
+        class="menu-btn secondary"
+        style="margin-top:10px"
+        onclick="openAddonPackagePage?.()"
+      >
+        ⚡ เพิ่มความเร็ว / แพ็กเสริม
+      </button>
+    </div>
+
+    <div class="section-card">
+      <div class="menu-title">เบอร์ที่เคยใช้</div>
+      <div id="guestPhoneList" style="margin-top:10px">
+        <div style="font-size:13px;color:#9ca3af">
+          กำลังโหลดรายการ...
+        </div>
+      </div>
+    </div>
+  `);
+
+  loadGuestPhoneList();
+}
+
+async function loadGuestPhoneList() {
+  const container = document.getElementById("guestPhoneList");
+  if (!container) return;
+
+  try {
+    const result = await callFn("get_guest_mobile_packages", {
+      line_user_id: CURRENT_CUSTOMER?.line_user_id || null,
+    });
+
+    const list = result?.packages || [];
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div style="font-size:13px;color:#9ca3af">
+          ยังไม่มีเบอร์ที่เคยทำรายการ
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list.map(renderGuestPhoneCard).join("");
+  } catch (err) {
+    container.innerHTML = `
+      <div style="font-size:13px;color:#ef4444">
+        ไม่สามารถโหลดข้อมูลได้
+      </div>
+    `;
+  }
+}
+
+/**
  * เปิดหน้า "เติมแพ็กเกจเน็ต"
- * เรียกจาก main.js
  */
 function openMobilePackagePage() {
   CURRENT_MOBILE_PACKAGE = null;
@@ -22,7 +116,7 @@ function openMobilePackagePage() {
 
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="goHome()">←</button>
+      <button class="back-btn" onclick="goBackSmart()">←</button>
       <div class="top-title">เติมแพ็กเกจเน็ต</div>
     </div>
 
@@ -48,12 +142,45 @@ function openMobilePackagePage() {
 }
 
 /* =========================
+UI HELPERS
+========================= */
+
+function maskPhone(phone) {
+  if (!phone || phone.length < 9) return phone;
+  return phone.replace(/^(\d{3})\d{4}(\d{2})$/, "$1-×××-$2");
+}
+
+function renderGuestPhoneCard(pkg) {
+  return `
+    <div
+      class="bill-card"
+      style="cursor:pointer"
+      onclick="renderPackageList([${JSON.stringify(pkg).replace(/"/g, '&quot;')}])"
+    >
+      <div style="display:flex;justify-content:space-between">
+        <div style="font-weight:600">
+          ${maskPhone(pkg.phone)}
+        </div>
+        <div style="font-size:12px;color:#2563eb">
+          ${pkg.limit_type || ""}
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:#6b7280;margin-top:4px">
+        Package ${pkg.price} บาท (${pkg.duration_days} วัน)
+      </div>
+
+      <div style="font-size:13px;color:#374151;margin-top:2px">
+        ${pkg.package_detail || ""}
+      </div>
+    </div>
+  `;
+}
+
+/* =========================
 STEP 1 : SEARCH PACKAGE
 ========================= */
 
-/**
- * ร้านกรอกเบอร์ → เช็คแพ็กเกจที่ร้านเคยบันทึกไว้
- */
 async function searchMobilePackage(btn) {
   const phone = document.getElementById("topupPhone")?.value?.trim();
 
@@ -66,12 +193,7 @@ async function searchMobilePackage(btn) {
   setButtonLoading(btn, "กำลังตรวจสอบ");
 
   try {
-    // 🔗 เรียก backend จริง
-    const result = await callFn(
-      "get_mobile_packages_by_phone",
-      { phone }
-    );
-
+    const result = await callFn("get_mobile_packages_by_phone", { phone });
     const packages = result.packages || [];
 
     if (packages.length === 0) {
@@ -79,7 +201,6 @@ async function searchMobilePackage(btn) {
     } else {
       renderPackageList(packages);
     }
-
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
@@ -91,16 +212,13 @@ async function searchMobilePackage(btn) {
 }
 
 /* =========================
-UI STATES
+NO PACKAGE FOUND
 ========================= */
 
-/**
- * ไม่พบแพ็กเกจ → ลูกค้าส่งคำขอให้ร้านตรวจสอบ
- */
 function renderNoPackageFound(phone) {
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="openMobilePackagePage()">← กลับ</button>
+      <button class="back-btn" onclick="openMobilePackagePage()">←</button>
       <div class="top-title">ไม่พบข้อมูลแพ็กเกจ</div>
     </div>
 
@@ -111,11 +229,9 @@ function renderNoPackageFound(phone) {
       </p>
 
       <div style="font-size:13px;color:#6b7280;margin-top:10px">
-        กรุณาส่งคำขอให้ร้านตรวจสอบแพ็กเกจ<br/>
-        ก่อนทำรายการเติมเงิน
+        กรุณาส่งคำขอให้ร้านตรวจสอบแพ็กเกจ
       </div>
 
-      <!-- ปุ่มหลัก -->
       <button
         class="primary-btn"
         style="margin-top:16px"
@@ -124,37 +240,32 @@ function renderNoPackageFound(phone) {
         📩 ส่งคำขอให้ร้านตรวจสอบแพ็กเกจ
       </button>
 
-      <!-- ปุ่มรอง -->
       <button
-  class="menu-btn secondary"
-  style="margin-top:12px"
-  onclick="openMobilePackagePage()"
->
-  ← กลับไปตรวจสอบใหม่
-</button>
+        class="menu-btn secondary"
+        style="margin-top:12px"
+        onclick="openMobilePackagePage()"
+      >
+        ← กลับไปตรวจสอบใหม่
+      </button>
     </div>
   `);
 }
+
+/* =========================
+CONSENT REQUEST
+========================= */
+
 function openPackageRequestConsent() {
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">← กลับ</button>
+      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">←</button>
       <div class="top-title">ขอความยินยอม</div>
     </div>
 
     <div class="section-card">
       <div style="font-size:14px;color:#374151;line-height:1.6">
-        ร้านจำเป็นต้องตรวจสอบข้อมูลแพ็กเกจจากระบบเครือข่าย
+        ร้านจำเป็นต้องตรวจสอบข้อมูลแพ็กเกจ
         และบันทึกประวัติการทำรายการของเบอร์นี้
-      </div>
-
-      <div style="font-size:13px;color:#6b7280;margin-top:10px">
-        ข้อมูลที่ใช้:
-        <ul style="padding-left:18px">
-          <li>หมายเลขโทรศัพท์</li>
-          <li>รายละเอียดแพ็กเกจ</li>
-          <li>ประวัติการขอตรวจสอบ</li>
-        </ul>
       </div>
 
       <div style="margin-top:16px">
@@ -173,22 +284,20 @@ function openPackageRequestConsent() {
       </button>
 
       <button
-  class="menu-btn secondary"
-  style="margin-top:10px"
-  onclick="renderNoPackageFound(CURRENT_PHONE)"
->
-  ยกเลิก
-</button>
+        class="menu-btn secondary"
+        style="margin-top:10px"
+        onclick="renderNoPackageFound(CURRENT_PHONE)"
+      >
+        ยกเลิก
+      </button>
     </div>
   `);
 }
+
 async function confirmRequestPackageReview() {
   const checked = document.getElementById("pkgConsentCheck")?.checked;
   if (!checked) {
-    showAlertModal(
-      "กรุณายินยอม",
-      "กรุณายินยอมให้ร้านตรวจสอบข้อมูลก่อนส่งคำขอ"
-    );
+    showAlertModal("กรุณายินยอม", "กรุณายินยอมก่อนส่งคำขอ");
     return;
   }
 
@@ -201,16 +310,18 @@ async function confirmRequestPackageReview() {
 
     showAlertModal(
       "ส่งคำขอสำเร็จ",
-      "ร้านจะตรวจสอบแพ็กเกจให้คุณ\nเมื่อบันทึกแล้วคุณจะสามารถกลับมาเติมได้"
+      "ร้านจะตรวจสอบแพ็กเกจให้คุณ\nเมื่อบันทึกแล้วคุณจะสามารถกลับมาเติมได้",
+      () => goBackSmart()
     );
   } catch (err) {
     showAlertModal("เกิดข้อผิดพลาด", err.message);
   }
 }
 
-/**
- * แสดงรายการแพ็กเกจที่ร้านเคยบันทึก
- */
+/* =========================
+PACKAGE LIST
+========================= */
+
 function renderPackageList(packages) {
   const items = packages.map((pkg) => `
     <div
@@ -230,7 +341,7 @@ function renderPackageList(packages) {
 
   renderCard(`
     <div class="top-bar">
-      <button class="back-btn" onclick="openMobilePackagePage()">← กลับ</button>
+      <button class="back-btn" onclick="openMobilePackagePage()">←</button>
       <div class="top-title">เลือกแพ็กเกจ</div>
     </div>
 
@@ -241,12 +352,9 @@ function renderPackageList(packages) {
 }
 
 /* =========================
-STEP 2 : CONFIRM
+CONFIRM & PAYMENT
 ========================= */
 
-/**
- * ลูกค้ายืนยันแพ็กเกจที่ใช้อยู่
- */
 function confirmPackage(pkg) {
   CURRENT_MOBILE_PACKAGE = pkg;
 
@@ -257,13 +365,6 @@ function confirmPackage(pkg) {
   );
 }
 
-/* =========================
-STEP 3 : PAYMENT
-========================= */
-
-/**
- * ขั้นถัดไป (จะ reuse payment.js)
- */
 function openPackagePayment() {
   showAlertModal(
     "ขั้นตอนถัดไป",
@@ -272,13 +373,9 @@ function openPackagePayment() {
 }
 
 /* =========================
-MANUAL INPUT (ร้านเท่านั้น)
+PROTECT MANUAL
 ========================= */
 
-/**
- * กันไม่ให้ลูกค้าเรียกฟังก์ชันนี้
- * (เผื่อมีคนยิง JS ตรง)
- */
 function openManualPackageForm() {
   showAlertModal(
     "ไม่สามารถทำรายการได้",
