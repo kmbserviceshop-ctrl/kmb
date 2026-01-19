@@ -40,22 +40,21 @@ function crc16(payload) {
   return (crc & 0xffff).toString(16).toUpperCase().padStart(4, "0");
 }
 
-/* =========================
-GENERATE PROMPTPAY QR
-========================= */
 function generatePromptPayQR(baseQR, amountBaht) {
   if (!amountBaht || amountBaht <= 0) return baseQR;
 
-  const satang = Math.round(Number(amountBaht) * 100);
-  const amt = String(satang);
+  // ✅ format เป็น "บาท.00" ตามสเปก
+  const amt = Number(amountBaht).toFixed(2); // "199.00"
 
   // ตัด CRC เดิม
   let qr = baseQR.replace(/6304[0-9A-F]{4}$/i, "");
 
-  // ตัด field 54 เดิม
-  qr = qr.replace(/54\d{2}\d+$/, "");
+  // ตัด field 54 เดิม (ถ้ามี)
+  qr = qr.replace(/54\d{2}[0-9.]+$/, "");
 
+  // ✅ field 54 ต้องเป็น string บาท (มี .)
   const field54 = `54${amt.length.toString().padStart(2, "0")}${amt}`;
+
   const payload = `${qr}${field54}6304`;
   const crc = crc16(payload);
 
