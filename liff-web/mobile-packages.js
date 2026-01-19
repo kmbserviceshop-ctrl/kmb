@@ -95,8 +95,7 @@ UI STATES
 ========================= */
 
 /**
- * ไม่พบแพ็กเกจ → แจ้งให้ติดต่อร้าน
- * (ลูกค้าไม่สามารถบันทึกเอง)
+ * ไม่พบแพ็กเกจ → ลูกค้าส่งคำขอให้ร้านตรวจสอบ
  */
 function renderNoPackageFound(phone) {
   renderCard(`
@@ -112,19 +111,101 @@ function renderNoPackageFound(phone) {
       </p>
 
       <div style="font-size:13px;color:#6b7280;margin-top:10px">
-        กรุณาแจ้งพนักงานร้าน<br/>
-        เพื่อบันทึกแพ็กเกจก่อนทำรายการ
+        กรุณาส่งคำขอให้ร้านตรวจสอบแพ็กเกจ<br/>
+        ก่อนทำรายการเติมเงิน
       </div>
 
+      <!-- ปุ่มหลัก -->
+      <button
+        class="primary-btn"
+        style="margin-top:16px"
+        onclick="openPackageRequestConsent()"
+      >
+        📩 ส่งคำขอให้ร้านตรวจสอบแพ็กเกจ
+      </button>
+
+      <!-- ปุ่มรอง -->
       <button
         class="secondary-btn"
-        style="margin-top:16px"
+        style="margin-top:10px"
         onclick="openMobilePackagePage()"
       >
         ← กลับไปตรวจสอบใหม่
       </button>
     </div>
   `);
+}
+function openPackageRequestConsent() {
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">←</button>
+      <div class="top-title">ขอความยินยอม</div>
+    </div>
+
+    <div class="section-card">
+      <div style="font-size:14px;color:#374151;line-height:1.6">
+        ร้านจำเป็นต้องตรวจสอบข้อมูลแพ็กเกจจากระบบเครือข่าย
+        และบันทึกประวัติการทำรายการของเบอร์นี้
+      </div>
+
+      <div style="font-size:13px;color:#6b7280;margin-top:10px">
+        ข้อมูลที่ใช้:
+        <ul style="padding-left:18px">
+          <li>หมายเลขโทรศัพท์</li>
+          <li>รายละเอียดแพ็กเกจ</li>
+          <li>ประวัติการขอตรวจสอบ</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:16px">
+        <input type="checkbox" id="pkgConsentCheck" />
+        <label for="pkgConsentCheck" style="font-size:14px">
+          ยินยอมให้ร้านตรวจสอบและบันทึกข้อมูล
+        </label>
+      </div>
+
+      <button
+        class="primary-btn"
+        style="margin-top:16px"
+        onclick="confirmRequestPackageReview()"
+      >
+        ยืนยันส่งคำขอ
+      </button>
+
+      <button
+        class="secondary-btn"
+        style="margin-top:10px"
+        onclick="renderNoPackageFound(CURRENT_PHONE)"
+      >
+        ยกเลิก
+      </button>
+    </div>
+  `);
+}
+async function confirmRequestPackageReview() {
+  const checked = document.getElementById("pkgConsentCheck")?.checked;
+  if (!checked) {
+    showAlertModal(
+      "กรุณายินยอม",
+      "กรุณายินยอมให้ร้านตรวจสอบข้อมูลก่อนส่งคำขอ"
+    );
+    return;
+  }
+
+  try {
+    await callFn("request_mobile_package_review", {
+      phone: CURRENT_PHONE,
+      line_user_id: CURRENT_CUSTOMER?.line_user_id || null,
+      customer_id: CURRENT_CUSTOMER?.customer_id || null,
+    });
+
+    showAlertModal(
+      "ส่งคำขอสำเร็จ",
+      "ร้านจะตรวจสอบแพ็กเกจให้คุณ\nเมื่อบันทึกแล้วคุณจะสามารถกลับมาเติมได้"
+    );
+  } catch (err) {
+    showAlertModal("เกิดข้อผิดพลาด", err.message);
+  }
 }
 
 /**
