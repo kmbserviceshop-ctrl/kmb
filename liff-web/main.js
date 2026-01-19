@@ -451,10 +451,10 @@ function showMemberMenu(customer) {
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">💳</div>
-          <div class="tile-text">ชำระเงิน</div>
-        </button>
+        <button class="menu-tile" onclick="openTopupMenu()">
+  <div class="tile-icon">📶</div>
+  <div class="tile-text">เติมแพ็กเกจ</div>
+</button>
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
@@ -1261,4 +1261,18 @@ function doLogout() {
       "ไม่สามารถออกจากระบบได้"
     );
   }
+}
+/* =========================
+MOBILE PACKAGE ACTIONS
+========================= */
+function openTopupMenu() {
+  if (typeof openMobilePackagePage !== "function") {
+    showAlertModal(
+      "ยังไม่พร้อมใช้งาน",
+      "ระบบเติมแพ็กเกจจะเปิดให้ใช้งานเร็ว ๆ นี้"
+    );
+    return;
+  }
+
+  openMobilePackagePage();
 }
