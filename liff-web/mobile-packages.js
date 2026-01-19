@@ -32,6 +32,13 @@ function goBackSmart() {
  */
 function openTopupHomePage() {
 
+  // ✅ FIX: sync context ให้ตรงความจริง
+  if (CURRENT_CUSTOMER?.name) {
+    ENTRY_CONTEXT = "member";
+  } else {
+    ENTRY_CONTEXT = "guest";
+  }
+
   const isMember =
     ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
 
@@ -46,7 +53,7 @@ function openTopupHomePage() {
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header : รูป + ชื่อ -->
+      <!-- Header -->
       <div class="home-header">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="home-avatar">👤</div>
@@ -64,7 +71,7 @@ function openTopupHomePage() {
         <div class="home-avatar">🔔</div>
       </div>
 
-      <!-- Points Card -->
+      <!-- Points -->
       <div style="
         margin-top:12px;
         background:linear-gradient(135deg,#111827,#000);
@@ -76,9 +83,7 @@ function openTopupHomePage() {
         align-items:center;
       ">
         <div>
-          <div style="font-size:22px;font-weight:700">
-            0 Points
-          </div>
+          <div style="font-size:22px;font-weight:700">0 Points</div>
           <div style="font-size:13px;opacity:.8;margin-top:4px">
             Redeem your points now!
           </div>
@@ -96,9 +101,8 @@ function openTopupHomePage() {
         </button>
       </div>
 
-      <!-- Menu Grid -->
+      <!-- Menu -->
       <div class="menu-grid" style="margin-top:18px">
-
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
           <div class="tile-text">บิลของฉัน</div>
@@ -113,7 +117,6 @@ function openTopupHomePage() {
           <div class="tile-icon">📦</div>
           <div class="tile-text">รายการอื่น</div>
         </button>
-
       </div>
 
       <!-- History -->
@@ -132,7 +135,7 @@ function openTopupHomePage() {
     </div>
   `);
 
-  // ✅ โหลดประวัติเฉพาะ member หลัง DOM ถูกสร้างแล้ว
+  // ✅ โหลดเฉพาะ member จริง ๆ
   if (ENTRY_CONTEXT === "member") {
     loadMyPackageRequests();
   }
