@@ -42,20 +42,11 @@ function openGuestHomePage() {
 
       <!-- Header -->
       <div class="home-header">
-        <div>
-          <div class="home-title">หน้าหลัก</div>
-          <div class="home-sub">ยินดีต้อนรับ</div>
-        </div>
-
-        <div class="home-avatar">
-          <span>👤</span>
-        </div>
-      </div>
-
+       
       <!-- Profile Card (guest) -->
       <div class="section-card">
-        <div class="member-name">ลูกค้าขาจร</div>
-        <div class="member-phone">กรุณาเลือกทำรายการ</div>
+        <div class="member-name">ยินดีต้อนรับเข้าสู่บริการ</div>
+        <div class="member-phone">หากต้องการใช้บริการเต็มรูปแบบสามารถสมัครชิกได้ที่หน้าเมนู</div>
       </div>
 
       <!-- Menu Grid -->
@@ -95,7 +86,7 @@ function openGuestHomePage() {
 
       <!-- รายการคำขอ -->
       <div class="section-card" style="margin-top:16px">
-        <div class="menu-title">รายการคำขอ</div>
+        <div class="menu-title">รายการคำขอ(ผู้ล็อกอินเท่านั้น)</div>
         <div id="guestPhoneList" style="margin-top:10px">
           <div style="font-size:13px;color:#9ca3af">
             กำลังโหลดรายการ...
