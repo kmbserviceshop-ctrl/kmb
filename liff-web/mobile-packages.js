@@ -26,13 +26,96 @@ function goBackSmart() {
   }
 }
 
-/* =========================
-ENTRY POINT
-========================= */
-
 /**
- * Guest Home – UI เหมือน Member 100% แต่ปิดสิทธิ์
+ * Guest Home
+ * ใช้ Member UI ทั้งก้อน แทนค่าด้วย Guest (ตำแหน่ง / สี / layout เหมือนกัน 100%)
  */
+function openGuestHomePage() {
+  ENTRY_CONTEXT = "guest";
+
+  renderCard(`
+    <div class="app-page home-page">
+
+      <!-- Header (เหมือน Member) -->
+      <div class="home-header">
+        <div></div>
+        <div class="home-avatar">🔔</div>
+      </div>
+
+      <!-- Points Card (โครงเดียวกับ Member) -->
+      <div class="points-card" style="
+        background:#ffffff;
+        border-radius:18px;
+        padding:18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        box-shadow:0 8px 20px rgba(0,0,0,0.06);
+      ">
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#263238">
+            Guest
+          </div>
+          <div style="font-size:13px;color:#607280;margin-top:4px">
+            สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ
+          </div>
+        </div>
+
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:700;color:#263238">
+            0 Points
+          </div>
+          <div style="font-size:12px;color:#607280;margin-top:2px">
+            Redeem your points now!
+          </div>
+          <button disabled style="
+            margin-top:6px;
+            padding:6px 14px;
+            border-radius:999px;
+            border:none;
+            background:#E7E9EC;
+            color:#9ca3af;
+            font-size:13px;
+          ">
+            Redeem
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu Grid (ตำแหน่งเดียวกับ Member) -->
+      <div class="menu-grid" style="margin-top:18px">
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📄</div>
+          <div class="tile-text">บิลของฉัน</div>
+        </button>
+
+        <button class="menu-tile active" onclick="openMobilePackagePage()">
+          <div class="tile-icon">📶</div>
+          <div class="tile-text">เติมแพ็กเกจ</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📦</div>
+          <div class="tile-text">รายการอื่น</div>
+        </button>
+
+      </div>
+
+      <!-- History (ตำแหน่งเดียวกับ Member) -->
+      <div class="section-card" style="margin-top:20px">
+        <div class="menu-title">
+          ประวัติ/บิลของฉัน
+        </div>
+        <div style="font-size:13px;color:#9ca3af">
+          เฉพาะสมาชิกที่ล็อกอินแล้วเท่านั้น
+        </div>
+      </div>
+
+    </div>
+  `);
+}
+
 async function loadMyPackageRequests() {
   const container = document.getElementById("guestPhoneList");
   if (!container) return;
