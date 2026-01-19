@@ -40,31 +40,29 @@ function openGuestHomePage() {
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header -->
+      <!-- Header (เหมือน Member) -->
       <div class="home-header">
-        <div>
-          <div class="home-title">หน้าหลัก</div>
-          <div class="home-sub">ยินดีต้อนรับ</div>
-        </div>
-
+        <div></div>
         <div class="home-avatar">
           <span>👤</span>
         </div>
       </div>
 
-      <!-- Hero Card (แทน Points ของ Member) -->
-      <div class="section-card" style="margin-top:12px">
-        <div style="font-size:15px;font-weight:600">
-          Guest
+      <!-- Hero / Points Card (โครงเดียวกับ Member) -->
+      <div class="points-card disabled">
+        <div class="points-left">
+          <div class="points-value">Guest</div>
+          <div class="points-sub">
+            สมัครสมาชิกเพื่อใช้งานฟีเจอร์เต็มรูปแบบ
+          </div>
         </div>
-        <div style="font-size:13px;color:#6b7280;margin-top:4px;line-height:1.5">
-          หากต้องการใช้บริการเต็มรูปแบบ<br/>
-          กรุณาสมัครสมาชิกก่อนใช้งาน
+        <div class="points-action disabled">
+          —
         </div>
       </div>
 
       <!-- Menu Grid (ตำแหน่งเดียวกับ Member) -->
-      <div class="menu-grid" style="margin-top:14px">
+      <div class="menu-grid" style="margin-top:16px">
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
@@ -83,8 +81,8 @@ function openGuestHomePage() {
 
       </div>
 
-      <!-- รายการคำขอ (ตำแหน่งเดียวกับ History ของ Member) -->
-      <div class="section-card" style="margin-top:16px">
+      <!-- History / Requests (ตำแหน่งเดียวกับ Member) -->
+      <div class="section-card" style="margin-top:18px">
         <div class="menu-title">
           รายการคำขอ
           <span style="font-size:12px;color:#ef4444">(ผู้ล็อกอินเท่านั้น)</span>
