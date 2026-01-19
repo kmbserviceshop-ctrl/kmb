@@ -466,51 +466,6 @@ function openPackagePayment() {
   });
 }
 
-async function submitTopupPayment(payload) {
-  /**
-   * payload = {
-   *   amount_satang,
-   *   slip_base64
-   * }
-   */
-
-  const lineAccessToken = liff.getAccessToken();
-  if (!lineAccessToken) {
-    throw new Error("no_line_access_token");
-  }
-
-  const profile = await liff.getProfile();
-
-  const body = {
-    phone: CURRENT_PHONE,
-    package_id: CURRENT_MOBILE_PACKAGE.id,
-    amount: payload.amount_satang,      // สตางค์
-    slip_base64: payload.slip_base64,
-    line_user_id: profile.userId,
-  };
-
-  const res = await fetch(
-    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/topup-payment-request",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "x-line-access-token": lineAccessToken,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || "topup_payment_failed");
-  }
-
-  // ✔ สำเร็จ
-  return true;
-}
-
 /* =========================
 PROTECT MANUAL
 ========================= */
