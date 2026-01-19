@@ -32,45 +32,80 @@ ENTRY POINT
 
 /**
  * หน้า Home สำหรับลูกค้าขาจร
+ * UI ต้องเหมือน member แต่จำกัดสิทธิ์
  */
 function openGuestHomePage() {
   ENTRY_CONTEXT = "guest";
 
   renderCard(`
-    <div class="top-bar">
-      <div class="top-title">KPOS Connect</div>
-    </div>
+    <div class="app-page home-page">
 
-    <div class="section-card">
-      <div style="font-size:18px;font-weight:600">
-        ยินดีต้อนรับ
-      </div>
-      <div style="font-size:14px;color:#6b7280;margin-top:6px">
-        กรุณาเลือกทำรายการ
-      </div>
-    </div>
+      <!-- Header -->
+      <div class="home-header">
+        <div>
+          <div class="home-title">หน้าหลัก</div>
+          <div class="home-sub">ยินดีต้อนรับ</div>
+        </div>
 
-    <div class="section-card">
-      <button class="primary-btn" onclick="openMobilePackagePage()">
-        ➕ เพิ่มเบอร์ใหม่ (ตรวจสอบแพ็กเกจ)
-      </button>
-
-      <button
-        class="menu-btn secondary"
-        style="margin-top:10px"
-        onclick="openAddonPackagePage?.()"
-      >
-        ⚡ เพิ่มความเร็ว / แพ็กเสริม
-      </button>
-    </div>
-
-    <div class="section-card">
-      <div class="menu-title">เบอร์ที่เคยใช้</div>
-      <div id="guestPhoneList" style="margin-top:10px">
-        <div style="font-size:13px;color:#9ca3af">
-          กำลังโหลดรายการ...
+        <div class="home-avatar">
+          <span>👤</span>
         </div>
       </div>
+
+      <!-- Profile Card (guest) -->
+      <div class="section-card">
+        <div class="member-name">ลูกค้าขาจร</div>
+        <div class="member-phone">กรุณาเลือกทำรายการ</div>
+      </div>
+
+      <!-- Menu Grid -->
+      <div class="menu-grid">
+
+        <!-- ❌ บิล : ปิด -->
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📄</div>
+          <div class="tile-text">บิลของฉัน</div>
+        </button>
+
+        <!-- ✅ เติมแพ็กเกจ : เปิด -->
+        <button class="menu-tile active" onclick="openMobilePackagePage()">
+          <div class="tile-icon">📶</div>
+          <div class="tile-text">เติมแพ็กเกจ</div>
+        </button>
+
+        <!-- ❌ อื่น ๆ : ปิด -->
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📦</div>
+          <div class="tile-text">รายการอื่น</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">⚙️</div>
+          <div class="tile-text">ตั้งค่า</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">📞</div>
+          <div class="tile-text">ติดต่อร้าน</div>
+        </button>
+
+        <button class="menu-tile disabled" disabled>
+          <div class="tile-icon">🚧</div>
+          <div class="tile-text">เร็ว ๆ นี้</div>
+        </button>
+
+      </div>
+
+      <!-- เบอร์ที่เคยใช้ -->
+      <div class="section-card" style="margin-top:16px">
+        <div class="menu-title">เบอร์ที่เคยใช้</div>
+        <div id="guestPhoneList" style="margin-top:10px">
+          <div style="font-size:13px;color:#9ca3af">
+            กำลังโหลดรายการ...
+          </div>
+        </div>
+      </div>
+
     </div>
   `);
 
