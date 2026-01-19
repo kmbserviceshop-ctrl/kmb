@@ -42,7 +42,7 @@ function openGuestHomePage() {
 
       <!-- Header -->
       <div class="home-header">
-      <div>
+        <div>
           <div class="home-title">หน้าหลัก</div>
           <div class="home-sub">ยินดีต้อนรับ</div>
         </div>
@@ -52,38 +52,44 @@ function openGuestHomePage() {
         </div>
       </div>
 
-       
-      <!-- Profile Card (guest) -->
+      <!-- Profile Card (Guest style like member) -->
       <div class="section-card">
         <div class="member-name">Guest</div>
-        <div class="member-phone">หากต้องการใช้บริการเต็มรูปแบบกรุณาสมัครสามาชิกก่อนใช้งาน</div>
+        <div class="member-phone">
+          หากต้องการใช้บริการเต็มรูปแบบ<br/>
+          กรุณาสมัครสมาชิกก่อนใช้งาน
+        </div>
       </div>
 
       <!-- Menu Grid -->
       <div class="menu-grid">
 
+        <!-- บิลของฉัน : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📄</div>
           <div class="tile-text">บิลของฉัน</div>
         </button>
 
+        <!-- เติมแพ็กเกจ : เปิด -->
         <button class="menu-tile active" onclick="openMobilePackagePage()">
           <div class="tile-icon">📶</div>
           <div class="tile-text">เติมแพ็กเกจ</div>
         </button>
 
+        <!-- รายการอื่น : ปิด -->
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
           <div class="tile-text">รายการอื่น</div>
         </button>
 
-      
-
       </div>
 
       <!-- รายการคำขอ -->
       <div class="section-card" style="margin-top:16px">
-        <div class="menu-title">รายการคำขอ(ผู้ล็อกอินเท่านั้น)</div>
+        <div class="menu-title">
+          รายการคำขอ <span style="font-size:12px;color:#ef4444">(ผู้ล็อกอินเท่านั้น)</span>
+        </div>
+
         <div id="guestPhoneList" style="margin-top:10px">
           <div style="font-size:13px;color:#9ca3af">
             กำลังโหลดรายการ...
@@ -94,6 +100,7 @@ function openGuestHomePage() {
     </div>
   `);
 
+  // ❗ ยังเรียกเหมือนเดิม (ไม่แก้ flow)
   loadMyPackageRequests();
 }
 
