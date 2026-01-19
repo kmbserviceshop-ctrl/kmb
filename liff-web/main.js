@@ -158,13 +158,13 @@ async function enterTopupFromRichMenu() {
      * - ผูกบัญชีแล้ว
      * - ใช้หน้า member เดิม 100%
      */
-    if (status.status === "member") {
-      ENTRY_CONTEXT = "member";
-      CURRENT_CUSTOMER = status.customer;
+   if (status.status === "member") {
+  ENTRY_CONTEXT = "member";
+  CURRENT_CUSTOMER = status.customer;
 
-      showMemberMenu(CURRENT_CUSTOMER);
-      return;
-    }
+  openTopupMenu(); // ✅ เข้าหน้าหลักเติมเน็ต (ภาพ 3)
+  return;
+}
 
     /**
      * GUEST / อื่น ๆ
@@ -1371,6 +1371,6 @@ function openTopupMenu() {
     return;
   }
 
-  //openMobilePackagePage();
-  penGuestHomePage();
+  openMobilePackagePage();
+ 
 }
