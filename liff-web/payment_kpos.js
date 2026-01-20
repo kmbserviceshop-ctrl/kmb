@@ -240,23 +240,26 @@ async function submitKposPayment(btn) {
   setButtonLoading(btn, "กำลังส่งข้อมูล");
 
   try {
-    await CURRENT_PAYMENT.onSubmit({
-      amount_satang: CURRENT_PAYMENT.amount_satang,
-      slip_base64: slipBase64,
-    });
+  await CURRENT_PAYMENT.onSubmit({
+    service: CURRENT_PAYMENT.service,
+    reference_id: CURRENT_PAYMENT.reference_id,
+    amount_satang: CURRENT_PAYMENT.amount_satang,
+    meta: CURRENT_PAYMENT.meta,
+    slip_base64: slipBase64,
+  });
 
-    showAlertModal(
-      "รับแจ้งชำระเงินแล้ว",
-      "ระบบได้รับข้อมูลเรียบร้อย\nรอร้านตรวจสอบ",
-      () => kposPaymentBack()
-    );
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err?.message || err || "ไม่สามารถดำเนินการได้"
-    );
-    resetButton(btn, "💳 ดำเนินการต่อ");
-  }
+  showAlertModal(
+    "รับแจ้งชำระเงินแล้ว",
+    "ระบบได้รับข้อมูลเรียบร้อย\nรอร้านตรวจสอบ",
+    () => kposPaymentBack()
+  );
+} catch (err) {
+  showAlertModal(
+    "เกิดข้อผิดพลาด",
+    err?.message || err || "ไม่สามารถดำเนินการได้"
+  );
+  resetButton(btn, "💳 ดำเนินการต่อ");
+}
 }
 
 /**
