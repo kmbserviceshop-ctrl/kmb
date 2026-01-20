@@ -657,7 +657,6 @@ async function openMyBills(btn) {
 /* =========================
 PAWN PAYMENT (KPOS)
 ========================= */
-
 function renderPawnBill(bill, index) {
   const item = bill.pawn_items || {};
 
@@ -677,14 +676,14 @@ function renderPawnBill(bill, index) {
     statusIcon = "⏳";
   } else if (today > dueDate) {
     statusText = "เกินกำหนด";
-    statusColor = "#f59e0b"; // ส้ม
+    statusColor = "#fc3f05"; // ส้ม
     statusIcon = "⚠️";
   } else {
     const diffDays = Math.ceil(
       (dueDate - today) / (1000 * 60 * 60 * 24)
     );
 
-    if (diffDays <= 7) {
+    if (diffDays <= 3) {
       statusText = "ใกล้ครบกำหนด";
       statusColor = "#f59e0b"; // ส้ม
       statusIcon = "⏰";
@@ -709,29 +708,29 @@ function renderPawnBill(bill, index) {
         ${item.brand || ""} ${item.model || ""}
       </div>
 
-      <!-- Detail (2 columns) -->
+      <!-- Detail (RIGHT ALIGNED VALUE) -->
       <div style="font-size:14px;">
 
-        <div style="display:flex;margin-bottom:6px;">
-          <div style="width:90px;color:#6b7280;">วันที่</div>
-          <div style="flex:1;">${formatDate(bill.deposit_date)}</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <div style="color:#6b7280;">วันที่</div>
+          <div style="text-align:right;">${formatDate(bill.deposit_date)}</div>
         </div>
 
-        <div style="display:flex;margin-bottom:6px;">
-          <div style="width:90px;color:#6b7280;">IMEI / SN</div>
-          <div style="flex:1;">${maskLast6(item.imei || item.sn)}</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <div style="color:#6b7280;">IMEI / SN</div>
+          <div style="text-align:right;">${maskLast6(item.imei || item.sn)}</div>
         </div>
 
-        <div style="display:flex;margin-bottom:6px;">
-          <div style="width:90px;color:#6b7280;">จำนวนเงิน</div>
-          <div style="flex:1;font-weight:600;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <div style="color:#6b7280;">จำนวนเงิน</div>
+          <div style="text-align:right;font-weight:600;">
             ${Number(bill.deposit_amount).toLocaleString()} บาท
           </div>
         </div>
 
-        <div style="display:flex;">
-          <div style="width:90px;color:#6b7280;">ครบกำหนด</div>
-          <div style="flex:1;">${formatDate(bill.due_date)}</div>
+        <div style="display:flex;justify-content:space-between;">
+          <div style="color:#6b7280;">ครบกำหนด</div>
+          <div style="text-align:right;">${formatDate(bill.due_date)}</div>
         </div>
 
       </div>
@@ -757,7 +756,7 @@ function renderPawnBill(bill, index) {
               style="width:100%;height:42px;justify-content:center;font-weight:600;"
               onclick="openPawnPaymentByIndex(${index})"
             >
-              💳 ชำระค่างวด / ต่ออายุบิล
+               ชำระค่างวด / ต่ออายุบิล
             </button>
           `
       }
