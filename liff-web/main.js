@@ -472,7 +472,7 @@ function showMemberMenu(customer) {
         "
       >
         <div>
-          <div style="font-size:18px;font-weight:700;">1500 Points</div>
+          <div style="font-size:18px;font-weight:700;">0 Points</div>
           <div style="font-size:13px;color:#cbd5f5;">
             Redeem your points now!
           </div>
@@ -496,35 +496,34 @@ function showMemberMenu(customer) {
       <div class="menu-grid">
 
         <button class="menu-tile active" onclick="openMyBills(this)">
-          <div class="tile-icon">📄</div>
-          <div class="tile-text">บิลของฉัน</div>
-        </button>
+  <div class="tile-icon">📄</div>
+  <div class="tile-text">บิลของฉัน</div>
+</button>
 
-        <button class="menu-tile" onclick="openTopupMenu()">
-          <div class="tile-icon">📶</div>
-          <div class="tile-text">เติมแพ็กเกจ</div>
-        </button>
+<button class="menu-tile" onclick="openTopupMenu()">
+  <div class="tile-icon">📶</div>
+  <div class="tile-text">ต่อแพ็กเกจ</div>
+</button>
 
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📦</div>
-          <div class="tile-text">รายการอื่น</div>
-        </button>
+<button class="menu-tile" onclick="openAddonMenu()">
+  <div class="tile-icon">➕</div>
+  <div class="tile-text">แพ็กเสริม</div>
+</button>
 
-        <button class="menu-tile" onclick="openSettings()">
-          <div class="tile-icon">⚙️</div>
-          <div class="tile-text">ตั้งค่า</div>
-        </button>
+<button class="menu-tile" onclick="openGameTopup()">
+  <div class="tile-icon">🎮</div>
+  <div class="tile-text">เติมเกม</div>
+</button>
 
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📞</div>
-          <div class="tile-text">ติดต่อร้าน</div>
-        </button>
+<button class="menu-tile disabled" disabled>
+  <div class="tile-icon">📱</div>
+  <div class="tile-text">มือถือ<br><small>เร็ว ๆ นี้</small></div>
+</button>
 
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">🚧</div>
-          <div class="tile-text">เร็ว ๆ นี้</div>
-        </button>
-
+<button class="menu-tile disabled" disabled>
+  <div class="tile-icon">🎧</div>
+  <div class="tile-text">อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small></div>
+</button>
       </div>
 
       <!-- Banner -->
