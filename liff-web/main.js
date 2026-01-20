@@ -610,6 +610,9 @@ async function openMyBills(btn) {
   resetButton(btn, "📄 บิลของฉัน");
 }
 }
+/* =========================
+PAWN PAYMENT (KPOS)
+========================= */
 
 function renderPawnBill(bill, index) {
   const item = bill.pawn_items || {};
@@ -682,17 +685,83 @@ function renderPawnBill(bill, index) {
     </div>
   `;
 }
+function renderPawnPaymentSummary(bill) {
+  const item = bill.pawn_items || {};
+  const dueDate = new Date(bill.due_date);
+  const newDueDate = new Date(dueDate);
+  newDueDate.setDate(newDueDate.getDate() + 15);
+
+  return `
+    <h3>${item.brand || ""} ${item.model || ""}</h3>
+    <p>IMEI / SN : ${item.imei || item.sn || "-"}</p>
+
+    <hr/>
+
+    <div class="bill-row">
+      <span>ครบกำหนดเดิม</span>
+      <span>${formatDate(bill.due_date)}</span>
+    </div>
+
+    <div class="bill-row">
+      <span>กำหนดใหม่</span>
+      <span>${formatDate(newDueDate)}</span>
+    </div>
+  `;
+}
+async function submitPawnInterestPayment(payload) {
+  const {
+    reference_id,
+    amount_satang,
+    slip_base64,
+  } = payload;
+
+  if (!reference_id) throw new Error("missing_reference_id");
+  if (!slip_base64) throw new Error("slip_required");
+
+  const lineAccessToken = liff.getAccessToken();
+  if (!lineAccessToken) throw new Error("no_line_access_token");
+
+  const body = {
+    pawn_transaction_id: reference_id,
+    amount: amount_satang, // สตางค์
+    slip_base64,
+  };
+
+  const res = await fetch(
+    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/payment-request",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "x-line-access-token": lineAccessToken,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) throw data;
+
+  return data;
+}
 
 function openPawnPayment(bill) {
-  if (typeof openPayment !== "function") {
-    showAlertModal(
-      "ผิดพลาด",
-      "ไม่พบหน้า payment"
-    );
-    return;
-  }
-
-  openPayment(bill);
+  openKposPayment({
+    service: "pawn_interest",
+    reference_id: bill.id,
+    title: "ต่ออายุบิล / ชำระค่างวด",
+    amount_satang: Number(bill.service_fee ?? 0),
+    service_fee_satang: 0,
+    meta: {
+      pawn_id: bill.id,
+      contract_no: bill.contract_no,
+      due_date: bill.due_date,
+    },
+    description_html: renderPawnPaymentSummary(bill),
+    onSubmit: submitPawnInterestPayment,
+    onBack: () => openMyBills(null),
+  });
 }
 
 function openPawnPaymentByIndex(index) {
