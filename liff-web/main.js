@@ -717,7 +717,7 @@ async function submitPawnInterestPayment(payload) {
   } = payload;
 
   if (!reference_id) throw new Error("missing_reference_id");
-  if (amount === undefined) throw new Error("missing_amount");
+  if (amount_satang === undefined) throw new Error("missing_amount");
   if (!slip_base64) throw new Error("slip_required");
 
   const lineAccessToken = liff.getAccessToken();
