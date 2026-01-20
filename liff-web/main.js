@@ -712,7 +712,7 @@ function renderPawnPaymentSummary(bill) {
 async function submitPawnInterestPayment(payload) {
   const {
     reference_id,
-    amount,        // ✅ ใช้บาท
+    amount_satang,      // ✅ ใช้บาท
     slip_base64,
   } = payload;
 
@@ -725,7 +725,7 @@ async function submitPawnInterestPayment(payload) {
 
   const body = {
     pawn_transaction_id: reference_id,
-    amount: amount, // ✅ บาท (ไม่ใช่สตางค์แล้ว)
+    amount: amount_satang,// ✅ บาท (ไม่ใช่สตางค์แล้ว)
     slip_base64,
   };
 
@@ -752,9 +752,12 @@ function openPawnPayment(bill) {
   openKposPayment({
     service: "pawn_interest",
     reference_id: bill.id,
-    title: "ต่ออายุบิล / ชำระค่าดอก",
-    amount: Number(bill.service_fee ?? 0), // ✅ บาท
-    service_fee_satang: 0, // (คงไว้ ไม่กระทบ)
+    title: "ต่ออายุบิล / ชำระค่างวด",
+
+    // ✅ FIX: แปลง "บาท → สตางค์" ให้ payment engine
+    amount_satang: Math.round(Number(bill.service_fee ?? 0) * 100),
+
+    service_fee_satang: 0,
     meta: {
       pawn_id: bill.id,
       contract_no: bill.contract_no,
