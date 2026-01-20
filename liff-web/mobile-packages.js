@@ -436,11 +436,13 @@ function confirmPackage(pkg) {
   );
 }
 
-function openPackagePayment() {
+async function openPackagePayment() {
   if (!CURRENT_MOBILE_PACKAGE || !CURRENT_PHONE) {
     showAlertModal("เกิดข้อผิดพลาด", "ข้อมูลแพ็กเกจไม่ครบ");
     return;
   }
+
+  const profile = await liff.getProfile(); // ⭐ สำคัญ
 
   openKposPayment({
     service: "topup",
@@ -450,6 +452,8 @@ function openPackagePayment() {
     amount_satang: Number(CURRENT_MOBILE_PACKAGE.price) * 100,
 
     meta: {
+      line_user_id: profile.userId,            // ⭐ จำเป็น (backend ใช้)
+      customer_id: CURRENT_CUSTOMER?.id ?? null,
       phone: CURRENT_PHONE,
       package_id: CURRENT_MOBILE_PACKAGE.id,
     },
