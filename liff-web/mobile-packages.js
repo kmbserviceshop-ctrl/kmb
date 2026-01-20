@@ -425,14 +425,23 @@ function renderPackageList(packages) {
 /* =========================
 CONFIRM & PAYMENT
 ========================= */
-
 function confirmPackage(pkg) {
   CURRENT_MOBILE_PACKAGE = pkg;
 
   showAlertModal(
     "ยืนยันการเติมแพ็กเกจ",
     `กรุณายืนยันแพ็กเกจที่ใช้งานอยู่\n\n${pkg.package_name}\n${pkg.price} บาท`,
-    () => openPackagePayment()
+    async () => {
+      try {
+        await openPackagePayment();
+      } catch (err) {
+        console.error("openPackagePayment error:", err);
+        showAlertModal(
+          "เกิดข้อผิดพลาด",
+          err?.message || "ไม่สามารถเปิดหน้าชำระเงินได้"
+        );
+      }
+    }
   );
 }
 
