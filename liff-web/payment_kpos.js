@@ -210,7 +210,6 @@ const qrData =
     waitForQRCode();
   }
 }
-
 /* =========================
 SUBMIT PAYMENT (GENERIC)
 ========================= */
@@ -254,10 +253,21 @@ async function submitKposPayment(btn) {
     () => kposPaymentBack()
   );
 } catch (err) {
-  showAlertModal(
-    "เกิดข้อผิดพลาด",
-    err?.message || err || "ไม่สามารถดำเนินการได้"
-  );
+  console.error("submitKposPayment error:", err);
+
+  let message = "ไม่สามารถดำเนินการได้";
+
+  if (typeof err === "string") {
+    message = err;
+  } else if (err?.message) {
+    message = err.message;
+  } else if (err?.error?.details) {
+    message = err.error.details;
+  } else if (err?.error) {
+    message = JSON.stringify(err.error);
+  }
+
+  showAlertModal("เกิดข้อผิดพลาด", message);
   resetButton(btn, "💳 ดำเนินการต่อ");
 }
 }
