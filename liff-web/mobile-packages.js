@@ -443,8 +443,16 @@ function openPackagePayment() {
   }
 
   openKposPayment({
+    service: "topup",
+    reference_id: CURRENT_MOBILE_PACKAGE.id,
+
     title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
     amount_satang: Number(CURRENT_MOBILE_PACKAGE.price) * 100,
+
+    meta: {
+      phone: CURRENT_PHONE,
+      package_id: CURRENT_MOBILE_PACKAGE.id,
+    },
 
     description_html: `
       <div class="bill-row">
