@@ -664,71 +664,108 @@ function renderPawnBill(bill, index) {
   const today = new Date();
   const dueDate = new Date(bill.due_date);
 
-  const isOverdue = today > dueDate;
+  // =========================
+  // STATUS LOGIC (ลำดับสำคัญ)
+  // =========================
+  let statusText = "ปกติ";
+  let statusColor = "#16a34a"; // เขียว
+  let statusIcon = "✔️";
 
-  const statusText = isOverdue ? "เกินกำหนด" : "ปกติ";
-  const statusClass = isOverdue
-    ? "bill-status warning"
-    : "bill-status";
+  if (bill.is_checking_payment) {
+    statusText = "กำลังตรวจสอบ";
+    statusColor = "#6b7280"; // เทา
+    statusIcon = "⏳";
+  } else if (today > dueDate) {
+    statusText = "เกินกำหนด";
+    statusColor = "#f59e0b"; // ส้ม
+    statusIcon = "⚠️";
+  } else {
+    const diffDays = Math.ceil(
+      (dueDate - today) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays <= 7) {
+      statusText = "ใกล้ครบกำหนด";
+      statusColor = "#f59e0b"; // ส้ม
+      statusIcon = "⏰";
+    }
+  }
 
   return `
-    <div class="bill-card">
-      <div class="bill-row" style="font-weight:600; display:flex; justify-content:space-between;">
-        <span>เลขที่บิล ${bill.contract_no}</span>
-        <span class="${statusClass}">${statusText}</span>
+    <div class="bill-card" style="background:#ffffff;border-radius:18px;padding:16px;">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:600;">
+          เลขที่บิล ${bill.contract_no}
+        </div>
+        <div style="font-size:14px;font-weight:600;color:${statusColor};">
+          ${statusIcon} ${statusText}
+        </div>
       </div>
 
-      <!-- ชื่อสินค้า ต้องอยู่ก่อน -->
-      <div style="margin:10px 0;font-weight:600">
+      <!-- Product -->
+      <div style="font-size:16px;font-weight:700;margin-bottom:10px;">
         ${item.brand || ""} ${item.model || ""}
       </div>
 
-      <div class="bill-row">
-        <span>วันที่</span>
-        <span>${formatDate(bill.deposit_date)}</span>
+      <!-- Detail (2 columns) -->
+      <div style="font-size:14px;">
+
+        <div style="display:flex;margin-bottom:6px;">
+          <div style="width:90px;color:#6b7280;">วันที่</div>
+          <div style="flex:1;">${formatDate(bill.deposit_date)}</div>
+        </div>
+
+        <div style="display:flex;margin-bottom:6px;">
+          <div style="width:90px;color:#6b7280;">IMEI / SN</div>
+          <div style="flex:1;">${maskLast6(item.imei || item.sn)}</div>
+        </div>
+
+        <div style="display:flex;margin-bottom:6px;">
+          <div style="width:90px;color:#6b7280;">จำนวนเงิน</div>
+          <div style="flex:1;font-weight:600;">
+            ${Number(bill.deposit_amount).toLocaleString()} บาท
+          </div>
+        </div>
+
+        <div style="display:flex;">
+          <div style="width:90px;color:#6b7280;">ครบกำหนด</div>
+          <div style="flex:1;">${formatDate(bill.due_date)}</div>
+        </div>
+
       </div>
 
-      <div class="bill-row">
-        <span>IMEI / SN</span>
-        <span>${maskLast6(item.imei || item.sn)}</span>
-      </div>
+      <!-- Divider -->
+      <div style="height:1px;background:#eceef1;margin:14px 0;"></div>
 
-      <div class="bill-row">
-        <span>จำนวนเงิน</span>
-        <span>${Number(bill.deposit_amount).toLocaleString()} บาท</span>
-      </div>
-
-      <div class="bill-row">
-        <span>ครบกำหนด</span>
-        <span>${formatDate(bill.due_date)}</span>
-      </div>
-
-     ${
-  bill.is_checking_payment
-    ? `
-      <button
-        class="menu-btn secondary"
-        style="margin-top:10px"
-        onclick="showCheckingPopup()"
-      >
-        ⏳ กำลังตรวจสอบ
-      </button>
-    `
-    : `
-      <button
-        class="menu-btn"
-        style="margin-top:10px"
-        onclick="openPawnPaymentByIndex(${index})"
-      >
-        💳 ชำระค่างวด / ต่ออายุบิล
-      </button>
-    `
-}
-
+      <!-- Action Button -->
+      ${
+        bill.is_checking_payment
+          ? `
+            <button
+              class="menu-btn secondary"
+              style="width:100%;height:40px;justify-content:center;"
+              onclick="showCheckingPopup()"
+            >
+              ⏳ กำลังตรวจสอบ
+            </button>
+          `
+          : `
+            <button
+              class="menu-btn"
+              style="width:100%;height:42px;justify-content:center;font-weight:600;"
+              onclick="openPawnPaymentByIndex(${index})"
+            >
+              💳 ชำระค่างวด / ต่ออายุบิล
+            </button>
+          `
+      }
 
     </div>
   `;
 }
+
 function renderPawnPaymentSummary(bill) {
   const item = bill.pawn_items || {};
   const dueDate = new Date(bill.due_date);
