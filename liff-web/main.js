@@ -284,7 +284,7 @@ function renderCard(html) {
 ปิดปรับปรุงระบบ
 ========================= */
 
-function showMaintenancePage() {
+function showMaintenancePageOld() {
   renderCard(`
     <div class="app-page" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
       <div class="section-card" style="text-align:center;">
@@ -300,6 +300,125 @@ function showMaintenancePage() {
         <button
           class="primary-btn"
           style="margin-top:16px;"
+          onclick="closeApp()"
+        >
+          ปิดหน้าต่าง
+        </button>
+
+      </div>
+    </div>
+  `);
+}
+function showMaintenancePage() {
+  renderCard(`
+    <div
+      style="
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#f3f4f6;
+        padding:20px;
+      "
+    >
+      <div
+        style="
+          width:100%;
+          max-width:360px;
+          background:linear-gradient(135deg,#ecfdf5,#ffffff);
+          border-radius:24px;
+          padding:22px 20px 24px;
+          box-shadow:0 20px 40px rgba(0,0,0,0.12);
+          text-align:center;
+          position:relative;
+          overflow:hidden;
+        "
+      >
+
+        <!-- ICON -->
+        <div style="font-size:42px;margin-bottom:10px;">📢</div>
+
+        <!-- TITLE -->
+        <div style="font-size:22px;font-weight:800;margin-bottom:6px;">
+          ปิดปรับปรุงระบบ
+        </div>
+
+        <!-- BRAND -->
+        <div
+          style="
+            font-size:32px;
+            font-weight:900;
+            color:#22c55e;
+            margin-bottom:8px;
+          "
+        >
+          KPOS Connect
+        </div>
+
+        <!-- SUB -->
+        <div
+          style="
+            font-size:14px;
+            color:#374151;
+            margin-bottom:14px;
+          "
+        >
+          ระบบอยู่ระหว่างการปรับปรุง
+        </div>
+
+        <!-- TIME BOX -->
+        <div
+          style="
+            background:#f1f5f9;
+            border-radius:14px;
+            padding:12px 14px;
+            margin-bottom:14px;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            color:#111827;
+            font-weight:600;
+          "
+        >
+          ⏰ เวลาให้บริการ 08:00 – 21:00
+        </div>
+
+        <!-- MESSAGE -->
+        <div
+          style="
+            font-size:13px;
+            color:#6b7280;
+            line-height:1.6;
+            margin-bottom:18px;
+          "
+        >
+          ขออภัยในความไม่สะดวก<br/>
+          กรุณากลับมาใช้งานใหม่ภายหลัง
+        </div>
+
+        <!-- CONTACT -->
+        <div
+          style="
+            font-size:13px;
+            color:#374151;
+            margin-bottom:20px;
+          "
+        >
+          ☎ 096-339-5696
+        </div>
+
+        <!-- BUTTON -->
+        <button
+          class="primary-btn"
+          style="
+            width:100%;
+            height:48px;
+            border-radius:14px;
+            font-size:16px;
+            font-weight:700;
+          "
           onclick="closeApp()"
         >
           ปิดหน้าต่าง
