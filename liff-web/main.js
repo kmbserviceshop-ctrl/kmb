@@ -13,7 +13,7 @@ const FN_BASE =
 /* =========================
 MAINTENANCE MODE
 ========================= */
-const MAINTENANCE_MODE = true; // 🔴 true = ปิดระบบ | false = เปิดใช้งาน
+const MAINTENANCE_MODE = false; // 🔴 true = ปิดระบบ | false = เปิดใช้งาน
 
 
 // ❗ anon key 
