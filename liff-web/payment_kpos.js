@@ -241,12 +241,12 @@ async function submitKposPayment(btn) {
 
   try {
   await CURRENT_PAYMENT.onSubmit({
-    service: CURRENT_PAYMENT.service,
-    reference_id: CURRENT_PAYMENT.reference_id,
-    amount_satang: CURRENT_PAYMENT.amount_satang,
-    meta: CURRENT_PAYMENT.meta,
-    slip_base64: slipBase64,
-  });
+  service: CURRENT_PAYMENT.service,
+  reference_id: CURRENT_PAYMENT.reference_id,
+  amount_satang: CURRENT_PAYMENT.amount_satang,
+  meta: CURRENT_PAYMENT.meta,
+  slip_base64: slipBase64,
+});
 
   showAlertModal(
     "รับแจ้งชำระเงินแล้ว",
