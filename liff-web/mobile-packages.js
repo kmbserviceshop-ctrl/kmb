@@ -11,16 +11,50 @@ let CURRENT_PHONE = null;
 let ENTRY_CONTEXT = "guest";
 
 /* =========================
-AUTH HELPERS
+LINE AUTH + CONSENT
 ========================= */
+
+async function getLineProfileSafe() {
+  try {
+    return await liff.getProfile();
+  } catch {
+    return null;
+  }
+}
 
 async function isLineLoggedIn() {
   try {
-    const profile = await liff.getProfile();
-    return !!profile?.userId;
+    return liff.isLoggedIn();
   } catch {
     return false;
   }
+}
+
+function showLoginConsent() {
+  showAlertModal(
+    "ยินยอมการใช้งาน",
+    `
+    ระบบจำเป็นต้องขออนุญาตเข้าถึงข้อมูลต่อไปนี้:<br/><br/>
+    • LINE User ID<br/>
+    • ชื่อโปรไฟล์<br/>
+    • รูปโปรไฟล์<br/><br/>
+    เพื่อความปลอดภัยและการให้บริการของร้าน
+    `,
+    () => {
+      liff.login();
+    }
+  );
+}
+
+function handleLoginLogout() {
+  isLineLoggedIn().then((loggedIn) => {
+    if (!loggedIn) {
+      showLoginConsent();
+    } else {
+      liff.logout();
+      location.reload();
+    }
+  });
 }
 
 function requireLogin(action) {
@@ -33,17 +67,6 @@ function requireLogin(action) {
       return;
     }
     action();
-  });
-}
-
-function handleLoginLogout() {
-  isLineLoggedIn().then((loggedIn) => {
-    if (!loggedIn) {
-      liff.login();
-    } else {
-      liff.logout();
-      location.reload();
-    }
   });
 }
 
@@ -64,14 +87,13 @@ TOPUP HOME
 ========================= */
 
 async function openTopupHomePage() {
-  if (CURRENT_CUSTOMER?.name) {
-    ENTRY_CONTEXT = "member";
-  } else {
-    ENTRY_CONTEXT = "guest";
-  }
-
   const loggedIn = await isLineLoggedIn();
-  const isMember = ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
+  const profile = loggedIn ? await getLineProfileSafe() : null;
+
+  ENTRY_CONTEXT = CURRENT_CUSTOMER?.name ? "member" : "guest";
+
+  const displayName = profile?.displayName || "Guest";
+  const avatarUrl = profile?.pictureUrl || "";
 
   renderCard(`
     <div class="app-page home-page">
@@ -79,13 +101,19 @@ async function openTopupHomePage() {
       <!-- Header -->
       <div class="home-header">
         <div style="display:flex;align-items:center;gap:10px">
-          <div class="home-avatar">👤</div>
+          <div class="home-avatar">
+            ${
+              avatarUrl
+                ? `<img src="${avatarUrl}" style="width:36px;height:36px;border-radius:50%" />`
+                : "👤"
+            }
+          </div>
           <div>
             <div style="font-size:16px;font-weight:600">
-              ${isMember ? CURRENT_CUSTOMER.name : "Guest"}
+              ${displayName}
             </div>
             <div style="font-size:13px;color:#6b7280">
-              ${isMember ? "ยินดีต้อนรับ" : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ"}
+              ${loggedIn ? "ยินดีต้อนรับ" : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ"}
             </div>
           </div>
         </div>
@@ -152,7 +180,7 @@ async function openTopupHomePage() {
     </div>
   `);
 
-  if (ENTRY_CONTEXT === "member" && loggedIn) {
+  if (loggedIn && ENTRY_CONTEXT === "member") {
     loadMyPackageRequests();
   }
 }
