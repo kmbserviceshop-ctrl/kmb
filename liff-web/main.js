@@ -453,19 +453,44 @@ function showMemberMenu(customer) {
       <!-- Header -->
       <div class="home-header">
         <div>
-          <div class="home-title">หน้าหลัก</div>
-          <div class="home-sub">ยินดีต้อนรับ</div>
+          <div class="home-title">${name}</div>
+          <div class="home-sub">Gold Community</div>
         </div>
-
-        <div class="home-avatar">
-          <span>👤</span>
-        </div>
+        <div class="home-avatar" onclick="openSettings()">⚙️</div>
       </div>
 
-      <!-- Profile Card -->
-      <div class="section-card">
-        <div class="member-name">คุณ ${name}</div>
-        <div class="member-phone">เบอร์: ${phone}</div>
+      <!-- Point Card -->
+      <div
+        style="
+          background:#0f172a;
+          color:#fff;
+          border-radius:16px;
+          padding:16px;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:16px;
+        "
+      >
+        <div>
+          <div style="font-size:18px;font-weight:700;">1500 Points</div>
+          <div style="font-size:13px;color:#cbd5f5;">
+            Redeem your points now!
+          </div>
+        </div>
+        <button
+          class="menu-btn"
+          style="
+            background:#111827;
+            color:#fff;
+            border:none;
+            height:36px;
+            padding:0 16px;
+          "
+          onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')"
+        >
+          Redeem
+        </button>
       </div>
 
       <!-- Menu Grid -->
@@ -477,9 +502,9 @@ function showMemberMenu(customer) {
         </button>
 
         <button class="menu-tile" onclick="openTopupMenu()">
-  <div class="tile-icon">📶</div>
-  <div class="tile-text">เติมแพ็กเกจ</div>
-</button>
+          <div class="tile-icon">📶</div>
+          <div class="tile-text">เติมแพ็กเกจ</div>
+        </button>
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📦</div>
@@ -487,9 +512,9 @@ function showMemberMenu(customer) {
         </button>
 
         <button class="menu-tile" onclick="openSettings()">
-  <div class="tile-icon">⚙️</div>
-  <div class="tile-text">ตั้งค่า</div>
-</button>
+          <div class="tile-icon">⚙️</div>
+          <div class="tile-text">ตั้งค่า</div>
+        </button>
 
         <button class="menu-tile disabled" disabled>
           <div class="tile-icon">📞</div>
@@ -502,6 +527,25 @@ function showMemberMenu(customer) {
         </button>
 
       </div>
+
+      <!-- Banner -->
+      <div
+        style="
+          margin-top:18px;
+          background:#ffffff;
+          border-radius:18px;
+          padding:14px;
+          display:flex;
+          align-items:center;
+          gap:12px;
+        "
+      >
+        <div style="font-size:34px;">📱</div>
+        <div style="font-size:20px;font-weight:700;color:#7c3aed;">
+          ผ่อนง่าย<br/>จ่ายสบาย
+        </div>
+      </div>
+
     </div>
   `);
 }
