@@ -491,16 +491,19 @@ async function openPackagePayment() {
     return;
   }
 
+  // 🔎 LOG ดูค่า FK ให้เห็นกับตา
+  console.log("TOPUP_REQUEST_ID (frontend):", data.topup_request_id);
+
   // ✅ STEP 2: เปิดหน้าชำระเงิน (ไม่แตะ core)
   openKposPayment({
     service: "topup",
-    reference_id: data.topup_request_id, // ⭐ FK ตัวแม่
+    reference_id: String(data.topup_request_id), // 🔥 FIX FK
 
     title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
-    amount_satang: priceBaht * 100, // 🔒 satang ชัดเจน
+    amount_satang: priceBaht * 100, // satang
 
     meta: {
-      line_user_id: profile.userId, // 🔥 REQUIRED
+      line_user_id: profile.userId, // REQUIRED
       customer_id: CURRENT_CUSTOMER?.id ?? null,
       phone: CURRENT_PHONE,
       package_id: CURRENT_MOBILE_PACKAGE.id,
