@@ -455,35 +455,35 @@ async function openPackagePayment() {
   // ✅ ต้องมี line_user_id
   const profile = await liff.getProfile();
 
-  // ✅ STEP 1: สร้าง topup_request (ตัวแม่)
-  const res = await fetch(`${FN_BASE}/create-topup-request`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: SUPABASE_ANON_KEY,
-      "x-line-access-token": "1", // ใช้ผ่าน CORS check
-    },
-    body: JSON.stringify({
+  let data;
+  try {
+    // ✅ STEP 1: สร้าง topup_request (ตัวแม่) — ใช้ callFn เท่านั้น
+    data = await callFn("create-topup-request", {
       phone: CURRENT_PHONE,
       package_id: CURRENT_MOBILE_PACKAGE.id,
       amount_expected: CURRENT_MOBILE_PACKAGE.price, // บาท
       line_user_id: profile.userId,
       customer_id: CURRENT_CUSTOMER?.id ?? null,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    showAlertModal("เกิดข้อผิดพลาด", err?.error || "สร้างรายการไม่สำเร็จ");
+    });
+  } catch (err) {
+    console.error("create-topup-request error:", err);
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err?.error || err?.message || "สร้างรายการไม่สำเร็จ"
+    );
     return;
   }
 
-  const data = await res.json();
+  // ✅ ป้องกันข้อมูลผิดพลาดจาก backend
+  if (!data?.topup_request_id) {
+    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบรหัสรายการชำระเงิน");
+    return;
+  }
 
   // ✅ STEP 2: เปิดหน้าชำระเงิน โดยใช้ id ที่เพิ่งสร้าง
   openKposPayment({
     service: "topup",
-    reference_id: data.topup_request_id, // ⭐ FK ถูกต้อง
+    reference_id: data.topup_request_id, // ⭐ FK ถูกต้องแล้ว
 
     title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
     amount_satang: Number(CURRENT_MOBILE_PACKAGE.price) * 100,
@@ -495,7 +495,6 @@ async function openPackagePayment() {
       package_id: CURRENT_MOBILE_PACKAGE.id,
     },
 
-    // ✅ ของเดิม ต้องคงไว้
     description_html: `
       <div class="bill-row">
         <span>เบอร์โทรศัพท์</span>
