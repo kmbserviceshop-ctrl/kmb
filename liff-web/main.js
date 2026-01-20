@@ -17,7 +17,6 @@ const SUPABASE_ANON_KEY =
 /* =========================
 HELPER : API CALL
 ========================= */
-
 async function callFn(path, payload) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3000);
@@ -28,7 +27,7 @@ async function callFn(path, payload) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
+        // ❌ apikey: SUPABASE_ANON_KEY,  ← ลบทิ้ง
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
