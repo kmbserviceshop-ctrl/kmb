@@ -708,14 +708,16 @@ function renderPawnPaymentSummary(bill) {
     </div>
   `;
 }
+
 async function submitPawnInterestPayment(payload) {
   const {
     reference_id,
-    amount_satang,
+    amount,        // ✅ ใช้บาท
     slip_base64,
   } = payload;
 
   if (!reference_id) throw new Error("missing_reference_id");
+  if (amount === undefined) throw new Error("missing_amount");
   if (!slip_base64) throw new Error("slip_required");
 
   const lineAccessToken = liff.getAccessToken();
@@ -723,7 +725,7 @@ async function submitPawnInterestPayment(payload) {
 
   const body = {
     pawn_transaction_id: reference_id,
-    amount: amount_satang, // สตางค์
+    amount: amount, // ✅ บาท (ไม่ใช่สตางค์แล้ว)
     slip_base64,
   };
 
@@ -750,9 +752,9 @@ function openPawnPayment(bill) {
   openKposPayment({
     service: "pawn_interest",
     reference_id: bill.id,
-    title: "ต่ออายุบิล / ชำระค่างวด",
-    amount_satang: Number(bill.service_fee ?? 0),
-    service_fee_satang: 0,
+    title: "ต่ออายุบิล / ชำระค่าดอก",
+    amount: Number(bill.service_fee ?? 0), // ✅ บาท
+    service_fee_satang: 0, // (คงไว้ ไม่กระทบ)
     meta: {
       pawn_id: bill.id,
       contract_no: bill.contract_no,
