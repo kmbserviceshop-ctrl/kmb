@@ -1,6 +1,7 @@
 /* =========================
 CONFIG
 ========================= */
+const MAINTENANCE_MODE = true;//เปิดปิดระบบ
 let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
 let HAS_READ_PDPA = false;
@@ -128,6 +129,14 @@ async function init() {
     const params = new URLSearchParams(window.location.search);
     const entry = params.get("entry");
 
+    /* =========================
+       MAINTENANCE GATE (BLOCK ALL)
+    ========================= */
+    if (MAINTENANCE_MODE) {
+      showMaintenancePage();
+      return; // ⛔ หยุดทุก flow
+    }
+
     if (entry === "topup") {
       ENTRY_CONTEXT = "member"; // ใช้ logic member/guest ภายใน topup
     }
@@ -254,6 +263,48 @@ UI HELPERS
 ========================= */
 function renderCard(html) {
   document.getElementById("app").innerHTML = html;
+}
+
+/* =========================
+ปิดปรับปรุงระบบ
+========================= */
+
+function showMaintenancePage() {
+  renderCard(`
+    <div class="app-page" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+      <div class="section-card" style="text-align:center;">
+        
+        <div style="font-size:42px;margin-bottom:10px;">🚧</div>
+
+        <h3 style="margin:0 0 8px;">กำลังพัฒนา</h3>
+
+        <p style="font-size:14px;color:#6b7280;white-space:pre-line;">
+          ${MAINTENANCE_MESSAGE}
+        </p>
+
+        <button
+          class="primary-btn"
+          style="margin-top:16px;"
+          onclick="closeApp()"
+        >
+          ปิดหน้าต่าง
+        </button>
+
+      </div>
+    </div>
+  `);
+}
+
+function closeApp() {
+  try {
+    if (typeof liff !== "undefined") {
+      liff.closeWindow();
+      return;
+    }
+  } catch (e) {}
+
+  // fallback (กรณี debug / browser)
+  window.close();
 }
 
 function showCheckingPopup() {
