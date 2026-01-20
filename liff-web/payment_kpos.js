@@ -277,9 +277,7 @@ async function submitKposPayment(btn) {
  * ใช้ payload กลางจาก KPOS Payment
  */
 async function submitTopupPayment(payload) {
-  if (!payload) {
-    throw new Error("missing_payload");
-  }
+  if (!payload) throw new Error("missing_payload");
 
   const {
     service,
@@ -289,33 +287,30 @@ async function submitTopupPayment(payload) {
     slip_base64,
   } = payload;
 
-  // 🔒 validate ขั้นต่ำ
-  if (service !== "topup") {
-    throw new Error("invalid_service");
-  }
-
-  if (!reference_id) {
-    throw new Error("missing_reference_id");
-  }
-
-  if (!amount_satang || amount_satang <= 0) {
-    throw new Error("invalid_amount");
-  }
-
-  if (!slip_base64) {
-    throw new Error("slip_required");
-  }
+  if (service !== "topup") throw new Error("invalid_service");
+  if (!reference_id) throw new Error("missing_reference_id");
+  if (!amount_satang || amount_satang <= 0) throw new Error("invalid_amount");
+  if (!slip_base64) throw new Error("slip_required");
 
   const lineAccessToken = liff.getAccessToken();
-  if (!lineAccessToken) {
-    throw new Error("no_line_access_token");
+  if (!lineAccessToken) throw new Error("no_line_access_token");
+
+  // 🔥 จุดสำคัญที่สุด
+  const lineUserId = meta?.line_user_id;
+  if (!lineUserId) {
+    throw new Error("missing_line_user_id");
   }
 
   const body = {
-    topup_request_id: reference_id, // ⭐ map ชัด
-    amount: amount_satang,          // สตางค์
+    topup_request_id: reference_id,
+    amount: amount_satang, // satang
     slip_base64,
-    meta: meta || {},
+    meta: {
+      line_user_id: lineUserId,                 // 🔥 REQUIRED
+      customer_id: meta?.customer_id ?? null,
+      phone: meta?.phone,
+      package_id: meta?.package_id,
+    },
   };
 
   const res = await fetch(
@@ -332,9 +327,7 @@ async function submitTopupPayment(payload) {
   );
 
   const data = await res.json();
-  if (!res.ok) {
-    throw data;
-  }
+  if (!res.ok) throw data;
 
   return data;
 }
