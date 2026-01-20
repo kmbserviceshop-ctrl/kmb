@@ -150,6 +150,16 @@ async function openTopupHomePage() {
           <div class="tile-text">คำขอของฉัน</div>
         </button>
 
+        <button class="menu-tile" onclick="openGameTopup()">
+  <div class="tile-icon">🎮</div>
+  <div class="tile-text">เติมเกม</div>
+</button>
+
+<button class="menu-tile disabled" disabled>
+  <div class="tile-icon">📱</div>
+  <div class="tile-text">มือถือ/อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small></div>
+</button>
+
       </div>
 
       <!-- History -->
