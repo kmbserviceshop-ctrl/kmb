@@ -15,16 +15,6 @@ MAINTENANCE MODE
 ========================= */
 const MAINTENANCE_MODE = true; // 🔴 true = ปิดระบบ | false = เปิดใช้งาน
 
-const MAINTENANCE_MESSAGE = `
-ระบบ KPOS Connect
-อยู่ระหว่างการปรับปรุง
-
-ขออภัยในความไม่สะดวก
-กรุณากลับมาใช้งานใหม่ภายหลัง
-
-เวลาทำการ: 08:00 – 21:00
-โทร: 096-339-5696
-`;
 
 // ❗ anon key 
 const SUPABASE_ANON_KEY =
@@ -283,32 +273,6 @@ function renderCard(html) {
 /* =========================
 ปิดปรับปรุงระบบ
 ========================= */
-
-function showMaintenancePageOld() {
-  renderCard(`
-    <div class="app-page" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
-      <div class="section-card" style="text-align:center;">
-        
-        <div style="font-size:42px;margin-bottom:10px;">🚧</div>
-
-        <h3 style="margin:0 0 8px;">กำลังพัฒนา</h3>
-
-        <p style="font-size:14px;color:#6b7280;white-space:pre-line;">
-          ${MAINTENANCE_MESSAGE}
-        </p>
-
-        <button
-          class="primary-btn"
-          style="margin-top:16px;"
-          onclick="closeApp()"
-        >
-          ปิดหน้าต่าง
-        </button>
-
-      </div>
-    </div>
-  `);
-}
 function showMaintenancePage() {
   renderCard(`
     <div
@@ -419,7 +383,8 @@ function showMaintenancePage() {
             font-size:16px;
             font-weight:700;
           "
-          onclick="closeApp()"
+          onclick="closeModal()"
+          
         >
           ปิดหน้าต่าง
         </button>
@@ -429,17 +394,6 @@ function showMaintenancePage() {
   `);
 }
 
-function closeApp() {
-  try {
-    if (typeof liff !== "undefined") {
-      liff.closeWindow();
-      return;
-    }
-  } catch (e) {}
-
-  // fallback (กรณี debug / browser)
-  window.close();
-}
 
 function showCheckingPopup() {
   showAlertModal("กำลังตรวจสอบการทำรายการ", "สัญญานี้กำลังตรวจสอบการทำรายการ\nท่านจะได้รับการแจ้งภายใน 24 ชั่วโมง");
