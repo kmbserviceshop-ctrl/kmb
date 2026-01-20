@@ -31,19 +31,50 @@ async function isLineLoggedIn() {
 }
 
 function showLoginConsent() {
-  showAlertModal(
-    "ยินยอมการใช้งาน",
-    `
-    ระบบจำเป็นต้องขออนุญาตเข้าถึงข้อมูลต่อไปนี้:<br/><br/>
-    • LINE User ID<br/>
-    • ชื่อโปรไฟล์<br/>
-    • รูปโปรไฟล์<br/><br/>
-    เพื่อความปลอดภัยและการให้บริการของร้าน
-    `,
-    () => {
-      liff.login();
-    }
-  );
+  renderCard(`
+    <div class="consent-overlay">
+      <div class="consent-card">
+
+        <h2 style="font-size:18px;font-weight:600;margin-bottom:12px">
+          นโยบายความเป็นส่วนตัว
+        </h2>
+
+        <div style="
+          max-height:45vh;
+          overflow:auto;
+          font-size:14px;
+          color:#374151;
+          line-height:1.6;
+          margin-bottom:16px;
+        ">
+          <strong>ระบบจะขอเข้าถึงข้อมูลต่อไปนี้</strong><br/><br/>
+          • LINE User ID<br/>
+          • ชื่อโปรไฟล์<br/>
+          • รูปโปรไฟล์<br/><br/>
+          เพื่อใช้ยืนยันตัวตน และให้บริการของร้านอย่างปลอดภัย
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button
+            class="primary-btn secondary-btn"
+            style="flex:1"
+            onclick="openTopupHomePage()"
+          >
+            ยกเลิก
+          </button>
+
+          <button
+            class="primary-btn"
+            style="flex:1"
+            onclick="liff.login()"
+          >
+            ยอมรับ
+          </button>
+        </div>
+
+      </div>
+    </div>
+  `);
 }
 
 function handleLoginLogout() {
