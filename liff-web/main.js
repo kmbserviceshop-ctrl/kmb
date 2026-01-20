@@ -1,7 +1,6 @@
 /* =========================
 CONFIG
 ========================= */
-const MAINTENANCE_MODE = true;//เปิดปิดระบบ
 let CURRENT_CUSTOMER = null;
 let CURRENT_BILLS = [];
 let HAS_READ_PDPA = false;
@@ -10,6 +9,22 @@ let FROM_PDPA_READ = false;
 const LIFF_ID = "2008883587-vieENd7j";
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
+
+/* =========================
+MAINTENANCE MODE
+========================= */
+const MAINTENANCE_MODE = true; // 🔴 true = ปิดระบบ | false = เปิดใช้งาน
+
+const MAINTENANCE_MESSAGE = `
+ระบบ KPOS Connect
+อยู่ระหว่างการปรับปรุง
+
+ขออภัยในความไม่สะดวก
+กรุณากลับมาใช้งานใหม่ภายหลัง
+
+เวลาทำการ: 08:00 – 21:00
+โทร: 096-339-5696
+`;
 
 // ❗ anon key 
 const SUPABASE_ANON_KEY =
