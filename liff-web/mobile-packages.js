@@ -446,7 +446,7 @@ function confirmPackage(pkg) {
 }
 
 async function openPackagePayment() {
-  // ✅ guard เดิม ต้องมี
+  // ✅ guard เดิม
   if (!CURRENT_MOBILE_PACKAGE || !CURRENT_PHONE) {
     showAlertModal("เกิดข้อผิดพลาด", "ข้อมูลแพ็กเกจไม่ครบ");
     return;
@@ -454,14 +454,25 @@ async function openPackagePayment() {
 
   // ✅ ต้องมี line_user_id
   const profile = await liff.getProfile();
+  if (!profile?.userId) {
+    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบข้อมูล LINE");
+    return;
+  }
+
+  // 🔒 normalize ราคา (กัน string)
+  const priceBaht = Number(CURRENT_MOBILE_PACKAGE.price);
+  if (!priceBaht || priceBaht <= 0) {
+    showAlertModal("เกิดข้อผิดพลาด", "ราคาแพ็กเกจไม่ถูกต้อง");
+    return;
+  }
 
   let data;
   try {
-    // ✅ STEP 1: สร้าง topup_request (ตัวแม่) — ใช้ callFn เท่านั้น
+    // ✅ STEP 1: สร้าง topup_request (ตัวแม่)
     data = await callFn("create-topup-request", {
       phone: CURRENT_PHONE,
       package_id: CURRENT_MOBILE_PACKAGE.id,
-      amount_expected: CURRENT_MOBILE_PACKAGE.price, // บาท
+      amount_expected: priceBaht, // บาท
       line_user_id: profile.userId,
       customer_id: CURRENT_CUSTOMER?.id ?? null,
     });
@@ -469,27 +480,27 @@ async function openPackagePayment() {
     console.error("create-topup-request error:", err);
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      err?.error || err?.message || "สร้างรายการไม่สำเร็จ"
+      err?.message || "สร้างรายการไม่สำเร็จ"
     );
     return;
   }
 
-  // ✅ ป้องกันข้อมูลผิดพลาดจาก backend
-  if (!data?.topup_request_id) {
+  // ✅ validate response
+  if (!data || !data.topup_request_id) {
     showAlertModal("เกิดข้อผิดพลาด", "ไม่พบรหัสรายการชำระเงิน");
     return;
   }
 
-  // ✅ STEP 2: เปิดหน้าชำระเงิน โดยใช้ id ที่เพิ่งสร้าง
+  // ✅ STEP 2: เปิดหน้าชำระเงิน (ไม่แตะ core)
   openKposPayment({
     service: "topup",
-    reference_id: data.topup_request_id, // ⭐ FK ถูกต้องแล้ว
+    reference_id: data.topup_request_id, // ⭐ FK ตัวแม่
 
     title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
-    amount_satang: Number(CURRENT_MOBILE_PACKAGE.price) * 100,
+    amount_satang: priceBaht * 100, // 🔒 satang ชัดเจน
 
     meta: {
-      line_user_id: profile.userId,            // ⭐ backend ใช้
+      line_user_id: profile.userId, // 🔥 REQUIRED
       customer_id: CURRENT_CUSTOMER?.id ?? null,
       phone: CURRENT_PHONE,
       package_id: CURRENT_MOBILE_PACKAGE.id,
