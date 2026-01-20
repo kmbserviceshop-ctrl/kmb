@@ -15,19 +15,19 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
 
 /* =========================
-HELPER : API CALL (ROLLBACK SAFE)
+HELPER : API CALL
 ========================= */
 async function callFn(path, payload) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
+  const timer = setTimeout(() => controller.abort(), 3000);
 
   try {
     const res = await fetch(`${FN_BASE}/${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`, // ✅ กลับมาใช้แบบเดิม
-        "x-line-access-token": "ok", // ✅ กัน guard
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        // ❌ apikey: SUPABASE_ANON_KEY,  ← ลบทิ้ง
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -35,13 +35,14 @@ async function callFn(path, payload) {
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(text || "callFn failed");
+      throw new Error(text);
     }
 
     return await res.json();
+
   } catch (err) {
     if (err.name === "AbortError") {
-      throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่");
+      throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
     throw err;
   } finally {
