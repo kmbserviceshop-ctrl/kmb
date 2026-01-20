@@ -33,7 +33,7 @@ async function isLineLoggedIn() {
 function handleLoginLogout() {
   isLineLoggedIn().then((loggedIn) => {
     if (!loggedIn) {
-      showLoginConsentPage();
+      openConsentPage();
     } else {
       liff.logout();
       location.reload();
@@ -191,53 +191,60 @@ function showMyRequests() {
 /* =========================
 CONSENT PAGE (PDPA)
 ========================= */
+/* =========================
+CONSENT PAGE (PDPA)
+แม่แบบ 100% จากหน้า Privacy
+========================= */
 
-function showLoginConsentPage() {
+function openConsentPage() {
   renderCard(`
     <div class="app-page">
 
       <!-- Top Bar -->
       <div class="top-bar">
-        <button class="back-btn" onclick="openTopupHomePage()">←</button>
-        <div class="top-title">นโยบายความเป็นส่วนตัว</div>
+        <button class="back-btn" onclick="closeConsentPage()">←</button>
+        <div class="top-title">ความเป็นส่วนตัว</div>
       </div>
 
-      <!-- Content -->
-      <div class="section-card" style="margin-bottom:16px">
+      <div class="section-card">
 
-        <p style="font-size:14px;line-height:1.6">
-          KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
-          ระบบจำเป็นต้องขอความยินยอมในการเก็บ ใช้ และประมวลผลข้อมูล
-          เพื่อให้สามารถให้บริการได้อย่างถูกต้องและปลอดภัย
-          ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+        <h3 style="margin-top:0">การขอความยินยอมในการเก็บข้อมูลส่วนบุคคล</h3>
+
+        <p>
+          KPOS จำเป็นต้องใช้ข้อมูลของท่านเพื่อให้บริการ เช่น
+          การฝากสินค้า การผ่อนสินค้า การแจ้งเตือนสถานะบิล
+          และการติดต่อร้านค้า
         </p>
 
-        <h4 style="margin-top:16px">ข้อมูลที่ระบบจะเข้าถึง</h4>
-        <ul style="font-size:14px;line-height:1.6;padding-left:18px">
+        <div class="divider"></div>
+
+        <h4>ข้อมูลที่ระบบจะเข้าถึง</h4>
+        <ul>
           <li>LINE User ID</li>
           <li>ชื่อโปรไฟล์</li>
           <li>รูปโปรไฟล์</li>
         </ul>
 
-        <h4 style="margin-top:16px">วัตถุประสงค์ในการใช้ข้อมูล</h4>
-        <ul style="font-size:14px;line-height:1.6;padding-left:18px">
+        <h4>วัตถุประสงค์ในการใช้ข้อมูล</h4>
+        <ul>
           <li>ยืนยันตัวตนผู้ใช้งาน</li>
           <li>ให้บริการของร้าน (เช่น เติมแพ็กเกจ / ประวัติการทำรายการ)</li>
           <li>แจ้งเตือนสถานะรายการและบิล</li>
           <li>ติดต่อให้ข้อมูลเกี่ยวกับบริการ</li>
         </ul>
 
-        <p style="font-size:14px;line-height:1.6;margin-top:16px">
+        <p>
           ท่านสามารถขอเข้าถึง แก้ไข หรือถอนความยินยอมได้
           โดยติดต่อร้านค้าที่ท่านใช้บริการในภายหลัง
+          ทั้งนี้เป็นไปตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)
         </p>
 
-        <div style="margin-top:16px">
-          <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px">
+        <div style="margin:14px 0">
+          <label style="display:flex;gap:10px;align-items:flex-start">
             <input
               type="checkbox"
-              id="consentCheckbox"
-              onchange="toggleConsentAcceptBtn()"
+              id="consentCheck"
+              onchange="toggleConsentSubmit()"
             />
             <span>
               ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
@@ -246,28 +253,49 @@ function showLoginConsentPage() {
           </label>
         </div>
 
+        <button
+          class="primary-btn"
+          id="consentSubmitBtn"
+          disabled
+          onclick="acceptConsentAndLogin()"
+        >
+          ยินยอมและใช้งานต่อ
+        </button>
+
+        <button
+          class="menu-btn secondary"
+          style="margin-top:10px"
+          onclick="declineConsent()"
+        >
+          ไม่ยินยอม
+        </button>
+
       </div>
-
-      <!-- Actions -->
-      <button
-        class="primary-btn"
-        id="consentAcceptBtn"
-        disabled
-        style="margin-bottom:10px"
-        onclick="acceptLoginConsent()"
-      >
-        ยินยอมและใช้งานต่อ
-      </button>
-
-      <button
-        class="secondary-btn"
-        onclick="openTopupHomePage()"
-      >
-        ไม่ยินยอม
-      </button>
-
     </div>
   `);
+}
+
+/* =========================
+CONSENT ACTIONS
+========================= */
+
+function toggleConsentSubmit() {
+  const checked = document.getElementById("consentCheck").checked;
+  document.getElementById("consentSubmitBtn").disabled = !checked;
+}
+
+function acceptConsentAndLogin() {
+  // ตรงนี้ถ้าจะ log consent ลง backend ค่อยเพิ่ม
+  liff.login();
+}
+
+function declineConsent() {
+  // UX เดียวกับหน้าอื่น: ไม่บังคับ
+  closeConsentPage();
+}
+
+function closeConsentPage() {
+  openTopupHomePage();
 }
 
 function toggleConsentAcceptBtn() {
