@@ -30,53 +30,6 @@ async function isLineLoggedIn() {
   }
 }
 
-function showLoginConsent() {
-  renderCard(`
-    <div class="consent-overlay">
-      <div class="consent-card">
-
-        <h2 style="font-size:18px;font-weight:600;margin-bottom:12px">
-          นโยบายความเป็นส่วนตัว
-        </h2>
-
-        <div style="
-          max-height:45vh;
-          overflow:auto;
-          font-size:14px;
-          color:#374151;
-          line-height:1.6;
-          margin-bottom:16px;
-        ">
-          <strong>ระบบจะขอเข้าถึงข้อมูลต่อไปนี้</strong><br/><br/>
-          • LINE User ID<br/>
-          • ชื่อโปรไฟล์<br/>
-          • รูปโปรไฟล์<br/><br/>
-          เพื่อใช้ยืนยันตัวตน และให้บริการของร้านอย่างปลอดภัย
-        </div>
-
-        <div style="display:flex;gap:10px">
-          <button
-            class="primary-btn secondary-btn"
-            style="flex:1"
-            onclick="openTopupHomePage()"
-          >
-            ยกเลิก
-          </button>
-
-          <button
-            class="primary-btn"
-            style="flex:1"
-            onclick="liff.login()"
-          >
-            ยอมรับ
-          </button>
-        </div>
-
-      </div>
-    </div>
-  `);
-}
-
 function handleLoginLogout() {
   isLineLoggedIn().then((loggedIn) => {
     if (!loggedIn) {
@@ -230,4 +183,92 @@ function showAddonPackage() {
 
 function showMyRequests() {
   showAlertModal("เร็ว ๆ นี้", "ระบบคำขอของฉันกำลังพัฒนา");
+}
+
+/* =========================
+ยอมรับเงือนไข
+========================= */
+function showLoginConsent() {
+  const modal = document.getElementById("modal");
+  const modalContent = document.getElementById("modalContent");
+
+  modalContent.innerHTML = `
+    <h4>นโยบายความเป็นส่วนตัว</h4>
+
+    <p style="text-align:left">
+      KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
+      ระบบจำเป็นต้องขอความยินยอมในการเก็บ ใช้ และประมวลผลข้อมูล
+      เพื่อให้สามารถให้บริการได้อย่างถูกต้องและปลอดภัย
+      ตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+    </p>
+
+    <p style="text-align:left;margin-top:10px">
+      <strong>ข้อมูลที่ระบบจะเข้าถึง:</strong><br/>
+      • LINE User ID<br/>
+      • ชื่อโปรไฟล์<br/>
+      • รูปโปรไฟล์
+    </p>
+
+    <p style="text-align:left;margin-top:10px">
+      <strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong><br/>
+      • ยืนยันตัวตนผู้ใช้งาน<br/>
+      • ให้บริการของร้าน (เช่น เติมแพ็กเกจ / ประวัติการทำรายการ / แจ้งเตือนผลการทำรายการ)<br/>
+      • แจ้งเตือนสถานะรายการและบิล<br/>
+      • ติดต่อให้ข้อมูลเกี่ยวกับบริการ
+    </p>
+
+    <p style="text-align:left;margin-top:10px">
+      ท่านสามารถขอเข้าถึง แก้ไข หรือถอนความยินยอมได้
+      โดยติดต่อร้านค้าในภายหลัง
+    </p>
+
+    <div style="text-align:left;margin:12px 0">
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px">
+        <input
+          type="checkbox"
+          id="consentCheckbox"
+          onchange="toggleConsentButton()"
+        />
+        <span>
+          ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
+          ตามนโยบายความเป็นส่วนตัว
+        </span>
+      </label>
+    </div>
+
+    <button
+      class="primary-btn"
+      id="consentAcceptBtn"
+      disabled
+      style="margin-bottom:8px"
+      onclick="acceptLoginConsent()"
+    >
+      ยินยอมและใช้งานต่อ
+    </button>
+
+    <button
+      class="secondary-btn"
+      onclick="closeModal()"
+    >
+      ไม่ยินยอม
+    </button>
+  `;
+
+  modal.style.display = "flex";
+}
+
+function toggleConsentButton() {
+  const checkbox = document.getElementById("consentCheckbox");
+  const btn = document.getElementById("consentAcceptBtn");
+  btn.disabled = !checkbox.checked;
+}
+
+function acceptLoginConsent() {
+  closeModal();
+  liff.login();
+}
+
+function closeModal() {
+  const modal = document.getElementById("modal");
+  modal.style.display = "none";
 }
