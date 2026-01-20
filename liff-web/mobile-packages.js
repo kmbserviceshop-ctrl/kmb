@@ -33,7 +33,7 @@ async function isLineLoggedIn() {
 function handleLoginLogout() {
   isLineLoggedIn().then((loggedIn) => {
     if (!loggedIn) {
-      showLoginConsent();
+      showLoginConsentPage();
     } else {
       liff.logout();
       location.reload();
@@ -188,102 +188,96 @@ function showMyRequests() {
 /* =========================
 ยอมรับเงือนไข
 ========================= */
-function showLoginConsent() {
-  const modal = document.getElementById("modal");
-  const modalContent = document.getElementById("modalContent");
+/* =========================
+CONSENT PAGE (PDPA)
+========================= */
 
-  modalContent.innerHTML = `
-    <div style="
-      display:flex;
-      flex-direction:column;
-      max-height:80vh;
-    ">
+function showLoginConsentPage() {
+  renderCard(`
+    <div class="app-page">
 
-      <!-- Header -->
-      <h4 style="margin:0 0 10px">
-        นโยบายความเป็นส่วนตัว
-      </h4>
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <button class="back-btn" onclick="openTopupHomePage()">←</button>
+        <div class="top-title">นโยบายความเป็นส่วนตัว</div>
+      </div>
 
-      <!-- Scrollable Content -->
-      <div style="
-        flex:1;
-        overflow-y:auto;
-        text-align:left;
-        font-size:13px;
-        color:#374151;
-        padding-right:4px;
-      ">
+      <!-- Content -->
+      <div class="section-card" style="margin-bottom:16px">
 
-        <p>
+        <p style="font-size:14px;line-height:1.6">
           KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
           ระบบจำเป็นต้องขอความยินยอมในการเก็บ ใช้ และประมวลผลข้อมูล
           เพื่อให้สามารถให้บริการได้อย่างถูกต้องและปลอดภัย
-          ตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+          ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)
         </p>
 
-        <p><strong>ข้อมูลที่ระบบจะเข้าถึง:</strong></p>
-        <ul>
+        <h4 style="margin-top:16px">ข้อมูลที่ระบบจะเข้าถึง</h4>
+        <ul style="font-size:14px;line-height:1.6;padding-left:18px">
           <li>LINE User ID</li>
           <li>ชื่อโปรไฟล์</li>
           <li>รูปโปรไฟล์</li>
         </ul>
 
-        <p><strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong></p>
-        <ul>
+        <h4 style="margin-top:16px">วัตถุประสงค์ในการใช้ข้อมูล</h4>
+        <ul style="font-size:14px;line-height:1.6;padding-left:18px">
           <li>ยืนยันตัวตนผู้ใช้งาน</li>
-          <li>ให้บริการของร้าน (เติมแพ็กเกจ / ประวัติการทำรายการ)</li>
+          <li>ให้บริการของร้าน (เช่น เติมแพ็กเกจ / ประวัติการทำรายการ)</li>
           <li>แจ้งเตือนสถานะรายการและบิล</li>
           <li>ติดต่อให้ข้อมูลเกี่ยวกับบริการ</li>
         </ul>
 
-        <p>
+        <p style="font-size:14px;line-height:1.6;margin-top:16px">
           ท่านสามารถขอเข้าถึง แก้ไข หรือถอนความยินยอมได้
-          โดยติดต่อร้านค้าในภายหลัง
+          โดยติดต่อร้านค้าที่ท่านใช้บริการในภายหลัง
         </p>
 
-        <label style="
-          display:flex;
-          gap:8px;
-          align-items:flex-start;
-          margin-top:12px;
-          font-size:13px;
-        ">
-          <input
-            type="checkbox"
-            id="consentCheckbox"
-            onchange="toggleConsentButton()"
-          />
-          <span>
-            ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
-            ตามนโยบายความเป็นส่วนตัว
-          </span>
-        </label>
+        <div style="margin-top:16px">
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px">
+            <input
+              type="checkbox"
+              id="consentCheckbox"
+              onchange="toggleConsentAcceptBtn()"
+            />
+            <span>
+              ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
+              ตามนโยบายความเป็นส่วนตัว
+            </span>
+          </label>
+        </div>
+
       </div>
 
-      <!-- Footer Buttons -->
-      <div style="margin-top:12px">
-        <button
-          class="primary-btn"
-          id="consentAcceptBtn"
-          disabled
-          style="margin-bottom:8px"
-          onclick="acceptLoginConsent()"
-        >
-          ยินยอมและใช้งานต่อ
-        </button>
+      <!-- Actions -->
+      <button
+        class="primary-btn"
+        id="consentAcceptBtn"
+        disabled
+        style="margin-bottom:10px"
+        onclick="acceptLoginConsent()"
+      >
+        ยินยอมและใช้งานต่อ
+      </button>
 
-        <button
-          class="secondary-btn"
-          onclick="closeModal()"
-        >
-          ไม่ยินยอม
-        </button>
-      </div>
+      <button
+        class="secondary-btn"
+        onclick="openTopupHomePage()"
+      >
+        ไม่ยินยอม
+      </button>
 
     </div>
-  `;
+  `);
+}
 
-  modal.style.display = "flex";
+function toggleConsentAcceptBtn() {
+  const cb = document.getElementById("consentCheckbox");
+  const btn = document.getElementById("consentAcceptBtn");
+  btn.disabled = !cb.checked;
+}
+
+function acceptLoginConsent() {
+  liff.login();
 }
 
 function toggleConsentButton() {
