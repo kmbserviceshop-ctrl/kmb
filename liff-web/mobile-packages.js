@@ -193,65 +193,94 @@ function showLoginConsent() {
   const modalContent = document.getElementById("modalContent");
 
   modalContent.innerHTML = `
-    <h4>นโยบายความเป็นส่วนตัว</h4>
+    <div style="
+      display:flex;
+      flex-direction:column;
+      max-height:80vh;
+    ">
 
-    <p style="text-align:left">
-      KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
-      ระบบจำเป็นต้องขอความยินยอมในการเก็บ ใช้ และประมวลผลข้อมูล
-      เพื่อให้สามารถให้บริการได้อย่างถูกต้องและปลอดภัย
-      ตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
-    </p>
+      <!-- Header -->
+      <h4 style="margin:0 0 10px">
+        นโยบายความเป็นส่วนตัว
+      </h4>
 
-    <p style="text-align:left;margin-top:10px">
-      <strong>ข้อมูลที่ระบบจะเข้าถึง:</strong><br/>
-      • LINE User ID<br/>
-      • ชื่อโปรไฟล์<br/>
-      • รูปโปรไฟล์
-    </p>
+      <!-- Scrollable Content -->
+      <div style="
+        flex:1;
+        overflow-y:auto;
+        text-align:left;
+        font-size:13px;
+        color:#374151;
+        padding-right:4px;
+      ">
 
-    <p style="text-align:left;margin-top:10px">
-      <strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong><br/>
-      • ยืนยันตัวตนผู้ใช้งาน<br/>
-      • ให้บริการของร้าน (เช่น เติมแพ็กเกจ / ประวัติการทำรายการ / แจ้งเตือนผลการทำรายการ)<br/>
-      • แจ้งเตือนสถานะรายการและบิล<br/>
-      • ติดต่อให้ข้อมูลเกี่ยวกับบริการ
-    </p>
+        <p>
+          KPOS ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน
+          ระบบจำเป็นต้องขอความยินยอมในการเก็บ ใช้ และประมวลผลข้อมูล
+          เพื่อให้สามารถให้บริการได้อย่างถูกต้องและปลอดภัย
+          ตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+        </p>
 
-    <p style="text-align:left;margin-top:10px">
-      ท่านสามารถขอเข้าถึง แก้ไข หรือถอนความยินยอมได้
-      โดยติดต่อร้านค้าในภายหลัง
-    </p>
+        <p><strong>ข้อมูลที่ระบบจะเข้าถึง:</strong></p>
+        <ul>
+          <li>LINE User ID</li>
+          <li>ชื่อโปรไฟล์</li>
+          <li>รูปโปรไฟล์</li>
+        </ul>
 
-    <div style="text-align:left;margin:12px 0">
-      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px">
-        <input
-          type="checkbox"
-          id="consentCheckbox"
-          onchange="toggleConsentButton()"
-        />
-        <span>
-          ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
-          ตามนโยบายความเป็นส่วนตัว
-        </span>
-      </label>
+        <p><strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong></p>
+        <ul>
+          <li>ยืนยันตัวตนผู้ใช้งาน</li>
+          <li>ให้บริการของร้าน (เติมแพ็กเกจ / ประวัติการทำรายการ)</li>
+          <li>แจ้งเตือนสถานะรายการและบิล</li>
+          <li>ติดต่อให้ข้อมูลเกี่ยวกับบริการ</li>
+        </ul>
+
+        <p>
+          ท่านสามารถขอเข้าถึง แก้ไข หรือถอนความยินยอมได้
+          โดยติดต่อร้านค้าในภายหลัง
+        </p>
+
+        <label style="
+          display:flex;
+          gap:8px;
+          align-items:flex-start;
+          margin-top:12px;
+          font-size:13px;
+        ">
+          <input
+            type="checkbox"
+            id="consentCheckbox"
+            onchange="toggleConsentButton()"
+          />
+          <span>
+            ข้าพเจ้ายินยอมให้ KPOS เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคล
+            ตามนโยบายความเป็นส่วนตัว
+          </span>
+        </label>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div style="margin-top:12px">
+        <button
+          class="primary-btn"
+          id="consentAcceptBtn"
+          disabled
+          style="margin-bottom:8px"
+          onclick="acceptLoginConsent()"
+        >
+          ยินยอมและใช้งานต่อ
+        </button>
+
+        <button
+          class="secondary-btn"
+          onclick="closeModal()"
+        >
+          ไม่ยินยอม
+        </button>
+      </div>
+
     </div>
-
-    <button
-      class="primary-btn"
-      id="consentAcceptBtn"
-      disabled
-      style="margin-bottom:8px"
-      onclick="acceptLoginConsent()"
-    >
-      ยินยอมและใช้งานต่อ
-    </button>
-
-    <button
-      class="secondary-btn"
-      onclick="closeModal()"
-    >
-      ไม่ยินยอม
-    </button>
   `;
 
   modal.style.display = "flex";
