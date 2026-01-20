@@ -26,126 +26,77 @@ function goBackSmart() {
   }
 }
 
-/**
- * Topup Home
- * ใช้ Member UI ทั้งก้อน แทนค่าด้วย Guest / Member
- */
-function openTopupHomePage() {
+/* =========================
+TOPUP HOME
+========================= */
 
-  // ✅ FIX: sync context ให้ตรงความจริง
+function openTopupHomePage() {
   if (CURRENT_CUSTOMER?.name) {
     ENTRY_CONTEXT = "member";
   } else {
     ENTRY_CONTEXT = "guest";
   }
 
-  const isMember =
-    ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
-
-  const displayName = isMember
-    ? CURRENT_CUSTOMER.name
-    : "Guest";
-
-  const displaySub = isMember
-    ? "ยินดีต้อนรับ"
-    : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ";
+  const isMember = ENTRY_CONTEXT === "member" && CURRENT_CUSTOMER?.name;
 
   renderCard(`
     <div class="app-page home-page">
 
-      <!-- Header -->
       <div class="home-header">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="home-avatar">👤</div>
-
           <div>
             <div style="font-size:16px;font-weight:600">
-              ${displayName}
+              ${isMember ? CURRENT_CUSTOMER.name : "Guest"}
             </div>
             <div style="font-size:13px;color:#6b7280">
-              ${displaySub}
+              ${isMember ? "ยินดีต้อนรับ" : "สมัครสมาชิกเพื่อใช้งานเต็มรูปแบบ"}
             </div>
           </div>
         </div>
-
         <div class="home-avatar">🔔</div>
       </div>
 
-      <!-- Points -->
       <div style="
         margin-top:12px;
         background:linear-gradient(135deg,#111827,#000);
         color:#fff;
         border-radius:18px;
         padding:18px;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
       ">
-        <div>
-          <div style="font-size:22px;font-weight:700">0 Points</div>
-          <div style="font-size:13px;opacity:.8;margin-top:4px">
-            Redeem your points now!
-          </div>
-        </div>
-
-        <button disabled style="
-          background:#1f2937;
-          color:#9ca3af;
-          border:none;
-          border-radius:999px;
-          padding:8px 18px;
-          font-size:13px;
-        ">
-          Redeem
-        </button>
+        <div style="font-size:22px;font-weight:700">0 Points</div>
+        <div style="font-size:13px;opacity:.8">Redeem your points now!</div>
       </div>
 
-      <!-- Menu -->
       <div class="menu-grid" style="margin-top:18px">
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📄</div>
-          <div class="tile-text">MyBille</div>
-        </button>
-
         <button class="menu-tile active" onclick="openMobilePackagePage()">
           <div class="tile-icon">📶</div>
           <div class="tile-text">ต่อแพ็กเน็ต</div>
         </button>
-
-        <button class="menu-tile disabled" disabled>
-          <div class="tile-icon">📦</div>
-          <div class="tile-text">UpSpeed Net</div>
-        </button>
       </div>
 
-      <!-- History -->
       <div class="section-card" style="margin-top:20px">
-        <div class="menu-title">ประวัติ/บิลของฉัน</div>
+        <div class="menu-title">ประวัติคำขอ</div>
         <div class="divider"></div>
-
-        <div
-          id="guestPhoneList"
-          style="font-size:13px;color:#9ca3af"
-        >
+        <div id="guestPhoneList" style="font-size:13px;color:#9ca3af">
           กำลังโหลดข้อมูล...
         </div>
       </div>
-
     </div>
   `);
 
-  // ✅ โหลดเฉพาะ member จริง ๆ
   if (ENTRY_CONTEXT === "member") {
     loadMyPackageRequests();
   }
 }
-/**
- * alias เดิม กันโค้ดเก่าพัง
- */
+
 function openGuestHomePage() {
   openTopupHomePage();
 }
+
+/* =========================
+LOAD REQUEST HISTORY
+========================= */
 
 async function loadMyPackageRequests() {
   const container = document.getElementById("guestPhoneList");
@@ -153,59 +104,34 @@ async function loadMyPackageRequests() {
 
   try {
     const profile = await liff.getProfile();
-
     const result = await callFn("get_my_mobile_package_requests", {
       line_user_id: profile.userId,
     });
 
     const list = result?.requests || [];
-
     if (list.length === 0) {
-      container.innerHTML = `
-        <div style="font-size:13px;color:#9ca3af">
-          ยังไม่มีคำขอที่ส่งไว้
-        </div>
-      `;
+      container.innerHTML = `<div style="color:#9ca3af">ยังไม่มีคำขอ</div>`;
       return;
     }
 
     container.innerHTML = list.map(renderMyRequestCard).join("");
-  } catch (err) {
-    container.innerHTML = `
-      <div style="font-size:13px;color:#ef4444">
-        ไม่สามารถโหลดรายการคำขอได้
-      </div>
-    `;
+  } catch {
+    container.innerHTML = `<div style="color:#ef4444">โหลดข้อมูลไม่ได้</div>`;
   }
 }
 
-/* =========================
-RENDER REQUEST CARD
-========================= */
-
 function renderMyRequestCard(req) {
-  const statusMap = {
-    pending: { text: "รอร้านตรวจสอบ", color: "#f59e0b" },
-    approved: { text: "อนุมัติแล้ว", color: "#16a34a" },
-    rejected: { text: "ไม่ผ่านการอนุมัติ", color: "#dc2626" },
-  };
-
-  const status = statusMap[req.status] || {
-    text: req.status,
-    color: "#6b7280",
+  const map = {
+    pending: "รอร้านตรวจสอบ",
+    approved: "อนุมัติแล้ว",
+    rejected: "ไม่ผ่าน",
   };
 
   return `
     <div class="bill-card">
-      <div style="display:flex;justify-content:space-between">
-        <div style="font-weight:600">${req.phone}</div>
-        <div style="font-size:12px;color:${status.color}">
-          ${status.text}
-        </div>
-      </div>
-
-      <div style="font-size:13px;color:#6b7280;margin-top:6px">
-        ส่งคำขอเมื่อ ${new Date(req.created_at).toLocaleDateString("th-TH")}
+      <div style="font-weight:600">${req.phone}</div>
+      <div style="font-size:12px;color:#6b7280">
+        ${map[req.status] || req.status}
       </div>
     </div>
   `;
@@ -216,8 +142,8 @@ OPEN TOPUP FLOW
 ========================= */
 
 function openMobilePackagePage() {
-  CURRENT_MOBILE_PACKAGE = null;
   CURRENT_PHONE = null;
+  CURRENT_MOBILE_PACKAGE = null;
 
   renderCard(`
     <div class="top-bar">
@@ -226,35 +152,27 @@ function openMobilePackagePage() {
     </div>
 
     <div class="section-card">
-      <div class="menu-title">กรอกเบอร์โทรศัพท์</div>
-
       <input
         id="topupPhone"
-        type="tel"
-        placeholder="เช่น 0612345678"
-        style="width:100%;padding:12px;border-radius:10px;border:1px solid #e5e7eb"
+        placeholder="กรอกเบอร์โทรศัพท์"
+        style="width:100%;padding:12px"
       />
-
-      <button
-        class="primary-btn"
-        style="margin-top:14px"
-        onclick="searchMobilePackage(this)"
-      >
-        🔍 ตรวจสอบแพ็กเกจ
+      <button class="primary-btn" style="margin-top:14px"
+        onclick="searchMobilePackage(this)">
+        ตรวจสอบแพ็กเกจ
       </button>
     </div>
   `);
 }
 
 /* =========================
-STEP 1 : SEARCH PACKAGE
+SEARCH PACKAGE
 ========================= */
 
 async function searchMobilePackage(btn) {
-  const phone = document.getElementById("topupPhone")?.value?.trim();
-
-  if (!phone || !/^[0-9]{9,10}$/.test(phone)) {
-    showAlertModal("ข้อมูลไม่ถูกต้อง", "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง");
+  const phone = document.getElementById("topupPhone").value.trim();
+  if (!/^[0-9]{9,10}$/.test(phone)) {
+    showAlertModal("ข้อมูลไม่ถูกต้อง", "กรุณากรอกเบอร์ให้ถูกต้อง");
     return;
   }
 
@@ -271,122 +189,68 @@ async function searchMobilePackage(btn) {
       renderPackageList(packages);
     }
   } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถตรวจสอบข้อมูลได้"
-    );
+    showAlertModal("ผิดพลาด", err.message);
   } finally {
-    resetButton(btn, "🔍 ตรวจสอบแพ็กเกจ");
+    resetButton(btn, "ตรวจสอบแพ็กเกจ");
   }
 }
 
 /* =========================
-NO PACKAGE FOUND
+NO PACKAGE
 ========================= */
 
 function renderNoPackageFound(phone) {
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMobilePackagePage()">←</button>
-      <div class="top-title">ไม่พบข้อมูลแพ็กเกจ</div>
+      <div class="top-title">ไม่พบแพ็กเกจ</div>
     </div>
 
     <div class="section-card">
-      <p style="font-size:14px;color:#374151;line-height:1.6">
-        เบอร์ <strong>${phone}</strong><br/>
-        ยังไม่มีแพ็กเกจที่ร้านบันทึกไว้ในระบบ
-      </p>
-
-      <div style="font-size:13px;color:#6b7280;margin-top:10px">
-        กรุณาส่งคำขอให้ร้านตรวจสอบแพ็กเกจ
-      </div>
-
-      <button
-        class="primary-btn"
-        style="margin-top:16px"
-        onclick="openPackageRequestConsent()"
-      >
-        📩 ส่งคำขอให้ร้านตรวจสอบแพ็กเกจ
-      </button>
-
-      <button
-        class="menu-btn secondary"
-        style="margin-top:12px"
-        onclick="openMobilePackagePage()"
-      >
-        ← กลับไปตรวจสอบใหม่
+      เบอร์ ${phone} ยังไม่มีแพ็กเกจในระบบ
+      <button class="primary-btn" style="margin-top:16px"
+        onclick="openPackageRequestConsent()">
+        ส่งคำขอให้ร้านตรวจสอบ
       </button>
     </div>
   `);
 }
 
 /* =========================
-CONSENT REQUEST
+REQUEST REVIEW
 ========================= */
 
 function openPackageRequestConsent() {
   renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="renderNoPackageFound(CURRENT_PHONE)">←</button>
-      <div class="top-title">ขอความยินยอม</div>
-    </div>
-
     <div class="section-card">
-      <div style="font-size:14px;color:#374151;line-height:1.6">
-        ร้านจำเป็นต้องตรวจสอบข้อมูลแพ็กเกจ
-        และบันทึกประวัติการทำรายการของเบอร์นี้
-      </div>
-
-      <div style="margin-top:16px">
-        <input type="checkbox" id="pkgConsentCheck" />
-        <label for="pkgConsentCheck" style="font-size:14px">
-          ยินยอมให้ร้านตรวจสอบและบันทึกข้อมูล
-        </label>
-      </div>
-
-      <button
-        class="primary-btn"
-        style="margin-top:16px"
-        onclick="confirmRequestPackageReview()"
-      >
-        ยืนยันส่งคำขอ
-      </button>
-
-      <button
-        class="menu-btn secondary"
-        style="margin-top:10px"
-        onclick="renderNoPackageFound(CURRENT_PHONE)"
-      >
-        ยกเลิก
+      <input type="checkbox" id="pkgConsentCheck" />
+      ยินยอมให้ร้านตรวจสอบข้อมูล
+      <button class="primary-btn" style="margin-top:16px"
+        onclick="confirmRequestPackageReview()">
+        ยืนยัน
       </button>
     </div>
   `);
 }
 
 async function confirmRequestPackageReview() {
-  const checked = document.getElementById("pkgConsentCheck")?.checked;
-  if (!checked) {
-    showAlertModal("กรุณายินยอม", "กรุณายินยอมก่อนส่งคำขอ");
+  if (!document.getElementById("pkgConsentCheck").checked) {
+    showAlertModal("กรุณายินยอม", "ต้องยินยอมก่อน");
     return;
   }
 
-  try {
-    const profile = await liff.getProfile();
+  const profile = await liff.getProfile();
+  await callFn("request_mobile_package_review", {
+    phone: CURRENT_PHONE,
+    line_user_id: profile.userId,
+    customer_id: null,
+  });
 
-    await callFn("request_mobile_package_review", {
-      phone: CURRENT_PHONE,
-      line_user_id: profile.userId,
-      customer_id: null,
-    });
-
-    showAlertModal(
-      "ส่งคำขอสำเร็จ",
-      "ร้านจะตรวจสอบแพ็กเกจให้คุณ\nเมื่อบันทึกแล้วคุณจะสามารถกลับมาเติมได้",
-      () => goBackSmart()
-    );
-  } catch (err) {
-    showAlertModal("เกิดข้อผิดพลาด", err.message);
-  }
+  showAlertModal(
+    "ส่งคำขอแล้ว",
+    "ร้านจะตรวจสอบแพ็กเกจให้",
+    goBackSmart
+  );
 }
 
 /* =========================
@@ -394,22 +258,6 @@ PACKAGE LIST
 ========================= */
 
 function renderPackageList(packages) {
-  const items = packages.map((pkg) => `
-    <div
-      class="bill-card"
-      onclick="confirmPackage(${JSON.stringify(pkg).replace(/"/g, '&quot;')})"
-      style="cursor:pointer"
-    >
-      <div style="font-weight:600">${pkg.package_name}</div>
-      <div style="font-size:13px;color:#6b7280;margin-top:4px">
-        ${pkg.package_detail || ""}
-      </div>
-      <div style="margin-top:6px;font-weight:600">
-        ${pkg.price} บาท / ${pkg.duration_days} วัน
-      </div>
-    </div>
-  `).join("");
-
   renderCard(`
     <div class="top-bar">
       <button class="back-btn" onclick="openMobilePackagePage()">←</button>
@@ -417,132 +265,32 @@ function renderPackageList(packages) {
     </div>
 
     <div class="section-card">
-      ${items}
+      ${packages.map(pkg => `
+        <div class="bill-card"
+          onclick="confirmSelectPackage(${JSON.stringify(pkg).replace(/"/g, '&quot;')})">
+          <div style="font-weight:600">${pkg.package_name}</div>
+          <div>${pkg.price} บาท / ${pkg.duration_days} วัน</div>
+        </div>
+      `).join("")}
     </div>
   `);
 }
 
 /* =========================
-CONFIRM & PAYMENT
+FINAL CONFIRM (NO PAYMENT)
 ========================= */
-function confirmPackage(pkg) {
+
+function confirmSelectPackage(pkg) {
   CURRENT_MOBILE_PACKAGE = pkg;
 
   showAlertModal(
-    "ยืนยันการเติมแพ็กเกจ",
-    `กรุณายืนยันแพ็กเกจที่ใช้งานอยู่\n\n${pkg.package_name}\n${pkg.price} บาท`,
-    async () => {
-      try {
-        await openPackagePayment();
-      } catch (err) {
-        console.error("openPackagePayment error:", err);
-        showAlertModal(
-          "เกิดข้อผิดพลาด",
-          err?.message || "ไม่สามารถเปิดหน้าชำระเงินได้"
-        );
-      }
-    }
-  );
-}
-
-async function openPackagePayment() {
-  // ✅ guard เดิม
-  if (!CURRENT_MOBILE_PACKAGE || !CURRENT_PHONE) {
-    showAlertModal("เกิดข้อผิดพลาด", "ข้อมูลแพ็กเกจไม่ครบ");
-    return;
-  }
-
-  // ✅ ต้องมี line_user_id
-  const profile = await liff.getProfile();
-  if (!profile?.userId) {
-    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบข้อมูล LINE");
-    return;
-  }
-
-  // 🔒 normalize ราคา (กัน string)
-  const priceBaht = Number(CURRENT_MOBILE_PACKAGE.price);
-  if (!priceBaht || priceBaht <= 0) {
-    showAlertModal("เกิดข้อผิดพลาด", "ราคาแพ็กเกจไม่ถูกต้อง");
-    return;
-  }
-
-  let data;
-  try {
-    // ✅ STEP 1: สร้าง topup_request (ตัวแม่)
-    data = await callFn("create-topup-request", {
-      phone: CURRENT_PHONE,
-      package_id: CURRENT_MOBILE_PACKAGE.id,
-      amount_expected: priceBaht, // บาท
-      line_user_id: profile.userId,
-      customer_id: CURRENT_CUSTOMER?.id ?? null,
-    });
-  } catch (err) {
-    console.error("create-topup-request error:", err);
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err?.message || "สร้างรายการไม่สำเร็จ"
-    );
-    return;
-  }
-
-  // ✅ validate response
-  if (!data || !data.topup_request_id) {
-    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบรหัสรายการชำระเงิน");
-    return;
-  }
-
-  // 🔎 LOG ดูค่า FK ให้เห็นกับตา
-  console.log("TOPUP_REQUEST_ID (frontend):", data.topup_request_id);
-
-  // ✅ STEP 2: เปิดหน้าชำระเงิน (ไม่แตะ core)
-  openKposPayment({
-    service: "topup",
-    reference_id: String(data.topup_request_id), // 🔥 FIX FK
-
-    title: "ชำระค่าแพ็กเกจอินเทอร์เน็ต",
-    amount_satang: priceBaht * 100, // satang
-
-    meta: {
-      line_user_id: profile.userId, // REQUIRED
-      customer_id: CURRENT_CUSTOMER?.id ?? null,
-      phone: CURRENT_PHONE,
-      package_id: CURRENT_MOBILE_PACKAGE.id,
-    },
-
-    description_html: `
-      <div class="bill-row">
-        <span>เบอร์โทรศัพท์</span>
-        <span>${CURRENT_PHONE}</span>
-      </div>
-      <div class="bill-row">
-        <span>แพ็กเกจ</span>
-        <span>${CURRENT_MOBILE_PACKAGE.package_name}</span>
-      </div>
-      <div class="bill-row">
-        <span>ระยะเวลา</span>
-        <span>${CURRENT_MOBILE_PACKAGE.duration_days} วัน</span>
-      </div>
+    "รับคำขอเรียบร้อย",
+    `
+    ร้านได้รับคำขอแพ็กเกจแล้ว<br/><br/>
+    <strong>${pkg.package_name}</strong><br/>
+    ${pkg.price} บาท / ${pkg.duration_days} วัน<br/><br/>
+    กรุณารอร้านตรวจสอบ
     `,
-
-    onSubmit: submitTopupPayment,
-    onBack: openTopupHomePage,
-  });
-}
-
-/* =========================
-PROTECT MANUAL
-========================= */
-
-function openManualPackageForm() {
-  showAlertModal(
-    "ไม่สามารถทำรายการได้",
-    "การบันทึกแพ็กเกจทำได้เฉพาะพนักงานร้านเท่านั้น"
-  );
-}
-
-function saveManualPackage() {
-  showAlertModal(
-    "ไม่สามารถทำรายการได้",
-    "การบันทึกแพ็กเกจทำได้เฉพาะพนักงานร้านเท่านั้น"
+    goBackSmart
   );
 }
