@@ -194,6 +194,176 @@ function showAddonPackage() {
 function showMyRequests() {
   showAlertModal("เร็ว ๆ นี้", "ระบบคำขอของฉันกำลังพัฒนา");
 }
+/* =========================
+หน้า “กรอกเบอร์โทร” PAGES
+========================= */
+function openMobilePackagePage() {
+  CURRENT_PHONE = null;
+  CURRENT_MOBILE_PACKAGE = null;
+
+  renderCard(`
+    <div class="app-page">
+
+      <div class="top-bar">
+        <button class="back-btn" onclick="goBackSmart()">←</button>
+        <div class="top-title">ต่อแพ็กเน็ต</div>
+      </div>
+
+      <div class="section-card">
+
+        <label style="font-size:14px">เบอร์โทรศัพท์</label>
+        <input
+          id="mobilePhoneInput"
+          inputmode="numeric"
+          maxlength="10"
+          placeholder="กรอกเบอร์โทร 10 หลัก"
+          style="
+            width:100%;
+            height:44px;
+            border-radius:10px;
+            border:1px solid #e5e7eb;
+            padding:0 12px;
+            font-size:16px;
+            margin-top:6px;
+          "
+        />
+
+        <button
+          class="primary-btn"
+          style="margin-top:16px"
+          onclick="submitPhoneForPackage()"
+        >
+          ดำเนินการต่อ
+        </button>
+
+      </div>
+    </div>
+  `);
+}
+//ตรวจแพ็กเกจจากเบอร์
+async function submitPhoneForPackage() {
+  const phone = document.getElementById("mobilePhoneInput").value.trim();
+
+  if (!/^\d{10}$/.test(phone)) {
+    showAlertModal("ข้อมูลไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
+    return;
+  }
+
+  try {
+    const res = await callFn("get_mobile_packages_by_phone", { phone });
+
+    if (res.packages && res.packages.length > 0) {
+      // ✅ พบแพ็กเกจ
+      CURRENT_PHONE = phone;
+      CURRENT_MOBILE_PACKAGE = res.packages[0];
+      openMobilePackageDetail();
+    } else {
+      // ❌ ไม่พบแพ็กเกจ
+      openNoPackageFound(phone);
+    }
+
+  } catch (err) {
+    showAlertModal("เกิดข้อผิดพลาด", err.message);
+  }
+}
+//หน้า “พบแพ็กเกจ” (แค่แสดงรายละเอียดก่อน)
+function openMobilePackageDetail() {
+  const p = CURRENT_MOBILE_PACKAGE;
+
+  renderCard(`
+    <div class="app-page">
+
+      <div class="top-bar">
+        <button class="back-btn" onclick="openMobilePackagePage()">←</button>
+        <div class="top-title">รายละเอียดแพ็กเกจ</div>
+      </div>
+
+      <div class="section-card">
+
+        <div style="font-size:18px;font-weight:700">
+          ${p.package_name}
+        </div>
+
+        <div style="margin-top:6px;color:#6b7280">
+          ${p.package_detail || "-"}
+        </div>
+
+        <div style="margin-top:12px;font-weight:600">
+          ราคา ${Number(p.price).toLocaleString()} บาท
+        </div>
+
+        <div style="margin-top:6px;font-size:13px;color:#6b7280">
+          ระยะเวลา ${p.duration_days} วัน
+        </div>
+
+      </div>
+    </div>
+  `);
+}
+//หน้า “ไม่พบแพ็กเกจ”
+function openNoPackageFound(phone) {
+  renderCard(`
+    <div class="app-page">
+
+      <div class="top-bar">
+        <button class="back-btn" onclick="openMobilePackagePage()">←</button>
+        <div class="top-title">ไม่พบแพ็กเกจ</div>
+      </div>
+
+      <div class="section-card" style="text-align:center">
+
+        <p style="font-size:15px">
+          ไม่พบแพ็กเกจของหมายเลข<br>
+          <strong>${maskPhone(phone)}</strong>
+        </p>
+
+        <p style="font-size:14px;color:#6b7280;margin-top:8px">
+          กรุณาส่งคำขอให้ร้านค้าตรวจโปรเน็ตของท่าน
+        </p>
+
+        <button
+          class="primary-btn"
+          style="margin-top:16px"
+          onclick="submitPackageRequest('${phone}')"
+        >
+          ส่งคำขอ
+        </button>
+
+        <button
+          class="menu-btn secondary"
+          style="margin-top:10px;width:100%"
+          onclick="openMobilePackagePage()"
+        >
+          ยกเลิก
+        </button>
+
+      </div>
+    </div>
+  `);
+}
+//ส่งคำขอ →
+async function submitPackageRequest(phone) {
+  try {
+    const profile = await getLineProfileSafe();
+
+    await callFn("request_mobile_package_review", {
+      phone,
+      line_user_id: profile?.userId || null,
+      customer_id: CURRENT_CUSTOMER?.customer_id || null,
+    });
+
+    showAlertModal(
+      "ส่งคำขอสำเร็จ",
+      `ส่งคำขอเช็คโปรเน็ตหมายเลข ${maskPhone(phone)} เรียบร้อยแล้ว
+ร้านจะทำการบันทึกโปรของท่านภายใน 1 ชั่วโมง
+สามารถดูผลคำขอได้ที่ “คำขอของฉัน”`,
+      () => openTopupHomePage()
+    );
+
+  } catch (err) {
+    showAlertModal("เกิดข้อผิดพลาด", err.message);
+  }
+}
 
 /* =========================
 CONSENT PAGE (PDPA)
