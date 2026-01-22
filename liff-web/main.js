@@ -7,6 +7,7 @@ let HAS_READ_PDPA = false;
 let READ_TIMER_PASSED = false;
 let FROM_PDPA_READ = false;
 const LIFF_ID = "2008883587-vieENd7j";
+let ACCESS_TOKEN = null; // 🔑 JWT ของ user
 const FN_BASE =
   "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1";
 
@@ -23,17 +24,22 @@ const SUPABASE_ANON_KEY =
 /* =========================
 HELPER : API CALL
 ========================= */
-async function callFn(path, payload) {
+async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3000);
+  const timer = setTimeout(() => controller.abort(), 5000);
+
+  // ✅ A.3 FIX: เลือก token อัตโนมัติ
+  const token =
+    options.forceAnon
+      ? SUPABASE_ANON_KEY
+      : ACCESS_TOKEN || SUPABASE_ANON_KEY;
 
   try {
     const res = await fetch(`${FN_BASE}/${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        // ❌ apikey: SUPABASE_ANON_KEY,  ← ลบทิ้ง
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -41,7 +47,7 @@ async function callFn(path, payload) {
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(text);
+      throw new Error(text || "request failed");
     }
 
     return await res.json();
@@ -77,9 +83,11 @@ async function refreshCustomerStatus() {
   try {
     const profile = await liff.getProfile();
 
-    const status = await callFn("check_line_status", {
-      line_user_id: profile.userId,
-    });
+    const status = await callFn(
+  "check_line_status",
+  { line_user_id: profile.userId },
+  { forceAnon: true } // ✅ บังคับชัดเจน
+);
 
     // ❌ ถ้า somehow กลายเป็น guest
     if (status.status !== "member") {
@@ -134,32 +142,23 @@ async function init() {
     const params = new URLSearchParams(window.location.search);
     const entry = params.get("entry");
 
-    /* =========================
-       MAINTENANCE GATE (BLOCK ALL)
-    ========================= */
     if (MAINTENANCE_MODE) {
       showMaintenancePage();
-      return; // ⛔ หยุดทุก flow
+      return;
     }
 
     if (entry === "topup") {
-      ENTRY_CONTEXT = "member"; // ใช้ logic member/guest ภายใน topup
+      ENTRY_CONTEXT = "member";
     }
 
     await liff.init({ liffId: LIFF_ID });
 
-    /* =========================
-       DEBUG MODE (ไม่เปิดจาก LINE)
-       ========================= */
     if (!liff.isInClient()) {
-
-      // ⭐ ถ้าเข้า topup โดยตรง
       if (entry === "topup") {
         openTopupHomePage();
         return;
       }
 
-      // ❗ behavior เดิม
       renderCard(`
         <div class="section-card">
           <h3>⚠️ Debug Mode</h3>
@@ -172,9 +171,6 @@ async function init() {
       return;
     }
 
-    /* =========================
-       LOGIN
-       ========================= */
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
@@ -186,9 +182,14 @@ async function init() {
       line_user_id: profile.userId,
     });
 
+    // ✅ A.2 FIX: รับ JWT จาก backend
+    if (status.access_token) {
+      ACCESS_TOKEN = status.access_token;
+    }
+
     /* =========================
-       REVOKED (BLOCK HARD)
-       ========================= */
+       REVOKED
+    ========================= */
     if (status.status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
@@ -200,10 +201,8 @@ async function init() {
 
     /* =========================
        GUEST
-       ========================= */
+    ========================= */
     if (status.status === "guest") {
-
-      // ⭐ guest + topup
       if (entry === "topup") {
         openTopupHomePage();
         return;
@@ -215,7 +214,7 @@ async function init() {
 
     /* =========================
        MEMBER
-       ========================= */
+    ========================= */
     CURRENT_CUSTOMER = status.customer;
 
     const {
@@ -223,15 +222,6 @@ async function init() {
       consent_version,
       current_consent_version,
     } = status.customer || {};
-
-    if (consent_status === "revoked") {
-      showAlertModal(
-        "ไม่สามารถใช้งานได้",
-        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
-        () => liff.closeWindow()
-      );
-      return;
-    }
 
     const needConsent =
       consent_status !== "accepted" ||
@@ -242,20 +232,17 @@ async function init() {
       return;
     }
 
-    // ⭐ member + topup
     if (entry === "topup") {
       openTopupHomePage();
       return;
     }
-
-    // ⭐ member + installment เพิ่มตรงนี้
 
     showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถเริ่มระบบได้ณขณะนี้กรุณาทำรายการภายหลัง"
+      err.message || "ไม่สามารถเริ่มระบบได้"
     );
   }
 }
@@ -1315,6 +1302,7 @@ function doLogout() {
     // 🔥 clear frontend state
     CURRENT_CUSTOMER = null;
     CURRENT_BILLS = [];
+    ACCESS_TOKEN = null;
     HAS_READ_PDPA = false;
     READ_TIMER_PASSED = false;
 
