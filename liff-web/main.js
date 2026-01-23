@@ -1023,6 +1023,15 @@ function showConfirmModal(title, message, onConfirm) {
 
 function showConsentPage() {
 
+  // ✅ FIX: ถ้ายินยอมแล้ว + version ตรง → ห้ามค้างหน้านี้
+  if (
+    CURRENT_CUSTOMER?.consent_status === "accepted" &&
+    CURRENT_CUSTOMER?.consent_version === CURRENT_CUSTOMER?.current_consent_version
+  ) {
+    showMemberMenu(CURRENT_CUSTOMER);
+    return;
+  }
+
   const isAccepted = CURRENT_CUSTOMER?.consent_status === "accepted";
 
   // 🔎 reset state เฉพาะกรณี
