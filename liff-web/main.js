@@ -28,9 +28,19 @@ async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
 
-  const token = options.forceAnon
-    ? SUPABASE_ANON_KEY
-    : ACCESS_TOKEN || SUPABASE_ANON_KEY;
+  let token;
+
+  if (options.forceAnon) {
+    token = SUPABASE_ANON_KEY;
+  } else {
+    token = ACCESS_TOKEN;
+  }
+
+  // 🔒 FIX สำคัญ: หลัง login แล้ว ห้าม fallback เป็น anon
+  if (!token) {
+    clearTimeout(timer);
+    throw new Error("missing_access_token");
+  }
 
   try {
     const res = await fetch(`${FN_BASE}/${path}`, {
@@ -45,7 +55,7 @@ async function callFn(path, payload, options = {}) {
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(text || "request failed");
+      throw new Error(text || "request_failed");
     }
 
     return await res.json();
@@ -80,13 +90,12 @@ async function refreshCustomerStatus() {
   try {
     const profile = await liff.getProfile();
 
-    // 🔧 FIX: ห้าม forceAnon หลัง login แล้ว
     const status = await callFn("check_line_status", {
       line_user_id: profile.userId,
     });
 
-    // 🔧 FIX: รับ JWT ใหม่ทุกครั้ง
-    if (status.access_token) {
+    // 🔑 FIX: ใช้ token จาก backend เฉพาะตอนที่ยังไม่มี
+    if (!ACCESS_TOKEN && status.access_token) {
       ACCESS_TOKEN = status.access_token;
     }
 
