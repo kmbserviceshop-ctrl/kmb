@@ -28,8 +28,15 @@ async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
 
-  let token = options.forceAnon ? SUPABASE_ANON_KEY : ACCESS_TOKEN;
+  let token;
 
+  if (options.forceAnon) {
+    token = SUPABASE_ANON_KEY;
+  } else {
+    token = ACCESS_TOKEN;
+  }
+
+  // 🔒 FIX สำคัญ: หลัง login แล้ว ห้าม fallback เป็น anon
   if (!token) {
     clearTimeout(timer);
     throw new Error("missing_access_token");
@@ -52,11 +59,15 @@ async function callFn(path, payload, options = {}) {
     }
 
     return await res.json();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+    }
+    throw err;
   } finally {
     clearTimeout(timer);
   }
 }
-
 
 function setButtonLoading(btn, text) {
   btn.classList.add("loading");
@@ -131,34 +142,76 @@ async function refreshCustomerStatus() {
 INIT
 ========================= */
 async function init() {
-  await liff.init({ liffId: LIFF_ID });
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const entry = params.get("entry");
 
-  if (!liff.isLoggedIn()) {
-    liff.login();
-    return;
+    if (MAINTENANCE_MODE) {
+      showMaintenancePage();
+      return;
+    }
+
+    await liff.init({ liffId: LIFF_ID });
+
+    if (!liff.isInClient()) {
+      showGuestForm();
+      return;
+    }
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    const profile = await liff.getProfile();
+
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
+
+    // 🔧 FIX: รับ token ตอน init
+    if (status.access_token) {
+      ACCESS_TOKEN = status.access_token;
+    }
+
+    if (status.status === "revoked") {
+      showAlertModal(
+        "ไม่สามารถใช้งานได้",
+        "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
+        () => liff.closeWindow()
+      );
+      return;
+    }
+
+    if (status.status === "guest") {
+      showGuestForm();
+      return;
+    }
+
+    CURRENT_CUSTOMER = status.customer;
+
+    const {
+      consent_status,
+      consent_version,
+      current_consent_version,
+    } = CURRENT_CUSTOMER || {};
+
+    const needConsent =
+      consent_status !== "accepted" ||
+      consent_version !== current_consent_version;
+
+    if (needConsent) {
+      showConsentPage();
+      return;
+    }
+
+    showMemberMenu(CURRENT_CUSTOMER);
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถเริ่มระบบได้"
+    );
   }
-
-  const profile = await liff.getProfile();
-
-  const status = await callFn(
-    "check_line_status",
-    { line_user_id: profile.userId },
-    { forceAnon: true }
-  );
-
-  if (status.status === "guest") {
-    showGuestForm();
-    return;
-  }
-
-  if (status.status === "revoked") {
-    alert("คุณได้ถอนความยินยอมแล้ว");
-    liff.closeWindow();
-    return;
-  }
-
-  CURRENT_CUSTOMER = status.customer;
-  showMemberMenu(CURRENT_CUSTOMER);
 }
 
 init();
@@ -385,34 +438,63 @@ function showGuestForm() {
 }
 
 /* =========================
-VERIFY CUSTOMER (จุดเดียวที่รับ JWT)
+VERIFY CUSTOMER
 ========================= */
 async function verifyCustomer() {
   const idCard = document.getElementById("id_card").value.trim();
   const phone = document.getElementById("phone").value.trim();
+  const btn = document.getElementById("verifyBtn");
 
-  const profile = await liff.getProfile();
-
-  const res = await callFn(
-    "register_customer_with_line",
-    {
-      customer_id: idCard,
-      line_user_id: profile.userId,
-    },
-    { forceAnon: true }
-  );
-
-  if (res?.access_token) {
-    ACCESS_TOKEN = res.access_token; // ✅ JWT SET ที่เดียว
-  }
-
-  if (res?.success) {
-    alert("สมัครสมาชิกสำเร็จ");
-    liff.closeWindow();
+  if (!idCard || !phone) {
+    showAlertModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  throw new Error("register_failed");
+  setButtonLoading(btn, "กำลังตรวจสอบ");
+
+  try {
+    const result = await callFn("find_customer_for_line", {
+      id_card: idCard,
+      phone,
+    });
+
+    if (!result.found) {
+      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
+      return;
+    }
+
+    const profile = await liff.getProfile();
+
+    const res = await callFn("register_customer_with_line", {
+      customer_id: result.customer_id,
+      line_user_id: profile.userId,
+    });
+
+    // 🔑 FIX สำคัญที่สุด: รับ JWT จาก backend
+    if (res?.access_token) {
+      ACCESS_TOKEN = res.access_token;
+    }
+
+    // ✅ สมัครสำเร็จ → ปิด LIFF ทันที (ทางเลือก A)
+    if (res?.success) {
+      showAlertModal(
+        "สมัครสมาชิกสำเร็จ",
+        "ระบบได้เชื่อมต่อบัญชี LINE ของคุณเรียบร้อยแล้ว",
+        () => {
+          liff.closeWindow(); // 🚪 จบ flow อย่างถูกต้อง
+        }
+      );
+      return;
+    }
+
+    // fallback (กรณีผิดปกติ)
+    throw new Error("สมัครสมาชิกไม่สำเร็จ");
+
+  } catch (err) {
+    showAlertModal("เกิดข้อผิดพลาด", err.message || "เกิดข้อผิดพลาด");
+  } finally {
+    resetButton(btn, "ตรวจสอบข้อมูล");
+  }
 }
 
 /* =========================
