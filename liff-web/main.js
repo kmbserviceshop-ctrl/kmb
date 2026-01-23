@@ -795,7 +795,6 @@ KPOS จะไม่เปิดเผยข้อมูลส่วนบุค
 กรุณาเลื่อนอ่านให้ครบถ้วนก่อนกดยืนยัน
 </div>
 
-<!-- สถานะ 1: ยังไม่ครบ -->
 <button
   class="primary-btn"
   id="consentReadDoneBtn"
@@ -816,47 +815,39 @@ KPOS จะไม่เปิดเผยข้อมูลส่วนบุค
   const box = document.getElementById("consentScrollBox");
   const btn = document.getElementById("consentReadDoneBtn");
 
-  // ✅ reset ปุ่มให้กลับเป็นสถานะ 1 เสมอ
   resetButton(btn, "อ่านและเข้าใจแล้ว");
   btn.disabled = true;
 
-  let scrolledToEnd = false; // reset ใหม่ทุกครั้ง
+  let scrolledToEnd = false;
 
-  // ✅ ต้องเลื่อนถึงท้าย
   box.addEventListener("scroll", () => {
     const nearBottom =
       box.scrollTop + box.clientHeight >= box.scrollHeight - 5;
 
     if (nearBottom) {
       scrolledToEnd = true;
-
-      // สถานะ 2: พร้อมกด
       if (READ_TIMER_PASSED) {
         btn.disabled = false;
       }
     }
   });
 
-  // ⏱️ เวลาอ่านขั้นต่ำ 10 วินาที
   setTimeout(() => {
     READ_TIMER_PASSED = true;
-
     if (scrolledToEnd) {
-      btn.disabled = false; // สถานะ 2
+      btn.disabled = false;
     }
   }, 3000);
 
   btn.onclick = () => {
-    // safety guard
     if (!READ_TIMER_PASSED || !scrolledToEnd) return;
 
-    // 🔄 สถานะ 3: กำลังทำงาน
     setButtonLoading(btn, "กำลังบันทึก");
     btn.disabled = true;
 
     setTimeout(() => {
-      // ✅ ยืนยันว่าอ่านแล้ว
       HAS_READ_PDPA = true;
+      FROM_PDPA_READ = true; // ✅ จุดที่เพิ่ม (สำคัญที่สุด)
 
       const checkbox =
         document.getElementById("consentCheck") ||
@@ -898,9 +889,9 @@ async function acceptConsent() {
     });
 
     // 🔥 FIX สำคัญมาก: set JWT ใหม่
-    if (res?.access_token) {
-      ACCESS_TOKEN = res.access_token;
-    }
+    //if (res?.access_token) {
+      //ACCESS_TOKEN = res.access_token;
+    //}
 
     showAlertModal(
       "ขอบคุณ",
