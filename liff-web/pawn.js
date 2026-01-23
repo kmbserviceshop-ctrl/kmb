@@ -155,29 +155,20 @@ function openPawnPaymentByIndex(index) {
   openPawnPayment(bill);
 }
 
-function openPawnPayment(bill) {
-  // ✅ GUARD: ต้องเคยเปิดแชท LINE ก่อน
-  if (!CURRENT_CUSTOMER?.line_user_id) {
+async function openPawnPayment(bill) {
+  // ✅ เช็คจาก LINE จริง (source of truth)
+  const profile = await liff.getProfile();
+
+  if (!profile?.userId) {
     showAlertModal(
       "ยังไม่ได้เปิดใช้งาน LINE แจ้งเตือน",
-      "กรุณากดปุ่มด้านล่างเพื่อเปิดแชท LINE King Mobile\nและพิมพ์ข้อความใดก็ได้ 1 ครั้ง\n\nจากนั้นกลับมาที่หน้านี้แล้วกดอีกครั้ง",
-      async () => {
-        // 1️⃣ เปิด LINE OA
-        window.open("https://lin.ee/NiAqiM9", "_blank");
-
-        // 2️⃣ รอ user กลับมา → sync สถานะใหม่
-        // (ไม่ reload, ไม่พัง session)
-        setTimeout(async () => {
-          try {
-            await refreshCustomerStatus();
-          } catch (e) {
-            console.warn("refreshCustomerStatus failed", e);
-          }
-        }, 1500);
-      }
+      "กรุณาเปิดแชท LINE King Mobile และพิมพ์ข้อความ 1 ครั้ง"
     );
     return;
   }
+
+  // 🔁 sync state ล่าสุด (กรณีเพิ่ง bind)
+  await refreshCustomerStatus();
 
   // ⬇️ โค้ดเดิมของคุณ (ไม่แตะ)
   openKposPayment({
