@@ -892,23 +892,22 @@ async function acceptConsent() {
   try {
     const profile = await liff.getProfile();
 
-    await callFn("accept_consent", {
+    // ✅ รับ response
+    const res = await callFn("accept_consent", {
       line_user_id: profile.userId,
     });
+
+    // 🔥 FIX สำคัญมาก: set JWT ใหม่
+    if (res?.access_token) {
+      ACCESS_TOKEN = res.access_token;
+    }
 
     showAlertModal(
       "ขอบคุณ",
       "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
       () => {
+        // 🔁 sync state ใหม่
         refreshCustomerStatus();
-
-        // 🔧 FIX: กัน LIFF cache
-        setTimeout(() => {
-          liff.openWindow({
-            url: window.location.origin,
-            external: false,
-          });
-        }, 100);
       }
     );
   } catch (err) {
