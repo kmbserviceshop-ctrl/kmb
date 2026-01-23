@@ -162,7 +162,7 @@ function openPawnPayment(bill) {
       "ยังไม่ได้เปิดใช้งาน LINE แจ้งเตือน",
       "กรุณากดปุ่มด้านล่างเพื่อเปิดแชท LINE King Mobile\nและพิมพ์ข้อความใดก็ได้ 1 ครั้ง",
       () => {
-        window.open("https://line.me/R/ti/p/@kingmobile", "_blank");
+        window.open("https://lin.ee/NiAqiM9", "_blank");
       }
     );
     return;
