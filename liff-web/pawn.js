@@ -14,16 +14,15 @@ PAWN MODULE
 // maskLast6
 // openKposPayment
 // SUPABASE_ANON_KEY
-
 /* =========================
 MENU : MY PAWN BILLS
 ========================= */
 async function openMyBills(btn) {
-  // ✅ FIX 1: guard JWT ก่อน
-  if (!ACCESS_TOKEN) {
+  // ✅ FIX: ไม่ต้องเช็ค ACCESS_TOKEN
+  if (!CURRENT_CUSTOMER?.customer_id) {
     showAlertModal(
-      "กำลังตรวจสอบตัวตน",
-      "กรุณารอสักครู่ ระบบกำลังยืนยันข้อมูลผู้ใช้งาน"
+      "ไม่พบข้อมูลผู้ใช้",
+      "กรุณาปิดแล้วเปิดใหม่จาก LINE อีกครั้ง"
     );
     return;
   }
@@ -36,9 +35,9 @@ async function openMyBills(btn) {
     const res = await callFn(
       "get_my_pawn_bills",
       {
-        // ✅ FIX 2: ใช้ field ที่ถูก
         customer_id: CURRENT_CUSTOMER.customer_id,
-      }
+      },
+      { forceAnon: true } // 🔒 ใช้ anon เท่านั้น
     );
 
     const bills = res.bills || [];
