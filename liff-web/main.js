@@ -456,19 +456,27 @@ async function verifyCustomer() {
 
     const profile = await liff.getProfile();
 
-    await callFn("register_customer_with_line", {
+    const res = await callFn("register_customer_with_line", {
       customer_id: result.customer_id,
       line_user_id: profile.userId,
     });
 
-    // 🔧 FIX: หลัง bind → re-sync จาก backend
-    showAlertModal(
-      "เชื่อมต่อสำเร็จ",
-      "กรุณาอ่านและให้ความยินยอมก่อนใช้งาน",
-      async () => {
-        await refreshCustomerStatus();
-      }
-    );
+    // ✅ ทางเลือก A (แนะนำที่สุด)
+    // สมัครสำเร็จ = ปิด LIFF ทันที
+    if (res?.success) {
+      showAlertModal(
+        "สมัครสมาชิกสำเร็จ",
+        "ระบบได้เชื่อมต่อบัญชี LINE ของคุณเรียบร้อยแล้ว",
+        () => {
+          liff.closeWindow(); // 🚪 จบ flow
+        }
+      );
+      return;
+    }
+
+    // fallback (กรณี backend ไม่ส่ง success มา)
+    throw new Error("สมัครสมาชิกไม่สำเร็จ");
+
   } catch (err) {
     showAlertModal("เกิดข้อผิดพลาด", err.message);
   } finally {
