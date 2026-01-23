@@ -30,7 +30,7 @@ async function openMyBills(btn) {
         //customer_id: CURRENT_CUSTOMER.customer_id,
         customer_id: CURRENT_CUSTOMER.id,
       },
-      { forceAnon: true } // ✅ FIX สำคัญมาก
+      //{ forceAnon: true } // ✅ FIX สำคัญมาก
     );
 
     const bills = res.bills || [];
