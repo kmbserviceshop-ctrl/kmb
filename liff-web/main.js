@@ -28,11 +28,9 @@ async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
 
-  // ✅ A.3 FIX: เลือก token อัตโนมัติ
-  const token =
-    options.forceAnon
-      ? SUPABASE_ANON_KEY
-      : ACCESS_TOKEN || SUPABASE_ANON_KEY;
+  const token = options.forceAnon
+    ? SUPABASE_ANON_KEY
+    : ACCESS_TOKEN || SUPABASE_ANON_KEY;
 
   try {
     const res = await fetch(`${FN_BASE}/${path}`, {
@@ -51,7 +49,6 @@ async function callFn(path, payload, options = {}) {
     }
 
     return await res.json();
-
   } catch (err) {
     if (err.name === "AbortError") {
       throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
@@ -77,19 +74,22 @@ function resetButton(btn, text) {
 
 /* =========================
 REFRESH CUSTOMER STATUS
-ใช้หลัง acceptConsent เท่านั้น
+ใช้หลัง bind / acceptConsent
 ========================= */
 async function refreshCustomerStatus() {
   try {
     const profile = await liff.getProfile();
 
-    const status = await callFn(
-  "check_line_status",
-  { line_user_id: profile.userId },
-  { forceAnon: true } // ✅ บังคับชัดเจน
-);
+    // 🔧 FIX: ห้าม forceAnon หลัง login แล้ว
+    const status = await callFn("check_line_status", {
+      line_user_id: profile.userId,
+    });
 
-    // ❌ ถ้า somehow กลายเป็น guest
+    // 🔧 FIX: รับ JWT ใหม่ทุกครั้ง
+    if (status.access_token) {
+      ACCESS_TOKEN = status.access_token;
+    }
+
     if (status.status !== "member") {
       showGuestForm();
       return;
@@ -101,9 +101,8 @@ async function refreshCustomerStatus() {
       consent_status,
       consent_version,
       current_consent_version,
-    } = status.customer || {};
+    } = CURRENT_CUSTOMER || {};
 
-    // 🔴 ถอนความยินยอม
     if (consent_status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
@@ -113,7 +112,6 @@ async function refreshCustomerStatus() {
       return;
     }
 
-    // 🟡 ยังไม่ยอมรับ / version ใหม่
     const needConsent =
       consent_status !== "accepted" ||
       consent_version !== current_consent_version;
@@ -124,7 +122,6 @@ async function refreshCustomerStatus() {
     }
 
     showMemberMenu(CURRENT_CUSTOMER);
-
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
@@ -132,13 +129,11 @@ async function refreshCustomerStatus() {
     );
   }
 }
-
 /* =========================
 INIT
 ========================= */
 async function init() {
   try {
-    // ✅ 1. ตรวจ entry จาก URL ก่อน
     const params = new URLSearchParams(window.location.search);
     const entry = params.get("entry");
 
@@ -147,27 +142,10 @@ async function init() {
       return;
     }
 
-    if (entry === "topup") {
-      ENTRY_CONTEXT = "member";
-    }
-
     await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isInClient()) {
-      if (entry === "topup") {
-        openTopupHomePage();
-        return;
-      }
-
-      renderCard(`
-        <div class="section-card">
-          <h3>⚠️ Debug Mode</h3>
-          <p>ไม่ได้เปิดจาก LINE</p>
-          <button class="primary-btn" onclick="showGuestForm()">
-            เข้าโหมดทดสอบ
-          </button>
-        </div>
-      `);
+      showGuestForm();
       return;
     }
 
@@ -182,14 +160,11 @@ async function init() {
       line_user_id: profile.userId,
     });
 
-    // ✅ A.2 FIX: รับ JWT จาก backend
+    // 🔧 FIX: รับ token ตอน init
     if (status.access_token) {
       ACCESS_TOKEN = status.access_token;
     }
 
-    /* =========================
-       REVOKED
-    ========================= */
     if (status.status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
@@ -199,29 +174,18 @@ async function init() {
       return;
     }
 
-    /* =========================
-       GUEST
-    ========================= */
     if (status.status === "guest") {
-      if (entry === "topup") {
-        openTopupHomePage();
-        return;
-      }
-
       showGuestForm();
       return;
     }
 
-    /* =========================
-       MEMBER
-    ========================= */
     CURRENT_CUSTOMER = status.customer;
 
     const {
       consent_status,
       consent_version,
       current_consent_version,
-    } = status.customer || {};
+    } = CURRENT_CUSTOMER || {};
 
     const needConsent =
       consent_status !== "accepted" ||
@@ -232,13 +196,7 @@ async function init() {
       return;
     }
 
-    if (entry === "topup") {
-      openTopupHomePage();
-      return;
-    }
-
     showMemberMenu(CURRENT_CUSTOMER);
-
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
@@ -473,91 +431,44 @@ function showGuestForm() {
 /* =========================
 VERIFY CUSTOMER
 ========================= */
-
 async function verifyCustomer() {
   const idCard = document.getElementById("id_card").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const btn = document.getElementById("verifyBtn");
-
-  const consentCheckbox =
-    document.getElementById("consentCheck") ||
-    document.getElementById("acceptTerms");
-
-  // 🔒 guard: ต้องอ่าน + ยอมรับเงื่อนไขก่อน
-  if (!HAS_READ_PDPA || !consentCheckbox || !consentCheckbox.checked) {
-    showAlertModal(
-      "กรุณาอ่านและยอมรับเงื่อนไข",
-      "กรุณากดอ่านนโยบายความเป็นส่วนตัวและให้ความยินยอมก่อนดำเนินการ"
-    );
-    return;
-  }
 
   if (!idCard || !phone) {
     showAlertModal("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  if (!/^\d{10}$/.test(phone)) {
-    showAlertModal("เบอร์โทรไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
-    return;
-  }
-
   setButtonLoading(btn, "กำลังตรวจสอบ");
 
   try {
-    // 1️⃣ ตรวจสอบลูกค้า
     const result = await callFn("find_customer_for_line", {
       id_card: idCard,
       phone,
     });
 
     if (!result.found) {
-      showAlertModal(
-        "ไม่พบข้อมูล",
-        "ไม่พบข้อมูลที่สามารถเชื่อมต่อกับ KPOS Connect ได้ กรุณาติดต่อร้านก่อนใช้งาน"
-      );
+      showAlertModal("ไม่พบข้อมูล", "ไม่พบข้อมูลลูกค้า");
       return;
     }
 
-    if (result.status !== "active") {
-      showAlertModal(
-        "ไม่สามารถเชื่อมต่อได้",
-        result.message || "สถานะลูกค้าไม่พร้อมใช้งาน"
-      );
-      return;
-    }
-
-    // 2️⃣ ผูก LINE
     const profile = await liff.getProfile();
-    const bind = await callFn("register_customer_with_line", {
+
+    await callFn("register_customer_with_line", {
       customer_id: result.customer_id,
       line_user_id: profile.userId,
     });
 
-    if (!bind.success) {
-      showAlertModal(
-        "ไม่สำเร็จ",
-        "ไม่สามารถเชื่อมต่อบัญชีได้ กรุณาติดต่อร้านค้า"
-      );
-      return;
-    }
-
-    // 3️⃣ set customer ชั่วคราว
-    CURRENT_CUSTOMER = {
-      customer_id: result.customer_id,
-      name: result.name,
-      phone: phone,
-      consent_status: "pending",
-    };
-
-    // 4️⃣ หลังผูกสำเร็จ → ไปหน้า PDPA (บังคับยอมรับ)
+    // 🔧 FIX: หลัง bind → re-sync จาก backend
     showAlertModal(
-  "เชื่อมต่อสำเร็จ",
-  "กรุณาอ่านและให้ความยินยอมในการใช้ข้อมูลส่วนบุคคลก่อนใช้งาน",
-  () => showConsentPage()
-);
-  
-
+      "เชื่อมต่อสำเร็จ",
+      "กรุณาอ่านและให้ความยินยอมก่อนใช้งาน",
+      async () => {
+        await refreshCustomerStatus();
+      }
+    );
   } catch (err) {
     showAlertModal("เกิดข้อผิดพลาด", err.message);
   } finally {
@@ -968,23 +879,11 @@ KPOS จะไม่เปิดเผยข้อมูลส่วนบุค
 }
 
 /* =========================
-PDPA CONSENT ACTIONS
+PDPA CONSENT
 ========================= */
-
 async function acceptConsent() {
   const btn = document.getElementById("consentAcceptBtn");
-  const checkbox = document.getElementById("consentCheck");
 
-  // 🔒 GUARD: ต้องอ่าน + ต้องติ๊กก่อน
-  if (!checkbox || !checkbox.checked || !HAS_READ_PDPA) {
-    showAlertModal(
-      "ไม่สามารถดำเนินการได้",
-      "กรุณาอ่านนโยบายความเป็นส่วนตัวให้ครบถ้วน\nและให้ความยินยอมก่อนใช้งาน"
-    );
-    return;
-  }
-
-  // 🔄 UX: loading + lock (มาตรฐานเดียวกับทั้งแอพ)
   if (btn) {
     setButtonLoading(btn, "กำลังบันทึก");
     btn.disabled = true;
@@ -993,38 +892,37 @@ async function acceptConsent() {
   try {
     const profile = await liff.getProfile();
 
-    // 1️⃣ บันทึก consent ที่ backend
     await callFn("accept_consent", {
       line_user_id: profile.userId,
     });
 
-    // 2️⃣ ⭐ update state ฝั่ง frontend ทันที
-    CURRENT_CUSTOMER = {
-      ...CURRENT_CUSTOMER,
-      consent_status: "accepted",
-      consent_version: CURRENT_CUSTOMER.current_consent_version,
-    };
-
-    // 3️⃣ แจ้งผล + refresh สถานะ
     showAlertModal(
       "ขอบคุณ",
       "คุณได้ให้ความยินยอมเรียบร้อยแล้ว",
-      () => refreshCustomerStatus()
-    );
+      () => {
+        refreshCustomerStatus();
 
+        // 🔧 FIX: กัน LIFF cache
+        setTimeout(() => {
+          liff.openWindow({
+            url: window.location.origin,
+            external: false,
+          });
+        }, 100);
+      }
+    );
   } catch (err) {
-    // ❌ error → แจ้ง + คืนปุ่ม
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถบันทึกความยินยอมได้"
     );
-
     if (btn) {
       resetButton(btn, "ยินยอมและใช้งานต่อ");
       btn.disabled = false;
     }
   }
 }
+
 function declineConsent() {
   showAlertModal(
     "ไม่สามารถใช้งานได้",
