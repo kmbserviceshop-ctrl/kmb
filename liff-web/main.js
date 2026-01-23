@@ -823,19 +823,9 @@ async function loadNotificationSettings() {
   CURRENT_CUSTOMER.notify_due = !!res.notify_due;
   CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
 }
-async function openNotificationSettings() {
-  try {
-    await loadNotificationSettings();
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้"
-    );
-    return;
-  }
-
-  const notifyDue = CURRENT_CUSTOMER.notify_due;
-  const notifyTxn = CURRENT_CUSTOMER.notify_transaction;
+function openNotificationSettings() {
+  const notifyDue = CURRENT_CUSTOMER.notify_due === true;
+  const notifyTxn = CURRENT_CUSTOMER.notify_transaction === true;
 
   renderCard(`
 <div class="top-bar">
@@ -845,44 +835,69 @@ async function openNotificationSettings() {
 
 <div class="section-card">
 
-  <div class="settings-item">
-    <div class="settings-text">
-      🔔 เตือนก่อนครบชำระ
-      <div style="font-size:12px;color:#6b7280">
-        แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
-      </div>
+<div class="settings-item">
+  <div class="settings-text">
+    🔔 เตือนก่อนครบชำระ
+    <div style="font-size:12px;color:#6b7280">
+      แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
     </div>
-    <label class="switch">
-      <input
-        type="checkbox"
-        ${notifyDue ? "checked" : ""}
-        onchange="toggleNotification('notify_due', this.checked, this)"
-      />
-      <span class="slider"></span>
-    </label>
   </div>
+  <label class="switch">
+    <input type="checkbox"
+      ${notifyDue ? "checked" : ""}
+      onchange="toggleNotification('notify_due', this.checked, this)">
+    <span class="slider"></span>
+  </label>
+</div>
 
-  <div class="settings-divider"></div>
+<div class="settings-divider"></div>
 
-  <div class="settings-item">
-    <div class="settings-text">
-      🧾 เตือนเมื่อทำรายการ
-      <div style="font-size:12px;color:#6b7280">
-        แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
-      </div>
+<div class="settings-item">
+  <div class="settings-text">
+    🧾 เตือนเมื่อทำรายการ
+    <div style="font-size:12px;color:#6b7280">
+      แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
     </div>
-    <label class="switch">
-      <input
-        type="checkbox"
-        ${notifyTxn ? "checked" : ""}
-        onchange="toggleNotification('notify_transaction', this.checked, this)"
-      />
-      <span class="slider"></span>
-    </label>
   </div>
+  <label class="switch">
+    <input type="checkbox"
+      ${notifyTxn ? "checked" : ""}
+      onchange="toggleNotification('notify_transaction', this.checked, this)">
+    <span class="slider"></span>
+  </label>
+</div>
 
 </div>
 `);
+}
+
+async function toggleNotification(type, enabled, checkboxEl) {
+  checkboxEl.disabled = true;
+
+  try {
+    await callFn("update_notification_settings", {
+      type,
+      enabled,
+    });
+
+    // sync state
+    CURRENT_CUSTOMER[type] = enabled;
+
+    showAlertModal(
+      "บันทึกสำเร็จ",
+      enabled
+        ? "เปิดการแจ้งเตือนเรียบร้อยแล้ว"
+        : "ปิดการแจ้งเตือนเรียบร้อยแล้ว"
+    );
+  } catch (err) {
+    checkboxEl.checked = !enabled;
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถบันทึกการตั้งค่าได้"
+    );
+  } finally {
+    checkboxEl.disabled = false;
+  }
 }
 async function toggleNotification(type, enabled, checkboxEl) {
   checkboxEl.disabled = true;
