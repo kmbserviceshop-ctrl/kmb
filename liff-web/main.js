@@ -28,12 +28,12 @@ async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
 
-  const token = options.forceAnon
-    ? SUPABASE_ANON_KEY
-    : ACCESS_TOKEN || SUPABASE_ANON_KEY;
+  async function doFetch() {
+    const token = options.forceAnon
+      ? SUPABASE_ANON_KEY
+      : (ACCESS_TOKEN || SUPABASE_ANON_KEY);
 
-  try {
-    const res = await fetch(`${FN_BASE}/${path}`, {
+    return fetch(`${FN_BASE}/${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,6 +42,17 @@ async function callFn(path, payload, options = {}) {
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+  }
+
+  try {
+    let res = await doFetch();
+
+    // 🔥 จุดแก้จริง
+    if (res.status === 401 && !options.forceAnon) {
+      // token หมด → refresh แล้วลองใหม่ 1 ครั้ง
+      await refreshCustomerStatus();
+      res = await doFetch();
+    }
 
     if (!res.ok) {
       const text = await res.text();
