@@ -19,6 +19,15 @@ PAWN MODULE
 MENU : MY PAWN BILLS
 ========================= */
 async function openMyBills(btn) {
+  // ✅ FIX 1: guard JWT ก่อน
+  if (!ACCESS_TOKEN) {
+    showAlertModal(
+      "กำลังตรวจสอบตัวตน",
+      "กรุณารอสักครู่ ระบบกำลังยืนยันข้อมูลผู้ใช้งาน"
+    );
+    return;
+  }
+
   if (btn) {
     setButtonLoading(btn, "กำลังโหลด");
   }
@@ -27,10 +36,9 @@ async function openMyBills(btn) {
     const res = await callFn(
       "get_my_pawn_bills",
       {
-        //customer_id: CURRENT_CUSTOMER.customer_id,
-        customer_id: CURRENT_CUSTOMER.id,
-      },
-      //{ forceAnon: true } // ✅ FIX สำคัญมาก
+        // ✅ FIX 2: ใช้ field ที่ถูก
+        customer_id: CURRENT_CUSTOMER.customer_id,
+      }
     );
 
     const bills = res.bills || [];
@@ -57,7 +65,8 @@ async function openMyBills(btn) {
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถโหลดบิลได้"
     );
-    resetButton(btn, "📄 บิลของฉัน");
+  } finally {
+    if (btn) resetButton(btn, "📄 บิลของฉัน");
   }
 }
 
