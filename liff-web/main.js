@@ -810,9 +810,32 @@ onclick="openNotificationSettings()">
   `);
 }
 
-function openNotificationSettings() {
-  const notifyDue = CURRENT_CUSTOMER?.notify_due ?? true;
-  const notifyTxn = CURRENT_CUSTOMER?.notify_transaction ?? true;
+async function loadNotificationSettings() {
+  const res = await callFn(
+    "get_notification_settings",
+    {},
+    { forceAnon: true }
+  );
+
+  // backend ต้องส่งมาแบบนี้
+  // { notify_due: true, notify_transaction: false }
+
+  CURRENT_CUSTOMER.notify_due = !!res.notify_due;
+  CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
+}
+async function openNotificationSettings() {
+  try {
+    await loadNotificationSettings();
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้"
+    );
+    return;
+  }
+
+  const notifyDue = CURRENT_CUSTOMER.notify_due;
+  const notifyTxn = CURRENT_CUSTOMER.notify_transaction;
 
   renderCard(`
 <div class="top-bar">
@@ -822,37 +845,41 @@ function openNotificationSettings() {
 
 <div class="section-card">
 
-<div class="settings-item">
-  <div class="settings-text">
-    🔔 เตือนก่อนครบชำระ
-    <div style="font-size:12px;color:#6b7280">
-      แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
+  <div class="settings-item">
+    <div class="settings-text">
+      🔔 เตือนก่อนครบชำระ
+      <div style="font-size:12px;color:#6b7280">
+        แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
+      </div>
     </div>
+    <label class="switch">
+      <input
+        type="checkbox"
+        ${notifyDue ? "checked" : ""}
+        onchange="toggleNotification('notify_due', this.checked, this)"
+      />
+      <span class="slider"></span>
+    </label>
   </div>
-  <label class="switch">
-    <input type="checkbox"
-      ${notifyDue ? "checked" : ""}
-      onchange="toggleNotification('notify_due', this.checked, this)">
-    <span class="slider"></span>
-  </label>
-</div>
 
-<div class="settings-divider"></div>
+  <div class="settings-divider"></div>
 
-<div class="settings-item">
-  <div class="settings-text">
-    🧾 เตือนเมื่อทำรายการ
-    <div style="font-size:12px;color:#6b7280">
-      แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
+  <div class="settings-item">
+    <div class="settings-text">
+      🧾 เตือนเมื่อทำรายการ
+      <div style="font-size:12px;color:#6b7280">
+        แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
+      </div>
     </div>
+    <label class="switch">
+      <input
+        type="checkbox"
+        ${notifyTxn ? "checked" : ""}
+        onchange="toggleNotification('notify_transaction', this.checked, this)"
+      />
+      <span class="slider"></span>
+    </label>
   </div>
-  <label class="switch">
-    <input type="checkbox"
-      ${notifyTxn ? "checked" : ""}
-      onchange="toggleNotification('notify_transaction', this.checked, this)">
-    <span class="slider"></span>
-  </label>
-</div>
 
 </div>
 `);
@@ -861,23 +888,21 @@ async function toggleNotification(type, enabled, checkboxEl) {
   checkboxEl.disabled = true;
 
   try {
-    await callFn("update_notification_settings", {
-      type,
-      enabled,
-    });
-
-    // update state local
-    CURRENT_CUSTOMER[type] = enabled;
-
-    showAlertModal(
-      "บันทึกสำเร็จ",
-      enabled
-        ? "ระบบได้เปิดการแจ้งเตือนเรียบร้อยแล้ว"
-        : "ระบบได้ปิดการแจ้งเตือนเรียบร้อยแล้ว"
+    await callFn(
+      "update_notification_settings",
+      {
+        type,
+        enabled,
+        line_user_id: CURRENT_CUSTOMER.line_user_id,
+      },
+      { forceAnon: true }
     );
 
+    // ✅ sync state จาก backend
+    CURRENT_CUSTOMER[type] = enabled;
+
   } catch (err) {
-    // rollback
+    // ❌ rollback UI
     checkboxEl.checked = !enabled;
 
     showAlertModal(
