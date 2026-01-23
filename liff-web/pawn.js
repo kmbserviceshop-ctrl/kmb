@@ -155,22 +155,7 @@ function openPawnPaymentByIndex(index) {
   openPawnPayment(bill);
 }
 
-async function openPawnPayment(bill) {
-  // ✅ เช็คจาก LINE จริง (source of truth)
-  const profile = await liff.getProfile();
-
-  if (!profile?.userId) {
-    showAlertModal(
-      "ยังไม่ได้เปิดใช้งาน LINE แจ้งเตือน",
-      "กรุณาเปิดแชท LINE King Mobile และพิมพ์ข้อความ 1 ครั้ง"
-    );
-    return;
-  }
-
-  // 🔁 sync state ล่าสุด (กรณีเพิ่ง bind)
-  await refreshCustomerStatus();
-
-  // ⬇️ โค้ดเดิมของคุณ (ไม่แตะ)
+function openPawnPayment(bill) {
   openKposPayment({
     service: "pawn_interest",
     reference_id: bill.id,
