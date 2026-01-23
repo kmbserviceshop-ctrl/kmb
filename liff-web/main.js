@@ -22,7 +22,65 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdib29jcmtnb3JzbG53bnVocWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzYzMTUsImV4cCI6MjA4MzUxMjMxNX0.egN-N-dckBh8mCbY08UbGPScWv6lYpPCxodStO-oeTQ";
 
 /* =========================
-HELPER : API CALL
+ERROR MESSAGES (GLOBAL)
+========================= */
+const ERROR_MESSAGES = {
+  // 🔐 Auth / LINE / Session
+  missing_line_user_id: "ไม่พบข้อมูลผู้ใช้ LINE",
+  auth_user_missing: "ไม่พบข้อมูลบัญชีผู้ใช้",
+  auth_user_invalid: "บัญชีผู้ใช้ไม่ถูกต้อง กรุณาติดต่อร้าน",
+  cannot_generate_magiclink: "ไม่สามารถยืนยันตัวตนได้",
+  cannot_issue_access_token: "ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่",
+  session_expired: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่",
+
+  // 👤 Customer
+  missing_parameters: "ข้อมูลไม่ครบถ้วน",
+  customer_not_found: "ไม่พบข้อมูลลูกค้า",
+  customer_not_active: "บัญชีลูกค้าถูกระงับการใช้งาน",
+  customer_already_linked: "ลูกค้ารายนี้ถูกผูกบัญชีแล้ว",
+  line_already_linked: "บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว",
+  organization_id_missing: "ข้อมูลร้านค้าไม่สมบูรณ์ กรุณาติดต่อร้าน",
+
+  // 📝 Consent / PDPA
+  consent_required: "กรุณาให้ความยินยอมก่อนใช้งาน",
+  consent_revoked: "คุณได้ถอนความยินยอมแล้ว ไม่สามารถใช้งานระบบได้",
+  consent_version_mismatch: "ต้องยืนยันนโยบายเวอร์ชันใหม่ก่อนใช้งาน",
+  accept_consent_failed: "ไม่สามารถบันทึกความยินยอมได้",
+
+  // 🌐 Network / API
+  request_timeout: "การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่",
+  network_error: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
+  unauthorized: "กรุณาเข้าสู่ระบบใหม่",
+  forbidden: "คุณไม่มีสิทธิ์ใช้งานส่วนนี้",
+
+  // ⚙️ System
+  internal_error: "ระบบขัดข้อง กรุณาลองใหม่ภายหลัง",
+  service_unavailable: "ระบบไม่พร้อมใช้งานชั่วคราว",
+  unknown_error: "เกิดข้อผิดพลาด กรุณาลองใหม่",
+};
+function translateError(err) {
+  if (!err) return ERROR_MESSAGES.unknown_error;
+
+  // กรณี backend ส่ง JSON: { error: "some_code" }
+  try {
+    const parsed = JSON.parse(err.message);
+    if (parsed?.error && ERROR_MESSAGES[parsed.error]) {
+      return ERROR_MESSAGES[parsed.error];
+    }
+  } catch (_) {
+    // ไม่ใช่ JSON → ข้าม
+  }
+
+  // กรณี error เป็น code ตรง ๆ
+  if (ERROR_MESSAGES[err.message]) {
+    return ERROR_MESSAGES[err.message];
+  }
+
+  return ERROR_MESSAGES.unknown_error;
+}
+
+/* =========================
+HELPER : API CALL (FULL)
 ========================= */
 async function callFn(path, payload, options = {}) {
   const controller = new AbortController();
@@ -47,29 +105,33 @@ async function callFn(path, payload, options = {}) {
   try {
     let res = await doFetch();
 
-    // 🔥 จุดแก้จริง
+    // 🔁 token หมด → refresh แล้วลองใหม่ 1 ครั้ง
     if (res.status === 401 && !options.forceAnon) {
-      // token หมด → refresh แล้วลองใหม่ 1 ครั้ง
       await refreshCustomerStatus();
       res = await doFetch();
     }
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(text || "request failed");
+      // ส่งต่อ error ดิบเข้า translateError
+      throw new Error(text || "internal_error");
     }
 
     return await res.json();
+
   } catch (err) {
+    // ⏱ timeout
     if (err.name === "AbortError") {
-      throw new Error("เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      throw new Error(ERROR_MESSAGES.request_timeout);
     }
-    throw err;
+
+    const message = translateError(err);
+    throw new Error(message);
+
   } finally {
     clearTimeout(timer);
   }
 }
-
 function setButtonLoading(btn, text) {
   btn.classList.add("loading");
   btn.innerHTML = `
