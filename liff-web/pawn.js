@@ -156,6 +156,19 @@ function openPawnPaymentByIndex(index) {
 }
 
 function openPawnPayment(bill) {
+  // ✅ GUARD: ต้องเคยเปิดแชท LINE ก่อน
+  if (!CURRENT_CUSTOMER?.line_user_id) {
+    showAlertModal(
+      "ยังไม่ได้เปิดใช้งาน LINE แจ้งเตือน",
+      "กรุณากดปุ่มด้านล่างเพื่อเปิดแชท LINE King Mobile\nและพิมพ์ข้อความใดก็ได้ 1 ครั้ง",
+      () => {
+        window.open("https://line.me/R/ti/p/@kingmobile", "_blank");
+      }
+    );
+    return;
+  }
+
+  // ⬇️ โค้ดเดิมของคุณ (ไม่เปลี่ยน)
   openKposPayment({
     service: "pawn_interest",
     reference_id: bill.id,
