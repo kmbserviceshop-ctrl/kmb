@@ -27,7 +27,8 @@ async function openMyBills(btn) {
     const res = await callFn(
       "get_my_pawn_bills",
       {
-        customer_id: CURRENT_CUSTOMER.customer_id,
+        //customer_id: CURRENT_CUSTOMER.customer_id,
+        customer_id: CURRENT_CUSTOMER.id,
       },
       { forceAnon: true } // ✅ FIX สำคัญมาก
     );
