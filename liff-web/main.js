@@ -697,16 +697,12 @@ async function loadHomePayments() {
     }
 
     box.innerHTML = list.map((r) => {
-     
-      const item = r.pawn_transactions?.[0]?.pawn_items?.[0] || {};
-      const product =
-        `${item.brand || ""} ${item.model || ""}`.trim();
 
       const badge =
         r.status === "pending"
           ? `<span style="background:#fde047;color:#92400e;">รอการตรวจสอบ</span>`
           : r.status === "approved"
-          ? `<span style="background:#dcfce7;color:#166534;">ปกติ</span>`
+          ? `<span style="background:#dcfce7;color:#166534;">อนุมัติแล้ว</span>`
           : `<span style="background:#fee2e2;color:#991b1b;">ไม่ผ่าน</span>`;
 
       return `
@@ -721,9 +717,11 @@ async function loadHomePayments() {
           margin-bottom:8px;
         ">
           <div>
-            <div style="color:#6b7280;">${formatDate(r.created_at)}</div>
+            <div style="color:#6b7280;">
+              ${formatDate(r.created_at)}
+            </div>
             <div style="font-weight:600;">
-              ${r.contract_no} ${product}
+              ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
             </div>
           </div>
           <div style="
@@ -737,6 +735,7 @@ async function loadHomePayments() {
         </div>
       `;
     }).join("");
+
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
