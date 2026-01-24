@@ -256,7 +256,7 @@ async function loadMyPaymentRequests() {
     return;
   }
 
-  // loading state
+  // loading
   box.innerHTML = `
     <div style="text-align:center;color:#9ca3af;font-size:13px;">
       กำลังโหลด...
@@ -276,40 +276,39 @@ async function loadMyPaymentRequests() {
       box.innerHTML = `
         <div style="text-align:center;color:#9ca3af;font-size:13px;">
           ยังไม่มีรายการแจ้งชำระ
-        </div>`;
+        </div>
+      `;
       return;
     }
 
-    box.innerHTML = list
-      .map((r) => {
-        let badge = "";
-        if (r.status === "pending") {
-          badge = `<span class="badge badge-pending">รอการตรวจสอบ</span>`;
-        } else if (r.status === "approved") {
-          badge = `<span class="badge badge-approved">อนุมัติแล้ว</span>`;
-        } else if (r.status === "rejected") {
-          badge = `<span class="badge badge-rejected">ไม่ผ่าน</span>`;
-        } else {
-          badge = `<span class="badge">${r.status}</span>`;
-        }
+    box.innerHTML = list.map((r) => {
+      let statusText = "รอการตรวจสอบ";
+      let statusClass = "bill-status warning";
 
-        return `
-          <div class="list-item">
-            <div class="list-left">
-              <div class="list-sub">
-                ${formatDate(r.created_at)}
-              </div>
-              <div class="list-title">
-                ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
-              </div>
-            </div>
-            <div class="list-right">
-              ${badge}
-            </div>
+      if (r.status === "approved") {
+        statusText = "อนุมัติแล้ว";
+        statusClass = "bill-status";
+      }
+
+      if (r.status === "rejected") {
+        statusText = "ไม่ผ่าน";
+        statusClass = "bill-status warning";
+      }
+
+      return `
+        <div class="bill-card">
+          <div class="bill-row">
+            <div>${formatDate(r.created_at)}</div>
+            <div class="${statusClass}">${statusText}</div>
           </div>
-        `;
-      })
-      .join("");
+
+          <div class="bill-row">
+            <div>ยอดชำระ</div>
+            <div>${Number(r.amount).toLocaleString()} บาท</div>
+          </div>
+        </div>
+      `;
+    }).join("");
 
   } catch (err) {
     showAlertModal(
