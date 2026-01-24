@@ -628,7 +628,7 @@ function showMemberMenu(customer) {
     <!-- Menu Grid -->
     <div class="menu-grid">
 
-      <button class="menu-tile active" onclick="openMyBills(this)">
+      <button class="menu-tile" onclick="openMyBills(this)">
         <div class="tile-icon">📄</div>
         <div class="tile-text">บิลของฉัน</div>
       </button>
@@ -650,35 +650,33 @@ function showMemberMenu(customer) {
 
       <button class="menu-tile disabled" disabled>
         <div class="tile-icon">📱</div>
-        <div class="tile-text">มือถือ<br><small>เร็ว ๆ นี้</small></div>
+        <div class="tile-text">
+          มือถือ<br><small>เร็ว ๆ นี้</small>
+        </div>
       </button>
 
       <button class="menu-tile disabled" disabled>
         <div class="tile-icon">🎧</div>
-        <div class="tile-text">อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small></div>
+        <div class="tile-text">
+          อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small>
+        </div>
       </button>
+
     </div>
 
-    <!-- Banner -->
-    <div
-      style="
-        margin-top:18px;
-        background:#ffffff;
-        border-radius:18px;
-        padding:14px;
-        display:flex;
-        align-items:center;
-        gap:12px;
-      "
-    >
-      <div style="font-size:34px;">📱</div>
-      <div style="font-size:20px;font-weight:700;color:#7c3aed;">
-        ผ่อนง่าย<br/>จ่ายสบาย
+    <!-- รายการแจ้งชำระ -->
+    <div style="margin-top:18px;">
+      <div style="font-weight:700;margin-bottom:8px;">
+        รายการแจ้งชำระ
       </div>
+      <div id="homePaymentList"></div>
     </div>
 
   </div>
   `);
+
+  // ✅ โหลดรายการแจ้งชำระบน Home เท่านั้น
+  loadHomePayments();
 }
 async function loadHomePayments() {
   const box = document.getElementById("homePaymentList");
