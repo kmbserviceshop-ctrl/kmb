@@ -252,9 +252,9 @@ async function loadMyPaymentRequests() {
     const res = await callFn(
   "get_my_payment_requests",
   {
-    customer_id: CURRENT_CUSTOMER.customer_id,
+    customer_id: CURRENT_CUSTOMER.id, // ✅ ตัวเดียวพอ
   },
-  { forceAnon: true }
+  { forceAnon: true } 
 );
 
     const list = res.requests || [];
