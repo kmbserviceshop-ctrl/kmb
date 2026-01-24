@@ -573,10 +573,11 @@ async function loadHomePaymentRequests() {
 }
 
 /* =========================
-MEMBER MENU (HOME)
+MEMBER MENU (UI ONLY)
 ========================= */
 function showMemberMenu(customer) {
   const name = customer.name || "ลูกค้า KPOS";
+  const phone = maskPhone(customer.phone || "");
 
   renderCard(`
   <div class="app-page home-page">
@@ -594,7 +595,7 @@ function showMemberMenu(customer) {
     <div
       style="
         background:#0f172a;
-        color:#ffffff;
+        color:#fff;
         border-radius:16px;
         padding:16px;
         display:flex;
@@ -609,17 +610,14 @@ function showMemberMenu(customer) {
           Redeem your points now!
         </div>
       </div>
-
       <button
         class="menu-btn"
         style="
           background:#111827;
           color:#fff;
           border:none;
-          border-radius:999px;
           height:36px;
           padding:0 16px;
-          font-weight:600;
         "
         onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')"
       >
@@ -630,14 +628,26 @@ function showMemberMenu(customer) {
     <!-- Menu Grid -->
     <div class="menu-grid">
 
-      <button class="menu-tile active" onclick="openMyBills()">
+      <!-- ✅ ของเดิม -->
+      <button class="menu-tile active" onclick="openMyBills(this)">
         <div class="tile-icon">📄</div>
         <div class="tile-text">บิลของฉัน</div>
       </button>
 
-      <button class="menu-tile" onclick="openTopupMenu()">
+      <!-- ✅ ส่ง this เหมือนกันทุกปุ่ม -->
+      <button class="menu-tile" onclick="openTopupMenu(this)">
         <div class="tile-icon">📶</div>
         <div class="tile-text">ต่อแพ็กเกจ</div>
+      </button>
+
+      <button class="menu-tile" onclick="openAddonMenu(this)">
+        <div class="tile-icon">➕</div>
+        <div class="tile-text">แพ็กเสริม</div>
+      </button>
+
+      <button class="menu-tile" onclick="openGameTopup(this)">
+        <div class="tile-icon">🎮</div>
+        <div class="tile-text">เติมเกม</div>
       </button>
 
       <button class="menu-tile disabled" disabled>
@@ -647,21 +657,41 @@ function showMemberMenu(customer) {
         </div>
       </button>
 
+      <button class="menu-tile disabled" disabled>
+        <div class="tile-icon">🎧</div>
+        <div class="tile-text">
+          อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small>
+        </div>
+      </button>
+
     </div>
 
-    <!-- Payment Section -->
-    <div class="section-title">รายการแจ้งชำระ</div>
-    <div id="homePaymentList">
-      <div style="text-align:center;color:#9ca3af;padding:12px;">
-        กำลังโหลด...
+    <!-- Banner -->
+    <div
+      style="
+        margin-top:18px;
+        background:#ffffff;
+        border-radius:18px;
+        padding:14px;
+        display:flex;
+        align-items:center;
+        gap:12px;
+      "
+    >
+      <div style="font-size:34px;">📱</div>
+      <div style="font-size:20px;font-weight:700;color:#7c3aed;">
+        ผ่อนง่าย<br/>จ่ายสบาย
       </div>
     </div>
 
   </div>
   `);
 
-  // โหลดรายการแจ้งชำระใต้ Home
-  loadHomePayments();
+  // ✅ โหลดบิลอัตโนมัติ “แบบเดิม”
+  setTimeout(() => {
+    const btn = document.querySelector(".menu-tile.active");
+    if (btn) openMyBills(btn);
+  }, 0);
 }
 /* tile style helper */
 function menuTileStyle() {
