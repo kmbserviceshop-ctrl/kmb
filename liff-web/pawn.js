@@ -256,6 +256,13 @@ async function loadMyPaymentRequests() {
     return;
   }
 
+  // loading state
+  box.innerHTML = `
+    <div style="text-align:center;color:#9ca3af;font-size:13px;">
+      กำลังโหลด...
+    </div>
+  `;
+
   try {
     const res = await callFn(
       "get_my_payment_requests",
@@ -263,7 +270,7 @@ async function loadMyPaymentRequests() {
       { forceAnon: true }
     );
 
-    const list = res.requests || [];
+    const list = res?.requests ?? [];
 
     if (!list.length) {
       box.innerHTML = `
@@ -273,22 +280,41 @@ async function loadMyPaymentRequests() {
       return;
     }
 
-    box.innerHTML = list.map((r) => `
-      <div class="list-item">
-        <div>
-          <div class="list-sub">${formatDate(r.created_at)}</div>
-          <div class="list-title">
-            ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
+    box.innerHTML = list
+      .map((r) => {
+        let badge = "";
+        if (r.status === "pending") {
+          badge = `<span class="badge badge-pending">รอการตรวจสอบ</span>`;
+        } else if (r.status === "approved") {
+          badge = `<span class="badge badge-approved">อนุมัติแล้ว</span>`;
+        } else if (r.status === "rejected") {
+          badge = `<span class="badge badge-rejected">ไม่ผ่าน</span>`;
+        } else {
+          badge = `<span class="badge">${r.status}</span>`;
+        }
+
+        return `
+          <div class="list-item">
+            <div class="list-left">
+              <div class="list-sub">
+                ${formatDate(r.created_at)}
+              </div>
+              <div class="list-title">
+                ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
+              </div>
+            </div>
+            <div class="list-right">
+              ${badge}
+            </div>
           </div>
-        </div>
-        <div class="list-badge">${r.status}</div>
-      </div>
-    `).join("");
+        `;
+      })
+      .join("");
 
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      err.message || "โหลดรายการไม่สำเร็จ"
+      err?.message || "โหลดรายการไม่สำเร็จ"
     );
   }
 }
