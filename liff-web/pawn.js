@@ -250,12 +250,12 @@ async function loadMyPaymentRequests() {
 
   try {
     const res = await callFn(
-  "get_my_payment_requests",
-  {
-    customer_id: CURRENT_CUSTOMER.id, // ✅ ตัวเดียวพอ
-  },
-  { forceAnon: true } 
-);
+      "get_my_payment_requests",
+      {
+        customer_id: CURRENT_CUSTOMER.id, // ✅ ใช้ id เท่านี้
+      },
+      { forceAnon: true } // จะใส่หรือไม่ใส่ก็ได้
+    );
 
     const list = res.requests || [];
 
@@ -267,26 +267,17 @@ async function loadMyPaymentRequests() {
       return;
     }
 
-    box.innerHTML = list.map((r) => {
-      const badge =
-        r.status === "pending"
-          ? `<span style="background:#fde047;color:#92400e;">รอการตรวจสอบ</span>`
-          : r.status === "approved"
-          ? `<span style="background:#dcfce7;color:#166534;">อนุมัติแล้ว</span>`
-          : `<span style="background:#fee2e2;color:#991b1b;">ไม่ผ่าน</span>`;
-
-      return `
-        <div class="list-item">
-          <div>
-            <div class="list-sub">${formatDate(r.created_at)}</div>
-            <div class="list-title">
-              ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
-            </div>
+    box.innerHTML = list.map((r) => `
+      <div class="list-item">
+        <div>
+          <div class="list-sub">${formatDate(r.created_at)}</div>
+          <div class="list-title">
+            ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
           </div>
-          <div class="list-badge">${badge}</div>
         </div>
-      `;
-    }).join("");
+        <div class="list-badge">${r.status}</div>
+      </div>
+    `).join("");
 
   } catch (err) {
     showAlertModal(
