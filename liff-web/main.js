@@ -691,20 +691,59 @@ modalEl.onclick = (e) => {
   if (e.target === modalEl) closeModal();
 };
 
-function showAlertModal(title, message, onClose) {
+function showAlertModal(title, message, options = {}) {
+  const {
+    retry = null,        // function สำหรับ retry
+    canCloseLiff = false // แสดงปุ่มปิด LINE
+  } = options;
+
   openModal(`
     <h4>${title}</h4>
     <p style="white-space:pre-line">${message}</p>
 
-    <button class="primary-btn" id="alertOkBtn">
-      ตกลง
-    </button>
+    ${
+      retry
+        ? `
+        <button class="primary-btn" id="retryBtn">
+          ลองใหม่อีกครั้ง
+        </button>
+        `
+        : `
+        <button class="primary-btn" id="okBtn">
+          ตกลง
+        </button>
+        `
+    }
+
+    ${
+      canCloseLiff
+        ? `
+        <button
+          class="secondary-btn"
+          style="margin-top:10px"
+          id="closeBtn"
+        >
+          ปิดหน้าต่าง
+        </button>
+        `
+        : ``
+    }
   `);
 
-  document.getElementById("alertOkBtn").onclick = () => {
-    closeModal();
-    if (typeof onClose === "function") onClose();
-  };
+  if (retry) {
+    document.getElementById("retryBtn").onclick = () => {
+      closeModal();
+      retry();
+    };
+  } else {
+    document.getElementById("okBtn").onclick = closeModal;
+  }
+
+  if (canCloseLiff) {
+    document.getElementById("closeBtn").onclick = () => {
+      try { liff.closeWindow(); } catch (_) {}
+    };
+  }
 }
 
 /* =========================
