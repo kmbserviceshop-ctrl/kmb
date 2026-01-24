@@ -1,5 +1,5 @@
 /* =========================
-PAWN MODULE
+PAWN.JS MODULE
 ========================= */
 
 // ⚠️ ใช้ตัวแปรจาก main.js โดยตรง
@@ -251,7 +251,8 @@ async function loadMyPaymentRequests() {
   try {
     const res = await callFn("get_my_payment_requests", {
       customer_id: CURRENT_CUSTOMER.id,
-    });
+       }, { forceAnon: true }
+    );
 
     const list = res.requests || [];
 
