@@ -674,9 +674,9 @@ function showMemberMenu(customer) {
 
   </div>
   `);
-
-  // ✅ โหลดรายการแจ้งชำระบน Home เท่านั้น
+  setTimeout(() => {
   loadHomePayments();
+}, 0);
 }
 async function loadHomePayments() {
   const box = document.getElementById("homePaymentList");
