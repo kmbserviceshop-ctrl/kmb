@@ -573,62 +573,145 @@ async function loadHomePaymentRequests() {
 }
 
 /* =========================
-MEMBER MENU (HOME)
+MEMBER MENU (UI)
 ========================= */
 function showMemberMenu(customer) {
   const name = customer.name || "ลูกค้า KPOS";
 
   renderCard(`
-<div class="app-page home-page">
+<div class="app-page home-page" style="padding:16px;">
 
-<!-- Header -->
-<div class="home-header">
-  <div>
-    <div class="home-title">${name}</div>
-    <div class="home-sub">Gold Community</div>
+  <!-- Header -->
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+  ">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="
+        width:44px;
+        height:44px;
+        border-radius:50%;
+        background:#e5e7eb;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:18px;
+      ">👤</div>
+
+      <div>
+        <div style="font-weight:700;font-size:16px;">${name}</div>
+        <div style="font-size:12px;color:#9ca3af;">Gold Community</div>
+      </div>
+    </div>
+
+    <button onclick="openSettings()" style="
+      background:none;
+      border:none;
+      font-size:20px;
+    ">⚙️</button>
   </div>
-  <div class="home-avatar" onclick="openSettings()">⚙️</div>
-</div>
 
-<!-- Point Card -->
-<div class="point-card">
-  <div>
-    <div class="point-title">0 Points</div>
-    <div class="point-sub">Redeem your points now!</div>
+  <!-- Point Card -->
+  <div style="
+    background:#0f172a;
+    color:#fff;
+    border-radius:16px;
+    padding:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+  ">
+    <div>
+      <div style="font-size:20px;font-weight:800;">0 Points</div>
+      <div style="font-size:13px;color:#cbd5f5;">
+        Redeem your points now!
+      </div>
+    </div>
+
+    <button
+      onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')"
+      style="
+        background:#111827;
+        color:#fff;
+        border:none;
+        border-radius:999px;
+        padding:8px 16px;
+        font-weight:600;
+      "
+    >
+      Redeem
+    </button>
   </div>
-  <button class="point-btn"
-    onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')">
-    Redeem
-  </button>
-</div>
 
-<!-- Menu -->
-<div class="menu-grid">
-  <button class="menu-tile active">
-    <div class="tile-icon">📄</div>
-    <div class="tile-text">บิลของฉัน</div>
-  </button>
+  <!-- Menu Buttons -->
+  <div style="
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:20px;
+  ">
 
-  <button class="menu-tile" onclick="openTopupMenu()">
-    <div class="tile-icon">📶</div>
-    <div class="tile-text">ต่อแพ็กเกจ</div>
-  </button>
+    <button onclick="openMyBills()" style="${menuTileStyle()}">
+      📄<div style="margin-top:6px;">บิลของฉัน</div>
+    </button>
 
-  <button class="menu-tile disabled" disabled>
-    <div class="tile-icon">📱</div>
-    <div class="tile-text">มือถือ<br><small>เร็ว ๆ นี้</small></div>
-  </button>
-</div>
+    <button onclick="openTopupMenu()" style="${menuTileStyle()}">
+      📊<div style="margin-top:6px;">เติมแพ็กเกจ</div>
+    </button>
 
-<!-- PAYMENT REQUEST LIST -->
-<div class="section-title">รายการแจ้งชำระ</div>
-<div id="homePaymentList"></div>
+    <button onclick="showAlertModal('เร็ว ๆ นี้','เมนูอื่น ๆ จะเปิดใช้งานในเร็ว ๆ นี้')" style="${menuTileStyle()}">
+      📦<div style="margin-top:6px;">รายการอื่น</div>
+    </button>
+
+  </div>
+
+  <!-- Payment Request List -->
+  <div style="
+    background:#fff;
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.04);
+  ">
+    <div style="font-weight:700;margin-bottom:10px;">
+      รายการแจ้งชำระ
+    </div>
+
+    <div style="
+      background:#f9fafb;
+      border-radius:12px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:13px;
+    ">
+      <div>
+        <div style="color:#6b7280;margin-bottom:4px;">
+          2026-01-30 14:35 น.
+        </div>
+        <div style="font-weight:600;">
+          PD-2026-0000045 OPPO A58 5G
+        </div>
+      </div>
+
+      <div style="
+        background:#fde047;
+        color:#92400e;
+        padding:4px 10px;
+        border-radius:999px;
+        font-size:12px;
+        font-weight:700;
+      ">
+        รอการตรวจสอบ
+      </div>
+    </div>
+  </div>
 
 </div>
 `);
-
-  // 🔥 โหลดรายการแจ้งชำระ
-  loadHomePayments();
 }
 /* tile style helper */
 function menuTileStyle() {
