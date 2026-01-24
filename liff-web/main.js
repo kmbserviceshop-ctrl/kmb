@@ -564,112 +564,149 @@ async function verifyCustomer() {
 }
 
 /* =========================
-MEMBER MENU (UI ONLY)
+HOME: PAYMENT REQUEST API
+========================= */
+async function loadHomePaymentRequests() {
+  return await callFn("get_my_payment_requests", {
+    customer_id: CURRENT_CUSTOMER.id,
+  });
+}
+
+/* =========================
+MEMBER MENU (HOME)
 ========================= */
 function showMemberMenu(customer) {
   const name = customer.name || "ลูกค้า KPOS";
-  const phone = maskPhone(customer.phone || "");
 
   renderCard(`
-    <div class="app-page home-page">
+<div class="app-page home-page">
 
-      <!-- Header -->
-      <div class="home-header">
-        <div>
-          <div class="home-title">${name}</div>
-          <div class="home-sub">Gold Community</div>
-        </div>
-        <div class="home-avatar" onclick="openSettings()">⚙️</div>
-      </div>
+<!-- Header -->
+<div class="home-header">
+  <div>
+    <div class="home-title">${name}</div>
+    <div class="home-sub">Gold Community</div>
+  </div>
+  <div class="home-avatar" onclick="openSettings()">⚙️</div>
+</div>
 
-      <!-- Point Card -->
-      <div
-        style="
-          background:#0f172a;
-          color:#fff;
-          border-radius:16px;
-          padding:16px;
+<!-- Point Card -->
+<div class="point-card">
+  <div>
+    <div class="point-title">0 Points</div>
+    <div class="point-sub">Redeem your points now!</div>
+  </div>
+  <button class="point-btn"
+    onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')">
+    Redeem
+  </button>
+</div>
+
+<!-- Menu -->
+<div class="menu-grid">
+  <button class="menu-tile active">
+    <div class="tile-icon">📄</div>
+    <div class="tile-text">บิลของฉัน</div>
+  </button>
+
+  <button class="menu-tile" onclick="openTopupMenu()">
+    <div class="tile-icon">📶</div>
+    <div class="tile-text">ต่อแพ็กเกจ</div>
+  </button>
+
+  <button class="menu-tile disabled" disabled>
+    <div class="tile-icon">📱</div>
+    <div class="tile-text">มือถือ<br><small>เร็ว ๆ นี้</small></div>
+  </button>
+</div>
+
+<!-- PAYMENT REQUEST LIST -->
+<div class="section-title">รายการแจ้งชำระ</div>
+<div id="homePaymentList"></div>
+
+</div>
+`);
+
+  // 🔥 โหลดรายการแจ้งชำระ
+  loadHomePayments();
+}
+/* tile style helper */
+function menuTileStyle() {
+  return `
+    background:#fff;
+    border-radius:16px;
+    padding:14px 8px;
+    border:1px solid #e5e7eb;
+    font-size:13px;
+    font-weight:600;
+    text-align:center;
+  `;
+}
+async function loadHomePayments() {
+  const box = document.getElementById("homePaymentList");
+  if (!box) return;
+
+  box.innerHTML = `<div style="text-align:center;padding:12px;">กำลังโหลด...</div>`;
+
+  try {
+    const res = await loadHomePaymentRequests();
+    const list = res.requests || [];
+
+    if (!list.length) {
+      box.innerHTML = `
+        <div style="text-align:center;color:#9ca3af;font-size:13px;">
+          ยังไม่มีรายการแจ้งชำระ
+        </div>`;
+      return;
+    }
+
+    box.innerHTML = list.map((r) => {
+      const item = r.pawn_transactions?.pawn_items || {};
+      const product =
+        `${item.brand || ""} ${item.model || ""}`.trim();
+
+      const badge =
+        r.status === "pending"
+          ? `<span style="background:#fde047;color:#92400e;">รอการตรวจสอบ</span>`
+          : r.status === "approved"
+          ? `<span style="background:#dcfce7;color:#166534;">ปกติ</span>`
+          : `<span style="background:#fee2e2;color:#991b1b;">ไม่ผ่าน</span>`;
+
+      return `
+        <div style="
+          background:#f9fafb;
+          border-radius:12px;
+          padding:12px;
           display:flex;
           justify-content:space-between;
           align-items:center;
-          margin-bottom:16px;
-        "
-      >
-        <div>
-          <div style="font-size:18px;font-weight:700;">0 Points</div>
-          <div style="font-size:13px;color:#cbd5f5;">
-            Redeem your points now!
+          font-size:13px;
+          margin-bottom:8px;
+        ">
+          <div>
+            <div style="color:#6b7280;">${formatDate(r.created_at)}</div>
+            <div style="font-weight:600;">
+              ${r.contract_no} ${product}
+            </div>
+          </div>
+          <div style="
+            padding:4px 10px;
+            border-radius:999px;
+            font-weight:700;
+            font-size:12px;
+          ">
+            ${badge}
           </div>
         </div>
-        <button
-          class="menu-btn"
-          style="
-            background:#111827;
-            color:#fff;
-            border:none;
-            height:36px;
-            padding:0 16px;
-          "
-          onclick="showAlertModal('เร็ว ๆ นี้','ระบบแลกแต้มจะเปิดใช้งานในเร็ว ๆ นี้')"
-        >
-          Redeem
-        </button>
-      </div>
-
-      <!-- Menu Grid -->
-      <div class="menu-grid">
-
-        <button class="menu-tile active" onclick="openMyBills(this)">
-  <div class="tile-icon">📄</div>
-  <div class="tile-text">บิลของฉัน</div>
-</button>
-
-<button class="menu-tile" onclick="openTopupMenu()">
-  <div class="tile-icon">📶</div>
-  <div class="tile-text">ต่อแพ็กเกจ</div>
-</button>
-
-<button class="menu-tile" onclick="openAddonMenu()">
-  <div class="tile-icon">➕</div>
-  <div class="tile-text">แพ็กเสริม</div>
-</button>
-
-<button class="menu-tile" onclick="openGameTopup()">
-  <div class="tile-icon">🎮</div>
-  <div class="tile-text">เติมเกม</div>
-</button>
-
-<button class="menu-tile disabled" disabled>
-  <div class="tile-icon">📱</div>
-  <div class="tile-text">มือถือ<br><small>เร็ว ๆ นี้</small></div>
-</button>
-
-<button class="menu-tile disabled" disabled>
-  <div class="tile-icon">🎧</div>
-  <div class="tile-text">อุปกรณ์เสริม<br><small>เร็ว ๆ นี้</small></div>
-</button>
-      </div>
-
-      <!-- Banner -->
-      <div
-        style="
-          margin-top:18px;
-          background:#ffffff;
-          border-radius:18px;
-          padding:14px;
-          display:flex;
-          align-items:center;
-          gap:12px;
-        "
-      >
-        <div style="font-size:34px;">📱</div>
-        <div style="font-size:20px;font-weight:700;color:#7c3aed;">
-          ผ่อนง่าย<br/>จ่ายสบาย
-        </div>
-      </div>
-
-    </div>
-  `);
+      `;
+    }).join("");
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "โหลดรายการไม่สำเร็จ",
+      { retry: loadHomePayments, canCloseLiff: true }
+    );
+  }
 }
 
 /* =========================
@@ -909,7 +946,6 @@ function openNotificationSettings() {
 </div>
 `);
 }
-
 async function toggleNotification(type, enabled, checkboxEl) {
   checkboxEl.disabled = true;
 
@@ -930,35 +966,6 @@ async function toggleNotification(type, enabled, checkboxEl) {
     );
   } catch (err) {
     checkboxEl.checked = !enabled;
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถบันทึกการตั้งค่าได้"
-    );
-  } finally {
-    checkboxEl.disabled = false;
-  }
-}
-async function toggleNotification(type, enabled, checkboxEl) {
-  checkboxEl.disabled = true;
-
-  try {
-    await callFn(
-      "update_notification_settings",
-      {
-        type,
-        enabled,
-        line_user_id: CURRENT_CUSTOMER.line_user_id,
-      },
-      { forceAnon: true }
-    );
-
-    // ✅ sync state จาก backend
-    CURRENT_CUSTOMER[type] = enabled;
-
-  } catch (err) {
-    // ❌ rollback UI
-    checkboxEl.checked = !enabled;
-
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถบันทึกการตั้งค่าได้"
