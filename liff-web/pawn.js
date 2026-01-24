@@ -220,3 +220,74 @@ async function submitPawnInterestPayment(payload) {
   if (!res.ok) throw data;
   return data;
 }
+/* =========================
+PAYMENT Requests
+========================= */
+function openMyPaymentRequests(btn) {
+  if (btn) setButtonLoading(btn, "กำลังโหลด");
+
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
+      <div class="top-title">รายการคำขอชำระ</div>
+    </div>
+
+    <div class="section-card">
+      <div id="paymentRequestList">
+        <div style="text-align:center;padding:12px;">
+          กำลังโหลด...
+        </div>
+      </div>
+    </div>
+  `);
+
+  setTimeout(loadMyPaymentRequests, 0);
+}
+
+async function loadMyPaymentRequests() {
+  const box = document.getElementById("paymentRequestList");
+  if (!box) return;
+
+  try {
+    const res = await callFn("get_my_payment_requests", {
+      customer_id: CURRENT_CUSTOMER.id,
+    });
+
+    const list = res.requests || [];
+
+    if (!list.length) {
+      box.innerHTML = `
+        <div style="text-align:center;color:#9ca3af;font-size:13px;">
+          ยังไม่มีรายการแจ้งชำระ
+        </div>`;
+      return;
+    }
+
+    box.innerHTML = list.map((r) => {
+      const badge =
+        r.status === "pending"
+          ? `<span style="background:#fde047;color:#92400e;">รอการตรวจสอบ</span>`
+          : r.status === "approved"
+          ? `<span style="background:#dcfce7;color:#166534;">อนุมัติแล้ว</span>`
+          : `<span style="background:#fee2e2;color:#991b1b;">ไม่ผ่าน</span>`;
+
+      return `
+        <div class="list-item">
+          <div>
+            <div class="list-sub">${formatDate(r.created_at)}</div>
+            <div class="list-title">
+              ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
+            </div>
+          </div>
+          <div class="list-badge">${badge}</div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "โหลดรายการไม่สำเร็จ"
+    );
+  }
+}
