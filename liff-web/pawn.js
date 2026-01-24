@@ -249,10 +249,13 @@ async function loadMyPaymentRequests() {
   if (!box) return;
 
   try {
-    const res = await callFn("get_my_payment_requests", {
-      customer_id: CURRENT_CUSTOMER.id,
-       }, { forceAnon: true }
-    );
+    const res = await callFn(
+  "get_my_payment_requests",
+  {
+    customer_id: CURRENT_CUSTOMER.customer_id,
+  },
+  { forceAnon: true }
+);
 
     const list = res.requests || [];
 
