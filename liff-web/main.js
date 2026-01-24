@@ -564,15 +564,6 @@ async function verifyCustomer() {
 }
 
 /* =========================
-HOME: PAYMENT REQUEST API
-========================= */
-async function loadHomePaymentRequests() {
-  return await callFn("get_my_payment_requests", {
-    customer_id: CURRENT_CUSTOMER.id,
-  });
-}
-
-/* =========================
 MEMBER MENU (UI ONLY)
 ========================= */
 function showMemberMenu(customer) {
@@ -633,10 +624,10 @@ function showMemberMenu(customer) {
         <div class="tile-text">บิลของฉัน</div>
       </button>
 
-      <button class="menu-tile" onclick="openTopupMenu()">
-        <div class="tile-icon">📶</div>
-        <div class="tile-text">ต่อแพ็กเกจ</div>
-      </button>
+      <button class="menu-tile" onclick="openMyPaymentRequests(this)">
+  <div class="tile-icon">🧾</div>
+  <div class="tile-text">รายการคำขอ</div>
+</button>
 
       <button class="menu-tile" onclick="openAddonMenu()">
         <div class="tile-icon">➕</div>
@@ -674,75 +665,6 @@ function showMemberMenu(customer) {
 
   </div>
   `);
-  setTimeout(() => {
-  loadHomePayments();
-}, 0);
-}
-async function loadHomePayments() {
-  const box = document.getElementById("homePaymentList");
-  if (!box) return;
-
-  box.innerHTML = `<div style="text-align:center;padding:12px;">กำลังโหลด...</div>`;
-
-  try {
-    const res = await loadHomePaymentRequests();
-    const list = res.requests || [];
-
-    if (!list.length) {
-      box.innerHTML = `
-        <div style="text-align:center;color:#9ca3af;font-size:13px;">
-          ยังไม่มีรายการแจ้งชำระ
-        </div>`;
-      return;
-    }
-
-    box.innerHTML = list.map((r) => {
-
-      const badge =
-        r.status === "pending"
-          ? `<span style="background:#fde047;color:#92400e;">รอการตรวจสอบ</span>`
-          : r.status === "approved"
-          ? `<span style="background:#dcfce7;color:#166534;">อนุมัติแล้ว</span>`
-          : `<span style="background:#fee2e2;color:#991b1b;">ไม่ผ่าน</span>`;
-
-      return `
-        <div style="
-          background:#f9fafb;
-          border-radius:12px;
-          padding:12px;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          font-size:13px;
-          margin-bottom:8px;
-        ">
-          <div>
-            <div style="color:#6b7280;">
-              ${formatDate(r.created_at)}
-            </div>
-            <div style="font-weight:600;">
-              ยอดชำระ ${Number(r.amount).toLocaleString()} บาท
-            </div>
-          </div>
-          <div style="
-            padding:4px 10px;
-            border-radius:999px;
-            font-weight:700;
-            font-size:12px;
-          ">
-            ${badge}
-          </div>
-        </div>
-      `;
-    }).join("");
-
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "โหลดรายการไม่สำเร็จ",
-      { retry: loadHomePayments, canCloseLiff: true }
-    );
-  }
 }
 
 /* =========================
