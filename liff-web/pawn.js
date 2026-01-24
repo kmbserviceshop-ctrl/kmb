@@ -248,13 +248,19 @@ async function loadMyPaymentRequests() {
   const box = document.getElementById("paymentRequestList");
   if (!box) return;
 
+  const customerId =
+    CURRENT_CUSTOMER?.customer_id || CURRENT_CUSTOMER?.id;
+
+  if (!customerId) {
+    showAlertModal("ผิดพลาด", "ไม่พบ customer_id");
+    return;
+  }
+
   try {
     const res = await callFn(
       "get_my_payment_requests",
-      {
-        customer_id: CURRENT_CUSTOMER.id, // ✅ ใช้ id เท่านี้
-      },
-      { forceAnon: true } // จะใส่หรือไม่ใส่ก็ได้
+      { customer_id: customerId },
+      { forceAnon: true }
     );
 
     const list = res.requests || [];
