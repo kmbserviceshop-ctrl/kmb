@@ -697,7 +697,8 @@ async function loadHomePayments() {
     }
 
     box.innerHTML = list.map((r) => {
-      const item = r.pawn_transactions?.[0]?.pawn_items || {};
+     
+      const item = r.pawn_transactions?.[0]?.pawn_items?.[0] || {};
       const product =
         `${item.brand || ""} ${item.model || ""}`.trim();
 
