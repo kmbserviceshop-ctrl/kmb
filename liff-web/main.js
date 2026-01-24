@@ -628,24 +628,27 @@ function showMemberMenu(customer) {
     <!-- Menu Grid -->
     <div class="menu-grid">
 
-      <!-- ✅ ของเดิม -->
-      <button class="menu-tile active" onclick="openMyBills(this)">
+      <!-- ❌ ไม่มี active ตอนเริ่ม -->
+      <button class="menu-tile"
+        onclick="menuActionWithLoading(this, openMyBills)">
         <div class="tile-icon">📄</div>
         <div class="tile-text">บิลของฉัน</div>
       </button>
 
-      <!-- ✅ ส่ง this เหมือนกันทุกปุ่ม -->
-      <button class="menu-tile" onclick="openTopupMenu(this)">
+      <button class="menu-tile"
+        onclick="menuActionWithLoading(this, openTopupMenu)">
         <div class="tile-icon">📶</div>
         <div class="tile-text">ต่อแพ็กเกจ</div>
       </button>
 
-      <button class="menu-tile" onclick="openAddonMenu(this)">
+      <button class="menu-tile"
+        onclick="menuActionWithLoading(this, openAddonMenu)">
         <div class="tile-icon">➕</div>
         <div class="tile-text">แพ็กเสริม</div>
       </button>
 
-      <button class="menu-tile" onclick="openGameTopup(this)">
+      <button class="menu-tile"
+        onclick="menuActionWithLoading(this, openGameTopup)">
         <div class="tile-icon">🎮</div>
         <div class="tile-text">เติมเกม</div>
       </button>
@@ -665,6 +668,10 @@ function showMemberMenu(customer) {
       </button>
 
     </div>
+
+    <!-- รายการแจ้งชำระ -->
+    <div class="section-title">รายการแจ้งชำระ</div>
+    <div id="homePaymentList"></div>
 
     <!-- Banner -->
     <div
@@ -687,11 +694,8 @@ function showMemberMenu(customer) {
   </div>
   `);
 
-  // ✅ โหลดบิลอัตโนมัติ “แบบเดิม”
-  setTimeout(() => {
-    const btn = document.querySelector(".menu-tile.active");
-    if (btn) openMyBills(btn);
-  }, 0);
+  // ✅ Home โหลด “รายการแจ้งชำระ” เท่านั้น
+  loadHomePayments();
 }
 /* tile style helper */
 function menuTileStyle() {
