@@ -1588,17 +1588,14 @@ function confirmRevokeConsentFinal() {
     revokeConsent 
   );
 }
-
-async function revokeConsentTest() {
+async function revokeConsent() {
   try {
     const profile = await liff.getProfile();
 
-    // 1️⃣ เรียก backend ถอนความยินยอม
     await callFn("revoke_consent", {
       line_user_id: profile.userId,
     });
 
-    // 2️⃣ 🔥 อัปเดต state ฝั่ง frontend (คงโครงเดิม)
     CURRENT_CUSTOMER = {
       ...CURRENT_CUSTOMER,
       consent_status: "revoked",
@@ -1608,31 +1605,20 @@ async function revokeConsentTest() {
     HAS_READ_PDPA = false;
     READ_TIMER_PASSED = false;
 
-    // 3️⃣ แจ้งผู้ใช้ + logout + ปิด LIFF
     showAlertModal(
       "ถอนความยินยอมแล้ว",
       "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
       () => {
-        try {
-          liff.logout(); // 🔑 FIX 3: ตัด LINE session
-        } catch (e) {
-          // ป้องกัน error กรณี environment บางแบบ
-        }
-        liff.closeWindow(); // 🚪 ปิด LIFF
+        try { liff.logout(); } catch (e) {}
+        liff.closeWindow();
       }
     );
-
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถถอนความยินยอมได้"
     );
   }
-}
-async function revokeConsent() {
-  console.log("start revoke");
-  await callFn("revoke_consent", { line_user_id });
-  console.log("revoke done");
 }
 function showConfirmModal(title, message, onConfirm) {
   openModal(`
