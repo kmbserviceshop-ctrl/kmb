@@ -1653,20 +1653,15 @@ function showConfirmModal(title, message, onConfirm) {
   cancelBtn.onclick = closeModal;
 
   confirmBtn.onclick = async () => {
-    // 🔒 lock UI
     setButtonLoading(confirmBtn, "กำลังดำเนินการ");
     confirmBtn.disabled = true;
     cancelBtn.disabled = true;
 
     try {
-      // ✅ รอให้ action เสร็จก่อน
-      await onConfirm();
-
-      // ✅ ปิด modal หลังสำเร็จ
-      closeModal();
+      await onConfirm();   // ⏳ รอ backend
+      closeModal();        // ✅ success
     } catch (err) {
-      // ❗ กันกรณี error หลุด
-      closeModal();
+      closeModal();        // ❗ error ก็ต้องปิด
       showAlertModal(
         "เกิดข้อผิดพลาด",
         err?.message || "ไม่สามารถดำเนินการได้"
