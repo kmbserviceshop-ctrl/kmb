@@ -12,7 +12,7 @@ PAYMENT KPOS (CORE)
  *   service_fee_satang?: number,
  *   meta?: object,
  *   description_html: string,
- *   onSubmit: async function(payload),
+ *  
  *   onBack: function()
  * }
  */
@@ -71,7 +71,7 @@ function openKposPayment(config) {
    *   amount_satang: number,        // ยอดทำรายการ (สตางค์)
    *   service_fee_satang?: number,  // ค่าบริการ (สตางค์)
    *   description_html: string,
-   *   onSubmit: async function(payload),
+   *   
    *   onBack: function()
    * }
    */
@@ -248,10 +248,13 @@ async function submitKposPayment(btn) {
 });
 
   showAlertModal(
-    "รับแจ้งชำระเงินแล้ว",
-    "ระบบได้รับข้อมูลเรียบร้อย\nรอร้านตรวจสอบ",
-    () => kposPaymentBack()
-  );
+  "รับแจ้งชำระเงินแล้ว",
+  "ระบบได้รับข้อมูลเรียบร้อย\nรอร้านตรวจสอบ",
+  {
+    onConfirm: () => kposPaymentBack()
+  }
+);
+
 } catch (err) {
   console.error("submitKposPayment error:", err);
 
@@ -270,66 +273,6 @@ async function submitKposPayment(btn) {
   showAlertModal("เกิดข้อผิดพลาด", message);
   resetButton(btn, "💳 ดำเนินการต่อ");
 }
-}
-
-/**
- * SUBMIT TOPUP PAYMENT (STANDARD)
- * ใช้ payload กลางจาก KPOS Payment
- */
-async function submitTopupPayment(payload) {
-  if (!payload) throw new Error("missing_payload");
-
-  const {
-    service,
-    reference_id,
-    amount_satang,
-    meta,
-    slip_base64,
-  } = payload;
-
-  if (service !== "topup") throw new Error("invalid_service");
-  if (!reference_id) throw new Error("missing_reference_id");
-  if (!amount_satang || amount_satang <= 0) throw new Error("invalid_amount");
-  if (!slip_base64) throw new Error("slip_required");
-
-  const lineAccessToken = liff.getAccessToken();
-  if (!lineAccessToken) throw new Error("no_line_access_token");
-
-  // 🔥 จุดสำคัญที่สุด
-  const lineUserId = meta?.line_user_id;
-  if (!lineUserId) {
-    throw new Error("missing_line_user_id");
-  }
-
-  const body = {
-    topup_request_id: reference_id,
-    amount: amount_satang, // satang
-    slip_base64,
-    meta: {
-      line_user_id: lineUserId,                 // 🔥 REQUIRED
-      customer_id: meta?.customer_id ?? null,
-      phone: meta?.phone,
-      package_id: meta?.package_id,
-    },
-  };
-
-  const res = await fetch(
-    "https://gboocrkgorslnwnuhqic.supabase.co/functions/v1/topup-payment-request",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "x-line-access-token": lineAccessToken,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  const data = await res.json();
-  if (!res.ok) throw data;
-
-  return data;
 }
 
 /* =========================
