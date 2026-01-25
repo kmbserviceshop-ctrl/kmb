@@ -1617,20 +1617,13 @@ function confirmRevokeConsentFinal() {
     }
   );
 }
-function showConfirmModal(title, message, onConfirm) {
+function showConfirmModal(title, message, onConfirm, afterConfirm) {
   openModal(`
     <h4>${title}</h4>
     <p style="white-space:pre-line">${message}</p>
 
-    <button class="primary-btn" id="confirmBtn">
-      ยืนยันทำรายการ
-    </button>
-
-    <button
-      class="secondary-btn"
-      id="cancelBtn"
-      style="margin-top:10px"
-    >
+    <button class="primary-btn" id="confirmBtn">ยืนยันทำรายการ</button>
+    <button class="secondary-btn" id="cancelBtn" style="margin-top:10px">
       ยกเลิกทำรายการ
     </button>
   `);
@@ -1646,8 +1639,9 @@ function showConfirmModal(title, message, onConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      await onConfirm();   // ✅ ต้อง resolve หรือ throw
-      closeModal();
+      await onConfirm();   // ❌ ห้ามเปิด modal ในนี้
+      closeModal();        // ✅ ปิดก่อน
+      if (afterConfirm) afterConfirm(); // ✅ ค่อยเปิด alert
     } catch (err) {
       closeModal();
       showAlertModal(
