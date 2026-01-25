@@ -652,12 +652,36 @@ function showMemberMenu(customer) {
     </div>
 
     <!-- การแจ้งเตือน -->
-    <div style="margin-top:18px;">
-      <div style="font-weight:700;margin-bottom:8px;">
-        บริการการนี้อยู่ระหว่างทดลองใช้บริการ
+<div style="margin-top:18px;">
+
+  <div
+    style="
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-radius:14px;
+      padding:14px 16px;
+      color:#9a3412;
+      font-size:14px;
+      line-height:1.6;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:10px;
+    "
+  >
+    <div style="font-size:18px; line-height:1;">⚠️</div>
+    <div>
+      <div style="font-weight:700; margin-bottom:2px;">
+        ระบบอยู่ระหว่างการทดลองใช้งาน
       </div>
-      <div id="homePaymentList"></div>
+      <div style="font-size:13px; color:#7c2d12;">
+        บางฟีเจอร์อาจยังไม่สมบูรณ์ หรือมีการเปลี่ยนแปลงโดยไม่ต้องแจ้งล่วงหน้า
+      </div>
     </div>
+  </div>
+
+  <div id="homePaymentList"></div>
+</div>
 
   </div>
   `);
