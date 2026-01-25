@@ -1629,18 +1629,18 @@ function showConfirmModal(title, message, onConfirm, afterConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      // ✅ ทำ logic อย่างเดียว (ห้ามเปิด modal ในนี้)
-      await onConfirm();
+      await onConfirm(); // เรียก revokeConsent
 
-      // 🔑 FIX สำคัญ: reset ปุ่มก่อนปิด
+      // ✅ รีเซ็ตปุ่มก่อนปิด modal
       resetButton(confirmBtn, "ยืนยันทำรายการ");
       confirmBtn.disabled = false;
       cancelBtn.disabled = false;
 
-      closeModal(); // ปิด confirm modal ก่อน
-      if (afterConfirm) afterConfirm(); // แล้วค่อยเปิด alert modal
+      closeModal();
+      if (afterConfirm) afterConfirm();
+
     } catch (err) {
-      // 🔑 FIX สำคัญ: reset ปุ่มแม้ error
+      // ✅ รีเซ็ตปุ่มแม้ error
       resetButton(confirmBtn, "ยืนยันทำรายการ");
       confirmBtn.disabled = false;
       cancelBtn.disabled = false;
