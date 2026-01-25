@@ -810,7 +810,7 @@ onclick="openNotificationSettings()">
 
       <!-- ⚠️ ถอนความยินยอม -->
       <div class="settings-item"
-           onclick="confirmRevokeConsent()">
+           onclick="showRevokeConsentPage()">
         <div class="settings-icon">⚠️</div>
         <div class="settings-text">ถอนความยินยอมในการใช้ข้อมูล</div>
       </div>
@@ -1415,4 +1415,57 @@ function openTopupMenu() {
   ENTRY_CONTEXT = "member"; // ⭐ สำคัญ: ระบุว่าเข้าจาก Member
 
   openGuestHomePage(); // 👉 Topup Home (ใช้ UI เดียวกับ Guest)
+}
+
+/* =========================
+ถอนความยินยอม
+========================= */
+function showRevokeConsentPage() {
+  renderCard(`
+    <div class="top-bar">
+      <button class="back-btn" onclick="openSettings()">←</button>
+      <div class="top-title">ถอนความยินยอม</div>
+    </div>
+
+    <div class="section-card">
+
+      <div style="font-size:14px; line-height:1.7; color:#374151;">
+        หากคุณถอนความยินยอม:
+        <ul style="padding-left:18px; margin-top:8px;">
+          <li>คุณจะไม่สามารถใช้บริการ KPOS ได้อีก</li>
+          <li>ไม่สามารถฝาก / ผ่อน / ดูบิล</li>
+          <li>การดำเนินการนี้ไม่สามารถย้อนกลับได้</li>
+        </ul>
+      </div>
+
+      <button
+        class="primary-btn"
+        style="margin-top:20px"
+        onclick="confirmRevokeConsentFinal()"
+      >
+        ยืนยันทำรายการ
+      </button>
+
+      <button
+        class="secondary-btn"
+        style="margin-top:10px"
+        onclick="openSettings()"
+      >
+        ยกเลิก
+      </button>
+
+    </div>
+  `);
+}
+function confirmRevokeConsentFinal() {
+  showConfirmModal(
+    "ยืนยันการถอนความยินยอม",
+    `การดำเนินการนี้ไม่สามารถย้อนกลับได้
+
+• คุณจะไม่สามารถใช้บริการ KPOS ได้อีก
+• ต้องเปิดใช้งานใหม่จาก LINE
+
+ต้องการดำเนินการต่อหรือไม่?`,
+    revokeConsent // ✅ ใช้ของเดิม
+  );
 }
