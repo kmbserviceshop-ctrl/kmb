@@ -1629,11 +1629,10 @@ async function revokeConsentTest() {
     );
   }
 }
-
 async function revokeConsent() {
   console.log("start revoke");
   await callFn("revoke_consent", { line_user_id });
-  console.log("revoke done"); // ← ดูว่ามาไหม
+  console.log("revoke done");
 }
 function showConfirmModal(title, message, onConfirm) {
   openModal(`
