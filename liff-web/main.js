@@ -1502,77 +1502,67 @@ function openTopupMenu() {
 ========================= */
 function showRevokeConsentPage() {
   renderCard(`
-  <div class="top-bar">
-    <button class="back-btn" onclick="openSettings()">←</button>
-    <div class="top-title">ถอนความยินยอม</div>
-  </div>
-
-  <div class="section-card">
-
-    <!-- WARNING -->
-    <div style="
-      background:#fff7ed;
-      border:1px solid #fed7aa;
-      border-radius:12px;
-      padding:14px;
-      margin-bottom:16px;
-      color:#9a3412;
-      font-size:14px;
-      line-height:1.6;
-    ">
-      ⚠️ การดำเนินการนี้เป็นการยกเลิกความยินยอมในการใช้ข้อมูลส่วนบุคคล
-      และจะส่งผลถาวรต่อการใช้งานระบบ
+    <div class="top-bar">
+      <button class="back-btn" onclick="openSettings()">←</button>
+      <div class="top-title">ถอนความยินยอม</div>
     </div>
 
-    <!-- MAIN IMPACT -->
-    <div style="font-size:14px; line-height:1.7; color:#374151;">
-      เมื่อคุณถอนความยินยอมแล้ว จะเกิดผลดังต่อไปนี้:
-      <ul style="padding-left:18px; margin-top:10px;">
-        <li><strong>ไม่สามารถเข้าใช้งาน KPOS Connect ได้อีก</strong></li>
-        <li>ไม่สามารถฝากสินค้า ผ่อนสินค้า หรือดูข้อมูลบิลใด ๆ ได้</li>
-        <li>ระบบจะยกเลิกการเชื่อมต่อบัญชีของคุณกับ LINE</li>
-      </ul>
-    </div>
+    <div class="section-card">
 
-    <!-- IRREVERSIBLE -->
-    <div style="
-      margin-top:14px;
-      font-size:14px;
-      color:#b91c1c;
-      font-weight:600;
-    ">
-      การดำเนินการนี้ไม่สามารถย้อนกลับได้
-    </div>
-
-    <!-- FOOTNOTE -->
-    <div style="margin-top:10px; font-size:13px; color:#6b7280;">
-      หากต้องการใช้งานระบบอีกครั้ง
-      กรุณาติดต่อร้านค้าที่ท่านใช้บริการโดยตรง
-    </div>
-
-    <!-- ACTION -->
-    <button
-      class="primary-btn"
-      style="margin-top:22px"
-      onclick="confirmRevokeConsentFinal()"
-    >
-      ยืนยันถอนความยินยอม
-    </button>
-
-    <div
-      style="
-        margin-top:14px;
-        text-align:center;
+      <div style="
+        background:#fff7ed;
+        border:1px solid #fed7aa;
+        border-radius:12px;
+        padding:14px;
+        margin-bottom:16px;
+        color:#9a3412;
         font-size:14px;
-        color:#6b7280;
-        cursor:pointer;
-      "
-      onclick="openSettings()"
-    >
-      ยกเลิกและกลับไปหน้าตั้งค่า
-    </div>
+        line-height:1.6;
+      ">
+        ⚠️ การดำเนินการนี้เป็นการยกเลิกความยินยอมในการใช้ข้อมูลส่วนบุคคล
+        และจะส่งผลถาวรต่อการใช้งานระบบ
+      </div>
 
-  </div>
+      <div style="font-size:14px; line-height:1.7; color:#374151;">
+        เมื่อคุณถอนความยินยอมแล้ว จะเกิดผลดังต่อไปนี้:
+        <ul style="padding-left:18px; margin-top:10px;">
+          <li><strong>ไม่สามารถเข้าใช้งาน KPOS Connect ได้อีก</strong></li>
+          <li>ไม่สามารถฝากสินค้า ผ่อนสินค้า หรือดูข้อมูลบิลใด ๆ ได้</li>
+          <li>ระบบจะยกเลิกการเชื่อมต่อบัญชีของคุณกับ LINE</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:14px; font-size:14px; color:#b91c1c; font-weight:600;">
+        การดำเนินการนี้ไม่สามารถย้อนกลับได้
+      </div>
+
+      <div style="margin-top:10px; font-size:13px; color:#6b7280;">
+        หากต้องการใช้งานระบบอีกครั้ง
+        กรุณาติดต่อร้านค้าที่ท่านใช้บริการโดยตรง
+      </div>
+
+      <button
+        class="primary-btn"
+        style="margin-top:22px"
+        onclick="confirmRevokeConsentFinal()"
+      >
+        ยืนยันถอนความยินยอม
+      </button>
+
+      <div
+        style="
+          margin-top:14px;
+          text-align:center;
+          font-size:14px;
+          color:#6b7280;
+          cursor:pointer;
+        "
+        onclick="openSettings()"
+      >
+        ยกเลิกและกลับไปหน้าตั้งค่า
+      </div>
+
+    </div>
   `);
 }
 async function revokeConsent() {
@@ -1582,7 +1572,6 @@ async function revokeConsent() {
     line_user_id: profile.userId,
   });
 
-  // update state ฝั่ง frontend
   CURRENT_CUSTOMER = {
     ...CURRENT_CUSTOMER,
     consent_status: "revoked",
@@ -1595,7 +1584,7 @@ async function revokeConsent() {
 function confirmRevokeConsentFinal() {
   showConfirmModal(
     "ยืนยันการถอนความยินยอม",
-    `การดำเนินการนี้ไม่สามารถย้อนกลับได้
+`การดำเนินการนี้ไม่สามารถย้อนกลับได้
 
 • คุณจะไม่สามารถใช้บริการ KPOS ได้อีก
 • ต้องเปิดใช้งานใหม่จาก LINE`,
@@ -1604,7 +1593,7 @@ function confirmRevokeConsentFinal() {
       await revokeConsent();
     },
     () => {
-      // ✅ UI อยู่ตรงนี้เท่านั้น
+      // ✅ UI ทำหลัง modal ปิดแล้วเท่านั้น
       showAlertModal(
         "ถอนความยินยอมแล้ว",
         "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
@@ -1640,9 +1629,9 @@ function showConfirmModal(title, message, onConfirm, afterConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      await onConfirm();   // ❌ ห้ามเปิด modal ในนี้
-      closeModal();        // ✅ ปิดก่อน
-      if (afterConfirm) afterConfirm(); // ✅ ค่อยเปิด alert
+      await onConfirm();   // logic
+      closeModal();        // ปิดก่อน
+      if (afterConfirm) afterConfirm(); // ค่อยเปิด alert
     } catch (err) {
       closeModal();
       showAlertModal(
