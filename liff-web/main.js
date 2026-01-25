@@ -684,8 +684,9 @@ modalEl.onclick = (e) => {
 
 function showAlertModal(title, message, options = {}) {
   const {
-    retry = null,        // function สำหรับ retry
-    canCloseLiff = false // แสดงปุ่มปิด LINE
+    retry = null,
+    onConfirm = null,
+    canCloseLiff = false
   } = options;
 
   openModal(`
@@ -694,29 +695,13 @@ function showAlertModal(title, message, options = {}) {
 
     ${
       retry
-        ? `
-        <button class="primary-btn" id="retryBtn">
-          ลองใหม่อีกครั้ง
-        </button>
-        `
-        : `
-        <button class="primary-btn" id="okBtn">
-          ตกลง
-        </button>
-        `
+        ? `<button class="primary-btn" id="retryBtn">ลองใหม่อีกครั้ง</button>`
+        : `<button class="primary-btn" id="okBtn">ตกลง</button>`
     }
 
     ${
       canCloseLiff
-        ? `
-        <button
-          class="secondary-btn"
-          style="margin-top:10px"
-          id="closeBtn"
-        >
-          ปิดหน้าต่าง
-        </button>
-        `
+        ? `<button class="secondary-btn" id="closeBtn">ปิดหน้าต่าง</button>`
         : ``
     }
   `);
@@ -727,7 +712,10 @@ function showAlertModal(title, message, options = {}) {
       retry();
     };
   } else {
-    document.getElementById("okBtn").onclick = closeModal;
+    document.getElementById("okBtn").onclick = () => {
+      closeModal();
+      if (typeof onConfirm === "function") onConfirm();
+    };
   }
 
   if (canCloseLiff) {
