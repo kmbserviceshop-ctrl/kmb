@@ -1653,11 +1653,24 @@ function showConfirmModal(title, message, onConfirm) {
   cancelBtn.onclick = closeModal;
 
   confirmBtn.onclick = async () => {
+    // 🔒 lock UI
     setButtonLoading(confirmBtn, "กำลังดำเนินการ");
     confirmBtn.disabled = true;
     cancelBtn.disabled = true;
 
-    closeModal();          // ⬅️ จุดแก้สำคัญ
-    await onConfirm();     // ⬅️ ค่อยทำงานจริง
+    try {
+      // ✅ รอให้ action เสร็จก่อน
+      await onConfirm();
+
+      // ✅ ปิด modal หลังสำเร็จ
+      closeModal();
+    } catch (err) {
+      // ❗ กันกรณี error หลุด
+      closeModal();
+      showAlertModal(
+        "เกิดข้อผิดพลาด",
+        err?.message || "ไม่สามารถดำเนินการได้"
+      );
+    }
   };
 }
