@@ -1575,50 +1575,47 @@ function showRevokeConsentPage() {
   </div>
   `);
 }
+async function revokeConsent() {
+  const profile = await liff.getProfile();
 
+  await callFn("revoke_consent", {
+    line_user_id: profile.userId,
+  });
+
+  // update state ฝั่ง frontend
+  CURRENT_CUSTOMER = {
+    ...CURRENT_CUSTOMER,
+    consent_status: "revoked",
+    consent_version: null,
+  };
+
+  HAS_READ_PDPA = false;
+  READ_TIMER_PASSED = false;
+}
 function confirmRevokeConsentFinal() {
   showConfirmModal(
     "ยืนยันการถอนความยินยอม",
     `การดำเนินการนี้ไม่สามารถย้อนกลับได้
 
 • คุณจะไม่สามารถใช้บริการ KPOS ได้อีก
-• ต้องเปิดใช้งานใหม่จาก LINE
+• ต้องเปิดใช้งานใหม่จาก LINE`,
+    async () => {
+      // 1️⃣ ทำงานจริง
+      await revokeConsent();
 
-ต้องการดำเนินการต่อหรือไม่?`,
-    revokeConsent 
+      // 2️⃣ แสดงผลลัพธ์หลัง confirm modal ปิดแล้ว
+      showAlertModal(
+        "ถอนความยินยอมแล้ว",
+        "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
+        {
+          onConfirm: () => {
+            try { liff.logout(); } catch (_) {}
+            liff.closeWindow();
+          }
+        }
+      );
+    }
   );
-}
-async function revokeConsent() {
-  try {
-    const profile = await liff.getProfile();
-
-    await callFn("revoke_consent", {
-      line_user_id: profile.userId,
-    });
-
-    CURRENT_CUSTOMER = {
-      ...CURRENT_CUSTOMER,
-      consent_status: "revoked",
-      consent_version: null,
-    };
-
-    HAS_READ_PDPA = false;
-    READ_TIMER_PASSED = false;
-
-    showAlertModal(
-      "ถอนความยินยอมแล้ว",
-      "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
-      () => {
-        try { liff.logout(); } catch (e) {}
-        liff.closeWindow();
-      }
-    );
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถถอนความยินยอมได้"
-    );
-  }
 }
 function showConfirmModal(title, message, onConfirm) {
   openModal(`
