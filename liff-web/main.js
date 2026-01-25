@@ -1111,60 +1111,6 @@ function declineConsent() {
   );
 }
 
-function confirmRevokeConsent() {
-  showConfirmModal(
-    "ถอนความยินยอม",
-    `หากคุณถอนความยินยอม:
-• คุณจะไม่สามารถใช้บริการ KPOS ได้อีก
-• ไม่สามารถฝาก / ผ่อน / ดูบิล
-• การดำเนินการนี้ไม่สามารถย้อนกลับได้
-
-ต้องการดำเนินการต่อหรือไม่?`,
-    revokeConsent // 👈 กดยืนยันเท่านั้นถึงเรียก
-  );
-}
-
-async function revokeConsent() {
-  try {
-    const profile = await liff.getProfile();
-
-    // 1️⃣ เรียก backend ถอนความยินยอม
-    await callFn("revoke_consent", {
-      line_user_id: profile.userId,
-    });
-
-    // 2️⃣ 🔥 อัปเดต state ฝั่ง frontend (คงโครงเดิม)
-    CURRENT_CUSTOMER = {
-      ...CURRENT_CUSTOMER,
-      consent_status: "revoked",
-      consent_version: null,
-    };
-
-    HAS_READ_PDPA = false;
-    READ_TIMER_PASSED = false;
-
-    // 3️⃣ แจ้งผู้ใช้ + logout + ปิด LIFF
-    showAlertModal(
-      "ถอนความยินยอมแล้ว",
-      "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
-      () => {
-        try {
-          liff.logout(); // 🔑 FIX 3: ตัด LINE session
-        } catch (e) {
-          // ป้องกัน error กรณี environment บางแบบ
-        }
-        liff.closeWindow(); // 🚪 ปิด LIFF
-      }
-    );
-
-  } catch (err) {
-    showAlertModal(
-      "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถถอนความยินยอมได้"
-    );
-  }
-}
-
 function showConfirmModal(title, message, onConfirm) {
   openModal(`
     <h4>${title}</h4>
@@ -1439,22 +1385,25 @@ function showRevokeConsentPage() {
       </div>
 
       <button
-        class="primary-btn"
-        style="margin-top:20px"
-        onclick="confirmRevokeConsentFinal()"
-      >
-        ยืนยันทำรายการ
-      </button>
+  class="primary-btn"
+  style="margin-top:20px"
+  onclick="confirmRevokeConsentFinal()"
+>
+  ยืนยันทำรายการ
+</button>
 
-      <button
-        class="secondary-btn"
-        style="margin-top:10px"
-        onclick="openSettings()"
-      >
-        ยกเลิก
-      </button>
-
-    </div>
+<div
+  style="
+    margin-top:12px;
+    text-align:center;
+    font-size:14px;
+    color:#6b7280;
+    cursor:pointer;
+  "
+  onclick="openSettings()"
+>
+  ยกเลิก
+</div>
   `);
 }
 function confirmRevokeConsentFinal() {
@@ -1466,6 +1415,47 @@ function confirmRevokeConsentFinal() {
 • ต้องเปิดใช้งานใหม่จาก LINE
 
 ต้องการดำเนินการต่อหรือไม่?`,
-    revokeConsent // ✅ ใช้ของเดิม
+    revokeConsent 
   );
+}
+
+async function revokeConsent() {
+  try {
+    const profile = await liff.getProfile();
+
+    // 1️⃣ เรียก backend ถอนความยินยอม
+    await callFn("revoke_consent", {
+      line_user_id: profile.userId,
+    });
+
+    // 2️⃣ 🔥 อัปเดต state ฝั่ง frontend (คงโครงเดิม)
+    CURRENT_CUSTOMER = {
+      ...CURRENT_CUSTOMER,
+      consent_status: "revoked",
+      consent_version: null,
+    };
+
+    HAS_READ_PDPA = false;
+    READ_TIMER_PASSED = false;
+
+    // 3️⃣ แจ้งผู้ใช้ + logout + ปิด LIFF
+    showAlertModal(
+      "ถอนความยินยอมแล้ว",
+      "ระบบได้บันทึกการถอนความยินยอมเรียบร้อย\nคุณจะไม่สามารถใช้งานระบบได้",
+      () => {
+        try {
+          liff.logout(); // 🔑 FIX 3: ตัด LINE session
+        } catch (e) {
+          // ป้องกัน error กรณี environment บางแบบ
+        }
+        liff.closeWindow(); // 🚪 ปิด LIFF
+      }
+    );
+
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถถอนความยินยอมได้"
+    );
+  }
 }
