@@ -576,8 +576,8 @@ function showMemberMenu(customer) {
     <!-- Header -->
     <div class="home-header">
       <div>
+      <div class="home-sub">สวัสดีคุณ</div>
         <div class="home-title">${name}</div>
-        <div class="home-sub">Gold Community</div>
       </div>
       <div class="home-avatar" onclick="openSettings()">⚙️</div>
     </div>
@@ -629,15 +629,11 @@ function showMemberMenu(customer) {
   <div class="tile-text">รายการคำขอ</div>
 </button>
 
-      <button class="menu-tile" onclick="openAddonMenu()">
+      <button class="menu-tile disabled" disabled>
         <div class="tile-icon">➕</div>
-        <div class="tile-text">แพ็กเสริม</div>
+        <div class="tile-text">แจ้งใบหาย</div>
       </button>
 
-      <button class="menu-tile" onclick="openGameTopup()">
-        <div class="tile-icon">🎮</div>
-        <div class="tile-text">เติมเกม</div>
-      </button>
 
       <button class="menu-tile disabled" disabled>
         <div class="tile-icon">📱</div>
@@ -655,10 +651,10 @@ function showMemberMenu(customer) {
 
     </div>
 
-    <!-- รายการแจ้งชำระ -->
+    <!-- การแจ้งเตือน -->
     <div style="margin-top:18px;">
       <div style="font-weight:700;margin-bottom:8px;">
-        รายการแจ้งชำระ
+        บริการการนี้อยู่ระหว่างทดลองใช้บริการ
       </div>
       <div id="homePaymentList"></div>
     </div>
@@ -802,7 +798,7 @@ onclick="openNotificationSettings()">
 
       <!-- 👤 การจัดการความยินยอม (แก้จุดนี้) -->
       <div class="settings-item"
-           onclick="showConsentPage()">
+           onclick="openConsentDetail()">
         <div class="settings-icon">👤</div>
         <div class="settings-text">การจัดการความยินยอม</div>
         <div class="settings-arrow">›</div>
@@ -932,7 +928,6 @@ async function toggleNotification(type, enabled, checkboxEl) {
     checkboxEl.disabled = false;
   }
 }
-
 function openConsentDetail() {
   // 🔁 reset state ทุกครั้งที่เปิด
   READ_TIMER_PASSED = false;
