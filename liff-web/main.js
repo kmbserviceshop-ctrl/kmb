@@ -1280,41 +1280,6 @@ function declineConsent() {
   );
 }
 
-function showConfirmModal(title, message, onConfirm) {
-  openModal(`
-    <h4>${title}</h4>
-    <p style="white-space:pre-line">${message}</p>
-
-    <!-- ปุ่มหลัก -->
-    <button class="primary-btn" id="confirmBtn">
-      ยืนยันทำรายการ
-    </button>
-
-    <!-- ปุ่มรอง -->
-    <button
-      class="secondary-btn"
-      id="cancelBtn"
-      style="margin-top:10px"
-    >
-      ยกเลิกทำรายการ
-    </button>
-  `);
-
-  const confirmBtn = document.getElementById("confirmBtn");
-  const cancelBtn = document.getElementById("cancelBtn");
-
-  cancelBtn.onclick = closeModal;
-
-  confirmBtn.onclick = () => {
-    // 🔒 lock + loading
-    setButtonLoading(confirmBtn, "กำลังดำเนินการ");
-    confirmBtn.disabled = true;
-    cancelBtn.disabled = true;
-
-    // เรียก action จริง
-    onConfirm();
-  };
-}
 
 function showConsentPage() {
 
@@ -1663,4 +1628,36 @@ async function revokeConsent() {
       err.message || "ไม่สามารถถอนความยินยอมได้"
     );
   }
+}
+function showConfirmModal(title, message, onConfirm) {
+  openModal(`
+    <h4>${title}</h4>
+    <p style="white-space:pre-line">${message}</p>
+
+    <button class="primary-btn" id="confirmBtn">
+      ยืนยันทำรายการ
+    </button>
+
+    <button
+      class="secondary-btn"
+      id="cancelBtn"
+      style="margin-top:10px"
+    >
+      ยกเลิกทำรายการ
+    </button>
+  `);
+
+  const confirmBtn = document.getElementById("confirmBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  cancelBtn.onclick = closeModal;
+
+  confirmBtn.onclick = async () => {
+    setButtonLoading(confirmBtn, "กำลังดำเนินการ");
+    confirmBtn.disabled = true;
+    cancelBtn.disabled = true;
+
+    closeModal();          // ⬅️ จุดแก้สำคัญ
+    await onConfirm();     // ⬅️ ค่อยทำงานจริง
+  };
 }
