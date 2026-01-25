@@ -1368,44 +1368,80 @@ function openTopupMenu() {
 ========================= */
 function showRevokeConsentPage() {
   renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="openSettings()">←</button>
-      <div class="top-title">ถอนความยินยอม</div>
+  <div class="top-bar">
+    <button class="back-btn" onclick="openSettings()">←</button>
+    <div class="top-title">ถอนความยินยอม</div>
+  </div>
+
+  <div class="section-card">
+
+    <!-- WARNING -->
+    <div style="
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:16px;
+      color:#9a3412;
+      font-size:14px;
+      line-height:1.6;
+    ">
+      ⚠️ การดำเนินการนี้เป็นการยกเลิกความยินยอมในการใช้ข้อมูลส่วนบุคคล
+      และจะส่งผลถาวรต่อการใช้งานระบบ
     </div>
 
-    <div class="section-card">
+    <!-- MAIN IMPACT -->
+    <div style="font-size:14px; line-height:1.7; color:#374151;">
+      เมื่อคุณถอนความยินยอมแล้ว จะเกิดผลดังต่อไปนี้:
+      <ul style="padding-left:18px; margin-top:10px;">
+        <li><strong>ไม่สามารถเข้าใช้งาน KPOS Connect ได้อีก</strong></li>
+        <li>ไม่สามารถฝากสินค้า ผ่อนสินค้า หรือดูข้อมูลบิลใด ๆ ได้</li>
+        <li>ระบบจะยกเลิกการเชื่อมต่อบัญชีของคุณกับ LINE</li>
+      </ul>
+    </div>
 
-      <div style="font-size:14px; line-height:1.7; color:#374151;">
-        หากคุณถอนความยินยอม:
-        <ul style="padding-left:18px; margin-top:8px;">
-          <li>คุณจะไม่สามารถใช้บริการ KPOS ได้อีก</li>
-          <li>ไม่สามารถฝาก / ผ่อน / ดูบิล</li>
-          <li>การดำเนินการนี้ไม่สามารถย้อนกลับได้</li>
-        </ul>
-      </div>
+    <!-- IRREVERSIBLE -->
+    <div style="
+      margin-top:14px;
+      font-size:14px;
+      color:#b91c1c;
+      font-weight:600;
+    ">
+      การดำเนินการนี้ไม่สามารถย้อนกลับได้
+    </div>
 
-      <button
-  class="primary-btn"
-  style="margin-top:20px"
-  onclick="confirmRevokeConsentFinal()"
->
-  ยืนยันทำรายการ
-</button>
+    <!-- FOOTNOTE -->
+    <div style="margin-top:10px; font-size:13px; color:#6b7280;">
+      หากต้องการใช้งานระบบอีกครั้ง
+      กรุณาติดต่อร้านค้าที่ท่านใช้บริการโดยตรง
+    </div>
 
-<div
-  style="
-    margin-top:12px;
-    text-align:center;
-    font-size:14px;
-    color:#6b7280;
-    cursor:pointer;
-  "
-  onclick="openSettings()"
->
-  ยกเลิก
-</div>
+    <!-- ACTION -->
+    <button
+      class="primary-btn"
+      style="margin-top:22px"
+      onclick="confirmRevokeConsentFinal()"
+    >
+      ยืนยันถอนความยินยอม
+    </button>
+
+    <div
+      style="
+        margin-top:14px;
+        text-align:center;
+        font-size:14px;
+        color:#6b7280;
+        cursor:pointer;
+      "
+      onclick="openSettings()"
+    >
+      ยกเลิกและกลับไปหน้าตั้งค่า
+    </div>
+
+  </div>
   `);
 }
+
 function confirmRevokeConsentFinal() {
   showConfirmModal(
     "ยืนยันการถอนความยินยอม",
