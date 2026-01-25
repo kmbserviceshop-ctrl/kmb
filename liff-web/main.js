@@ -1629,10 +1629,22 @@ function showConfirmModal(title, message, onConfirm, afterConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      await onConfirm();   // logic
-      closeModal();        // ปิดก่อน
-      if (afterConfirm) afterConfirm(); // ค่อยเปิด alert
+      // ✅ ทำ logic อย่างเดียว (ห้ามเปิด modal ในนี้)
+      await onConfirm();
+
+      // 🔑 FIX สำคัญ: reset ปุ่มก่อนปิด
+      resetButton(confirmBtn, "ยืนยันทำรายการ");
+      confirmBtn.disabled = false;
+      cancelBtn.disabled = false;
+
+      closeModal(); // ปิด confirm modal ก่อน
+      if (afterConfirm) afterConfirm(); // แล้วค่อยเปิด alert modal
     } catch (err) {
+      // 🔑 FIX สำคัญ: reset ปุ่มแม้ error
+      resetButton(confirmBtn, "ยืนยันทำรายการ");
+      confirmBtn.disabled = false;
+      cancelBtn.disabled = false;
+
       closeModal();
       showAlertModal(
         "เกิดข้อผิดพลาด",
