@@ -1589,7 +1589,7 @@ function confirmRevokeConsentFinal() {
   );
 }
 
-async function revokeConsent() {
+async function revokeConsentTest() {
   try {
     const profile = await liff.getProfile();
 
@@ -1628,6 +1628,12 @@ async function revokeConsent() {
       err.message || "ไม่สามารถถอนความยินยอมได้"
     );
   }
+}
+
+async function revokeConsent() {
+  console.log("start revoke");
+  await callFn("revoke_consent", { line_user_id });
+  console.log("revoke done"); // ← ดูว่ามาไหม
 }
 function showConfirmModal(title, message, onConfirm) {
   openModal(`
