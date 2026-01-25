@@ -1658,10 +1658,10 @@ function showConfirmModal(title, message, onConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      await onConfirm();   // ⏳ รอ backend
-      closeModal();        // ✅ success
+      await onConfirm();   // ✅ ต้อง resolve หรือ throw
+      closeModal();
     } catch (err) {
-      closeModal();        // ❗ error ก็ต้องปิด
+      closeModal();
       showAlertModal(
         "เกิดข้อผิดพลาด",
         err?.message || "ไม่สามารถดำเนินการได้"
