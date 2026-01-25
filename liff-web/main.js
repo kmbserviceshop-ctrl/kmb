@@ -1572,6 +1572,8 @@ async function revokeConsent() {
     line_user_id: profile.userId,
   });
 
+  console.log("revoke done"); // 👈 ถ้าไม่ขึ้น = backend / callFn ค้าง
+
   CURRENT_CUSTOMER = {
     ...CURRENT_CUSTOMER,
     consent_status: "revoked",
@@ -1629,18 +1631,19 @@ function showConfirmModal(title, message, onConfirm, afterConfirm) {
     cancelBtn.disabled = true;
 
     try {
-      await onConfirm(); // เรียก revokeConsent
+      // 🔴 สำคัญ: onConfirm ต้องมี logic อย่างเดียว ห้ามเปิด modal
+      await onConfirm();
 
-      // ✅ รีเซ็ตปุ่มก่อนปิด modal
+      // ✅ รีเซ็ตปุ่มให้หลุด loading แน่ ๆ
       resetButton(confirmBtn, "ยืนยันทำรายการ");
       confirmBtn.disabled = false;
       cancelBtn.disabled = false;
 
-      closeModal();
-      if (afterConfirm) afterConfirm();
+      closeModal();              // ปิด confirm modal ก่อน
+      if (afterConfirm) afterConfirm(); // แล้วค่อยเปิด alert
 
     } catch (err) {
-      // ✅ รีเซ็ตปุ่มแม้ error
+      // ✅ error ก็ต้องรีเซ็ตปุ่ม
       resetButton(confirmBtn, "ยืนยันทำรายการ");
       confirmBtn.disabled = false;
       cancelBtn.disabled = false;
