@@ -226,22 +226,43 @@ window.IS_GUEST_PAY = false;
 /* =========================
 INIT
 ========================= */
+/* =========================
+INIT
+========================= */
 async function init() {
   try {
-    // ✅ FIX สำคัญที่สุด: ถ้าเป็น Guest Pay → หยุด init ทันที
+    /* =========================
+    GUEST PAY MODE (STOP ALL LIFF)
+    ========================= */
     if (window.IS_GUEST_PAY === true) {
-      console.log("INIT skipped: Guest Pay mode");
+      console.log("INIT: Guest Pay render");
+
+      if (typeof openGuestPaymentForm === "function") {
+        openGuestPaymentForm(); // ✅ render หลัง DOM พร้อม
+        return;
+      }
+
+      // fallback กันหน้าขาว
+      renderCard(`
+        <div style="text-align:center;padding:40px">
+          <h3>ไม่สามารถเปิดหน้าชำระเงินได้</h3>
+          <p style="color:#6b7280">ระบบยังไม่พร้อมใช้งาน</p>
+        </div>
+      `);
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const entry = params.get("entry");
-
+    /* =========================
+    MAINTENANCE
+    ========================= */
     if (MAINTENANCE_MODE) {
       showMaintenancePage();
       return;
     }
 
+    /* =========================
+    LIFF INIT
+    ========================= */
     await liff.init({ liffId: LIFF_ID });
 
     if (!liff.isInClient()) {
@@ -254,22 +275,30 @@ async function init() {
       return;
     }
 
+    /* =========================
+    LOAD PROFILE
+    ========================= */
     const profile = await liff.getProfile();
 
     const status = await callFn("check_line_status", {
       line_user_id: profile.userId,
     });
 
-    // 🔧 FIX: รับ token ตอน init
-    if (status.access_token) {
+    // 🔑 รับ JWT ตอน init
+    if (status?.access_token) {
       ACCESS_TOKEN = status.access_token;
     }
 
+    /* =========================
+    STATUS HANDLING
+    ========================= */
     if (status.status === "revoked") {
       showAlertModal(
         "ไม่สามารถใช้งานได้",
         "คุณได้ถอนความยินยอมในการใช้ข้อมูล\nระบบไม่สามารถให้บริการได้",
-        () => liff.closeWindow()
+        () => {
+          try { liff.closeWindow(); } catch (_) {}
+        }
       );
       return;
     }
@@ -279,6 +308,9 @@ async function init() {
       return;
     }
 
+    /* =========================
+    MEMBER FLOW
+    ========================= */
     CURRENT_CUSTOMER = status.customer;
 
     const {
@@ -299,13 +331,15 @@ async function init() {
     showMemberMenu(CURRENT_CUSTOMER);
 
   } catch (err) {
+    console.error("INIT ERROR:", err);
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      err.message || "ไม่สามารถเริ่มระบบได้"
+      err?.message || "ไม่สามารถเริ่มระบบได้"
     );
   }
 }
 
+// 🔥 เรียกแค่ครั้งเดียว
 init();
 
 
