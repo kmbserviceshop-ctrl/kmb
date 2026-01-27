@@ -866,8 +866,17 @@ async function loadNotificationSettings() {
   CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
 }
 async function openNotificationSettings() {
-  if (!CURRENT_CUSTOMER) {
-    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบข้อมูลผู้ใช้");
+  // 🔒 ต้องมีทั้ง customer และ JWT
+  if (!CURRENT_CUSTOMER || !ACCESS_TOKEN) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      "เซสชันหมดอายุ กรุณาเปิด KPOS Connect ใหม่จาก LINE",
+      {
+        onConfirm: () => {
+          try { liff.closeWindow(); } catch (_) {}
+        }
+      }
+    );
     return;
   }
 
