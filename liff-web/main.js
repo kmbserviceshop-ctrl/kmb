@@ -786,76 +786,76 @@ Settings Page
 ========================= */
 function openSettings() {
   renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
-      <div class="top-title">ตั้งค่า</div>
+  <div class="top-bar">
+    <button class="back-btn" onclick="showMemberMenu(CURRENT_CUSTOMER)">←</button>
+    <div class="top-title">ตั้งค่า</div>
+  </div>
+
+  <div class="settings-card">
+
+    <div class="menu-title" style="padding: 12px 18px 6px;">
+      การตั้งค่าทั่วไป
     </div>
 
-    <div class="settings-card">
-
-      <!-- การตั้งค่าทั่วไป -->
-      <div class="menu-title" style="padding: 12px 18px 6px;">
-        การตั้งค่าทั่วไป
-      </div>
-
-      <!-- 🔔 แจ้งเตือน -->
-<div class="settings-item"
-onclick="openNotificationSettingsSafe()">
-  <div class="settings-icon">🔔</div>
-  <div class="settings-text">ตั้งค่าการแจ้งเตือน</div>
-  <div class="settings-arrow">›</div>
-</div>
-
-      <div class="settings-divider"></div>
-
-      <!-- 👤 การจัดการความยินยอม (แก้จุดนี้) -->
-      <div class="settings-item"
-           onclick="openConsentDetail()">
-        <div class="settings-icon">👤</div>
-        <div class="settings-text">การจัดการความยินยอม</div>
-        <div class="settings-arrow">›</div>
-      </div>
-
-      <!-- ข้อกำหนด -->
-      <div class="menu-title" style="padding: 18px 18px 6px;">
-        ข้อกำหนดและความเป็นส่วนตัว
-      </div>
-
-      <!-- 📄 เงื่อนไข -->
-<div class="settings-item"
-     onclick="showTermsPage()">
-     
-        <div class="settings-icon">📄</div>
-        <div class="settings-text">ข้อกำหนดและเงื่อนไข</div>
-        <div class="settings-arrow">›</div>
-      </div>
-
-      <div class="settings-divider"></div>
-
-      <!-- ⚠️ ถอนความยินยอม -->
-      <div class="settings-item"
-           onclick="showRevokeConsentPage()">
-        <div class="settings-icon">⚠️</div>
-        <div class="settings-text">ถอนความยินยอมในการใช้ข้อมูล</div>
-      </div>
-
-      <div class="settings-divider"></div>
-
-      <!-- 🚪 Logout -->
-      <div class="settings-item"
-           onclick="confirmLogout()">
-        <div class="settings-icon">🚪</div>
-        <div class="settings-text">ออกจากระบบ</div>
-      </div>
-
+    <!-- 🔔 แจ้งเตือน -->
+    <div class="settings-item" onclick="openNotificationSettingsSafe()">
+      <div class="settings-icon">🔔</div>
+      <div class="settings-text">ตั้งค่าการแจ้งเตือน</div>
+      <div class="settings-arrow">›</div>
     </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- 👤 การจัดการความยินยอม -->
+    <div class="settings-item" onclick="openConsentDetail()">
+      <div class="settings-icon">👤</div>
+      <div class="settings-text">การจัดการความยินยอม</div>
+      <div class="settings-arrow">›</div>
+    </div>
+
+    <div class="menu-title" style="padding: 18px 18px 6px;">
+      ข้อกำหนดและความเป็นส่วนตัว
+    </div>
+
+    <div class="settings-item" onclick="showTermsPage()">
+      <div class="settings-icon">📄</div>
+      <div class="settings-text">ข้อกำหนดและเงื่อนไข</div>
+      <div class="settings-arrow">›</div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <div class="settings-item" onclick="showRevokeConsentPage()">
+      <div class="settings-icon">⚠️</div>
+      <div class="settings-text">ถอนความยินยอมในการใช้ข้อมูล</div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <div class="settings-item" onclick="confirmLogout()">
+      <div class="settings-icon">🚪</div>
+      <div class="settings-text">ออกจากระบบ</div>
+    </div>
+
+  </div>
   `);
 }
 
-async function loadNotificationSettings() {
-  const res = await callFn("get_notification_settings", {});
+/* =========================
+Notification Settings
+========================= */
 
-  // 🔴 guard สำคัญ
+// 👉 ดึงค่าจาก backend (ใช้ line_user_id)
+async function loadNotificationSettings() {
+  if (!CURRENT_CUSTOMER?.line_user_id) {
+    throw new Error("missing_line_user_id");
+  }
+
+  const res = await callFn("notification_settings", {
+    action: "get",
+    line_user_id: CURRENT_CUSTOMER.line_user_id,
+  });
+
   if (!res || typeof res !== "object") {
     throw new Error("invalid_response");
   }
@@ -863,12 +863,13 @@ async function loadNotificationSettings() {
   CURRENT_CUSTOMER.notify_due = !!res.notify_due;
   CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
 }
+
 async function openNotificationSettings() {
-  // 🔒 ต้องมีทั้ง customer และ JWT
-  if (!CURRENT_CUSTOMER || !ACCESS_TOKEN) {
+  // ✅ guard ที่ถูกต้อง (ไม่เช็ค ACCESS_TOKEN แล้ว)
+  if (!CURRENT_CUSTOMER || !CURRENT_CUSTOMER.line_user_id) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
-      "เซสชันหมดอายุ กรุณาเปิด KPOS Connect ใหม่จาก LINE",
+      "ไม่พบข้อมูลผู้ใช้ LINE กรุณาเปิด KPOS Connect ใหม่",
       {
         onConfirm: () => {
           try { liff.closeWindow(); } catch (_) {}
@@ -879,7 +880,6 @@ async function openNotificationSettings() {
   }
 
   try {
-    // 🔥 ดึงค่าจริงจาก backend ก่อน render
     await loadNotificationSettings();
   } catch (err) {
     showAlertModal(
@@ -893,57 +893,63 @@ async function openNotificationSettings() {
   const notifyTxn = CURRENT_CUSTOMER.notify_transaction === true;
 
   renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="openSettings()">←</button>
-      <div class="top-title">การแจ้งเตือน</div>
+  <div class="top-bar">
+    <button class="back-btn" onclick="openSettings()">←</button>
+    <div class="top-title">การแจ้งเตือน</div>
+  </div>
+
+  <div class="section-card">
+
+    <div class="settings-item">
+      <div class="settings-text">
+        🔔 เตือนก่อนครบชำระ
+        <div style="font-size:12px;color:#6b7280">
+          แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
+        </div>
+      </div>
+      <label class="switch">
+        <input
+          type="checkbox"
+          ${notifyDue ? "checked" : ""}
+          onchange="toggleNotification('notify_due', this.checked, this)"
+        >
+        <span class="slider"></span>
+      </label>
     </div>
 
-    <div class="section-card">
+    <div class="settings-divider"></div>
 
-      <div class="settings-item">
-        <div class="settings-text">
-          🔔 เตือนก่อนครบชำระ
-          <div style="font-size:12px;color:#6b7280">
-            แจ้งเตือนก่อนถึงวันครบกำหนดชำระ
-          </div>
+    <div class="settings-item">
+      <div class="settings-text">
+        🧾 เตือนเมื่อทำรายการ
+        <div style="font-size:12px;color:#6b7280">
+          แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
         </div>
-        <label class="switch">
-          <input
-            type="checkbox"
-            ${notifyDue ? "checked" : ""}
-            onchange="toggleNotification('notify_due', this.checked, this)"
-          >
-          <span class="slider"></span>
-        </label>
       </div>
-
-      <div class="settings-divider"></div>
-
-      <div class="settings-item">
-        <div class="settings-text">
-          🧾 เตือนเมื่อทำรายการ
-          <div style="font-size:12px;color:#6b7280">
-            แจ้งเตือนเมื่อมีการฝาก / ผ่อน / ต่อสัญญา
-          </div>
-        </div>
-        <label class="switch">
-          <input
-            type="checkbox"
-            ${notifyTxn ? "checked" : ""}
-            onchange="toggleNotification('notify_transaction', this.checked, this)"
-          >
-          <span class="slider"></span>
-        </label>
-      </div>
-
+      <label class="switch">
+        <input
+          type="checkbox"
+          ${notifyTxn ? "checked" : ""}
+          onchange="toggleNotification('notify_transaction', this.checked, this)"
+        >
+        <span class="slider"></span>
+      </label>
     </div>
+
+  </div>
   `);
 }
+
 async function toggleNotification(type, enabled, checkboxEl) {
   checkboxEl.disabled = true;
 
   try {
-    await callFn("update_notification_settings", { type, enabled });
+    await callFn("notification_settings", {
+      action: "update",
+      line_user_id: CURRENT_CUSTOMER.line_user_id,
+      type,
+      enabled,
+    });
 
     CURRENT_CUSTOMER[type] = enabled;
 
@@ -955,7 +961,6 @@ async function toggleNotification(type, enabled, checkboxEl) {
     );
   } catch (err) {
     checkboxEl.checked = !enabled;
-
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถบันทึกการตั้งค่าได้"
