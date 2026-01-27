@@ -866,8 +866,21 @@ async function loadNotificationSettings() {
   CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
 }
 async function openNotificationSettings() {
-  // 🔥 ดึงค่าจริงจาก backend ก่อน render
-  await loadNotificationSettings();
+  if (!CURRENT_CUSTOMER) {
+    showAlertModal("เกิดข้อผิดพลาด", "ไม่พบข้อมูลผู้ใช้");
+    return;
+  }
+
+  try {
+    // 🔥 ดึงค่าจริงจาก backend ก่อน render
+    await loadNotificationSettings();
+  } catch (err) {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err.message || "ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้"
+    );
+    return;
+  }
 
   const notifyDue = CURRENT_CUSTOMER.notify_due === true;
   const notifyTxn = CURRENT_CUSTOMER.notify_transaction === true;
