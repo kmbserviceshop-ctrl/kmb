@@ -10,33 +10,110 @@ ENTRY PAGE
 ========================= */
 function openGuestLookupPage() {
   renderCard(`
-    <div class="top-bar">
-      <button class="back-btn" onclick="showGuestForm()">←</button>
-      <div class="top-title">ต่อดอก / ชำระเงิน</div>
-    </div>
+  <div class="top-bar">
+    <button class="back-btn" onclick="showGuestForm()">←</button>
+    <div class="top-title">ต่อดอก / ชำระเงิน</div>
+  </div>
 
-    <div class="section-card">
+  <div style="max-width:420px;margin:0 auto;padding:24px 20px 32px;">
+    <div style="
+      background:#fff;
+      border-radius:20px;
+      padding:22px 20px 26px;
+      box-shadow:0 10px 28px rgba(0,0,0,0.08);
+    ">
 
-      <div class="form-group">
-        <label>เลขที่สัญญา / เลขที่ฝาก</label>
-        <input id="guestContractNo" class="input" placeholder="เช่น PD123456" />
+      <div style="font-size:22px;font-weight:800;margin-bottom:6px;">
+        ต่อดอก / ชำระเงิน
       </div>
 
-      <div class="form-group">
-        <label>เลขบัตรประชาชน (4 ตัวท้าย)</label>
-        <input id="guestIdCard" class="input" maxlength="4" />
+      <div style="font-size:14px;color:#6b7280;margin-bottom:18px;">
+        กรุณากรอกข้อมูลเพื่อทำรายการชำระเงิน
       </div>
 
-      <div class="form-group">
-        <label>เบอร์ติดต่อ</label>
-        <input id="guestPhone" class="input" />
+      <!-- เลขสัญญา -->
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:15px;font-weight:600;margin-bottom:6px;">
+          เลขที่สัญญา / เลขที่ฝาก
+        </label>
+        <input
+          id="guestContractNo"
+          placeholder="เช่น PD123456"
+          style="
+            width:100%;
+            height:52px;
+            font-size:16px;
+            padding:0 14px;
+            border-radius:14px;
+            border:1px solid #d1d5db;
+            box-sizing:border-box;
+          "
+        />
       </div>
 
-      <button class="primary-btn" onclick="submitGuestLookup(this)">
+      <!-- เลขบัตร 4 ตัวท้าย -->
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:15px;font-weight:600;margin-bottom:6px;">
+          เลขบัตรประชาชน (4 ตัวท้าย)
+        </label>
+        <input
+          id="guestIdCard"
+          maxlength="4"
+          inputmode="numeric"
+          placeholder="เช่น 1234"
+          style="
+            width:100%;
+            height:52px;
+            font-size:16px;
+            padding:0 14px;
+            border-radius:14px;
+            border:1px solid #d1d5db;
+            box-sizing:border-box;
+          "
+        />
+      </div>
+
+      <!-- เบอร์ติดต่อ -->
+      <div style="margin-bottom:22px;">
+        <label style="display:block;font-size:15px;font-weight:600;margin-bottom:6px;">
+          เบอร์ติดต่อ
+        </label>
+        <input
+          id="guestPhone"
+          inputmode="numeric"
+          placeholder="เช่น 08xxxxxxxx"
+          style="
+            width:100%;
+            height:52px;
+            font-size:16px;
+            padding:0 14px;
+            border-radius:14px;
+            border:1px solid #d1d5db;
+            box-sizing:border-box;
+          "
+        />
+        <div style="font-size:13px;color:#6b7280;margin-top:6px;">
+          เบอร์โทรศัพท์ที่ใช้ทำสัญญา
+        </div>
+      </div>
+
+      <!-- ปุ่ม -->
+      <button
+        class="primary-btn"
+        style="
+          width:100%;
+          height:54px;
+          font-size:17px;
+          font-weight:700;
+          border-radius:16px;
+        "
+        onclick="submitGuestLookup(this)"
+      >
         🔍 ตรวจสอบข้อมูล
       </button>
 
     </div>
+  </div>
   `);
 }
 
@@ -104,7 +181,7 @@ function openGuestPayment() {
     amount_satang: amount_due_satang,
 
     description_html: `
-      <div style="font-size:13px;line-height:1.6">
+      <div style="font-size:14px;line-height:1.6">
         <div><b>เลขที่สัญญา:</b> ${contract_no}</div>
         <div><b>สินค้า:</b> ${product_name}</div>
         <div><b>วันครบกำหนด:</b> ${due_date}</div>
