@@ -228,6 +228,12 @@ INIT
 ========================= */
 async function init() {
   try {
+    // ✅ FIX สำคัญที่สุด: ถ้าเป็น Guest Pay → หยุด init ทันที
+    if (window.IS_GUEST_PAY === true) {
+      console.log("INIT skipped: Guest Pay mode");
+      return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const entry = params.get("entry");
 
@@ -291,6 +297,7 @@ async function init() {
     }
 
     showMemberMenu(CURRENT_CUSTOMER);
+
   } catch (err) {
     showAlertModal(
       "เกิดข้อผิดพลาด",
@@ -298,6 +305,7 @@ async function init() {
     );
   }
 }
+
 init();
 
 
