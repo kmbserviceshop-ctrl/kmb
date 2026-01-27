@@ -215,17 +215,21 @@ window.IS_GUEST_PAY = false;
   if (entry === "guest_pay") {
     window.IS_GUEST_PAY = true;
 
-    if (typeof openGuestPaymentForm === "function") {
-      openGuestPaymentForm(); // ✅ render ทันที
+    // ✅ ใช้ฟังก์ชันที่มีอยู่จริง
+    if (typeof openGuestLookupPage === "function") {
+      openGuestLookupPage();
     } else {
       console.error("guest_payment.js not loaded");
+      renderCard(`
+        <div style="text-align:center;padding:40px">
+          <h3>ไม่สามารถเปิดหน้าชำระเงินได้</h3>
+          <p style="color:#6b7280">guest_payment.js ยังไม่ถูกโหลด</p>
+        </div>
+      `);
     }
   }
 })();
 
-/* =========================
-INIT
-========================= */
 /* =========================
 INIT
 ========================= */
@@ -235,21 +239,8 @@ async function init() {
     GUEST PAY MODE (STOP ALL LIFF)
     ========================= */
     if (window.IS_GUEST_PAY === true) {
-      console.log("INIT: Guest Pay render");
-
-      if (typeof openGuestPaymentForm === "function") {
-        openGuestPaymentForm(); // ✅ render หลัง DOM พร้อม
-        return;
-      }
-
-      // fallback กันหน้าขาว
-      renderCard(`
-        <div style="text-align:center;padding:40px">
-          <h3>ไม่สามารถเปิดหน้าชำระเงินได้</h3>
-          <p style="color:#6b7280">ระบบยังไม่พร้อมใช้งาน</p>
-        </div>
-      `);
-      return;
+      console.log("INIT skipped: Guest Pay mode");
+      return; // ❗ ห้ามให้ LIFF ทำงาน
     }
 
     /* =========================
@@ -339,7 +330,7 @@ async function init() {
   }
 }
 
-// 🔥 เรียกแค่ครั้งเดียว
+// 🔥 เรียกครั้งเดียวพอ
 init();
 
 
