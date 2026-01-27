@@ -14,7 +14,7 @@ function openGuestLookupPage() {
   <div style="max-width:420px;margin:0 auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.08)">
 
     <div style="text-align:center;margin-bottom:20px;">
-      <div style="font-size:20px;font-weight:800;">ต่อดอก / ชำระเงิน</div>
+      <div style="font-size:20px;font-weight:800;">ต่ออายุสัญญา / ชำระเงิน</div>
       <div style="font-size:14px;color:#6b7280;margin-top:6px;">
         กรอกข้อมูลเพื่อดำเนินการชำระเงิน
       </div>
@@ -98,7 +98,7 @@ function openGuestPayment() {
   } = GUEST_LOOKUP_RESULT;
 
   openKposPayment({
-    title: "ชำระต่อดอก (ไม่ต้องล็อกอิน)",
+    title: "ชำระอายุบิล (ไม่ต้องล็อกอิน)",
     service: "pawn_extend_guest",
     reference_id: pawn_transaction_id,
     amount_satang: amount_due_satang,
