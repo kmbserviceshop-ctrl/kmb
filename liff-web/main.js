@@ -800,7 +800,7 @@ function openSettings() {
 
       <!-- 🔔 แจ้งเตือน -->
 <div class="settings-item"
-onclick="openNotificationSettings()">
+onclick="openNotificationSettingsSafe()">
   <div class="settings-icon">🔔</div>
   <div class="settings-text">ตั้งค่าการแจ้งเตือน</div>
   <div class="settings-arrow">›</div>
@@ -964,6 +964,17 @@ async function toggleNotification(type, enabled, checkboxEl) {
     checkboxEl.disabled = false;
   }
 }
+
+function openNotificationSettingsSafe() {
+  openNotificationSettings().catch(err => {
+    showAlertModal(
+      "เกิดข้อผิดพลาด",
+      err?.message || "ไม่สามารถเปิดหน้าการแจ้งเตือนได้"
+    );
+  });
+}
+
+
 function openConsentDetailTest() {
   // 🔁 reset state ทุกครั้งที่เปิด
   READ_TIMER_PASSED = false;
@@ -1106,6 +1117,8 @@ KPOS จะไม่เปิดเผยข้อมูลส่วนบุค
     }, 600);
   };
 }
+
+
 function openConsentDetail() {
   // 🔁 reset state ทุกครั้งที่เปิด
   READ_TIMER_PASSED = false;
