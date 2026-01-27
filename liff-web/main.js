@@ -853,14 +853,12 @@ onclick="openNotificationSettings()">
 }
 
 async function loadNotificationSettings() {
-  const res = await callFn(
-    "get_notification_settings",
-    {},
+  const res = await callFn("get_notification_settings", {});
 
-  );
-
-  // backend ต้องส่งมาแบบนี้
-  // { notify_due: true, notify_transaction: false }
+  // 🔴 guard สำคัญ
+  if (!res || typeof res !== "object") {
+    throw new Error("invalid_response");
+  }
 
   CURRENT_CUSTOMER.notify_due = !!res.notify_due;
   CURRENT_CUSTOMER.notify_transaction = !!res.notify_transaction;
@@ -945,12 +943,8 @@ async function toggleNotification(type, enabled, checkboxEl) {
   checkboxEl.disabled = true;
 
   try {
-    await callFn("update_notification_settings", {
-      type,
-      enabled,
-    });
+    await callFn("update_notification_settings", { type, enabled });
 
-    // sync state
     CURRENT_CUSTOMER[type] = enabled;
 
     showAlertModal(
@@ -961,6 +955,7 @@ async function toggleNotification(type, enabled, checkboxEl) {
     );
   } catch (err) {
     checkboxEl.checked = !enabled;
+
     showAlertModal(
       "เกิดข้อผิดพลาด",
       err.message || "ไม่สามารถบันทึกการตั้งค่าได้"
