@@ -206,20 +206,20 @@ async function refreshCustomerStatus() {
 /* =========================
 GUEST PAY ENTRY (STOP MAIN INIT)
 ========================= */
+window.IS_GUEST_PAY = false;
+
 (function detectGuestEntry() {
   const params = new URLSearchParams(window.location.search);
   const entry = params.get("entry");
 
   if (entry === "guest_pay") {
-    // ❗ ห้ามให้ main.js init
+    window.IS_GUEST_PAY = true;
+
     if (typeof openGuestPaymentForm === "function") {
-      openGuestPaymentForm(); // 👉 ฟังก์ชันจาก guest_payment.js
+      openGuestPaymentForm(); // ✅ render ทันที
     } else {
       console.error("guest_payment.js not loaded");
     }
-
-    // ❌ หยุดการทำงาน main.js ทั้งไฟล์
-    throw new Error("STOP_MAIN_INIT");
   }
 })();
 
