@@ -112,29 +112,40 @@ async function callFn(path, payload, options = {}) {
     }
 
     if (!res.ok) {
-  let body = null;
-  try {
-    body = await res.json();
-  } catch (_) {
-    body = { error: "unknown_error" };
-  }
+      let body = null;
+      try {
+        body = await res.json();
+      } catch (_) {
+        body = { error: "unknown_error" };
+      }
 
-  const err = new Error(body.error || "api_error");
-  err.status = res.status;
-  err.body = body;   // 👈 จุดสำคัญที่สุด
-  throw err;
-}
+      const err = new Error(body.error || "api_error");
+      err.status = res.status;
+      err.body = body;           // ✅ ต้องรักษาไว้
+      throw err;
+    }
 
     return await res.json();
 
   } catch (err) {
     // ⏱ timeout
     if (err.name === "AbortError") {
-      throw new Error(ERROR_MESSAGES.request_timeout);
+      const e = new Error(ERROR_MESSAGES.request_timeout);
+      e.error = "request_timeout";
+      throw e;
     }
 
+    // ⭐ FIX สำคัญที่สุด
+    // ถ้าเป็น error จาก backend → ส่งต่อทั้งก้อน ห้ามแปลงใหม่
+    if (err && err.body) {
+      throw err;
+    }
+
+    // fallback กรณี error แปลก ๆ
     const message = translateError(err);
-    throw new Error(message);
+    const e = new Error(message);
+    e.error = "unknown_error";
+    throw e;
 
   } finally {
     clearTimeout(timer);
