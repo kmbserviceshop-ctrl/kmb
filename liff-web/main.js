@@ -112,10 +112,18 @@ async function callFn(path, payload, options = {}) {
     }
 
     if (!res.ok) {
-      const text = await res.text();
-      // ส่งต่อ error ดิบเข้า translateError
-      throw new Error(text || "internal_error");
-    }
+  let body = null;
+  try {
+    body = await res.json();
+  } catch (_) {
+    body = { error: "unknown_error" };
+  }
+
+  const err = new Error(body.error || "api_error");
+  err.status = res.status;
+  err.body = body;   // 👈 จุดสำคัญที่สุด
+  throw err;
+}
 
     return await res.json();
 
