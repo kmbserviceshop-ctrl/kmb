@@ -360,57 +360,69 @@ function openGuestAlreadySubmitted() {
 }
 
 function openGuestTerms() {
-  document.getElementById("guestModalTitle").innerText =
-    "ข้อกำหนดและเงื่อนไขการใช้บริการ";
+  const titleEl = document.getElementById("guestModalTitle");
+  const bodyEl = document.getElementById("guestModalBody");
 
-  document.getElementById("guestModalBody").innerHTML = `
-<b>KPOS Connect (ผู้ใช้แบบไม่ล็อกอิน)</b><br><br>
+  if (!titleEl || !bodyEl) return;
 
-การใช้บริการตรวจสอบข้อมูลและชำระเงินผ่านระบบนี้
-มีวัตถุประสงค์เพื่ออำนวยความสะดวกแก่ลูกค้าในการต่ออายุสัญญา
-และชำระค่าบริการเท่านั้น<br><br>
+  titleEl.innerText = "ข้อกำหนดและเงื่อนไขการใช้บริการ";
 
-ข้อมูลที่แสดงในระบบเป็นข้อมูลจากร้านค้า
-หากพบความคลาดเคลื่อน กรุณาติดต่อร้านค้าโดยตรง<br><br>
+  bodyEl.innerHTML = `
+    <b>KPOS Connect (ผู้ใช้แบบไม่ล็อกอิน)</b><br><br>
 
-ระบบไม่รับผิดชอบต่อความเสียหายใด ๆ
-อันเกิดจากการใช้งานระบบหรือการกรอกข้อมูลไม่ถูกต้อง<br><br>
+    การใช้บริการตรวจสอบข้อมูลและชำระเงินผ่านระบบนี้
+    มีวัตถุประสงค์เพื่ออำนวยความสะดวกแก่ลูกค้าในการต่ออายุสัญญา
+    และชำระค่าบริการเท่านั้น<br><br>
 
-ร้านค้าขอสงวนสิทธิ์ในการปรับปรุงหรือเปลี่ยนแปลงเงื่อนไขการให้บริการ
-โดยไม่จำเป็นต้องแจ้งให้ทราบล่วงหน้า
-`;
+    ข้อมูลที่แสดงในระบบเป็นข้อมูลจากร้านค้า
+    หากพบความคลาดเคลื่อน กรุณาติดต่อร้านค้าโดยตรง<br><br>
+
+    ระบบไม่รับผิดชอบต่อความเสียหายใด ๆ
+    อันเกิดจากการใช้งานระบบหรือการกรอกข้อมูลไม่ถูกต้อง<br><br>
+
+    ร้านค้าขอสงวนสิทธิ์ในการปรับปรุงหรือเปลี่ยนแปลงเงื่อนไขการให้บริการ
+    โดยไม่จำเป็นต้องแจ้งให้ทราบล่วงหน้า
+  `;
 
   showGuestModal();
 }
 
 function openGuestPrivacy() {
-  document.getElementById("guestModalTitle").innerText =
-    "นโยบายความเป็นส่วนตัว";
+  const titleEl = document.getElementById("guestModalTitle");
+  const bodyEl = document.getElementById("guestModalBody");
 
-  document.getElementById("guestModalBody").innerHTML = `
-<b>การคุ้มครองข้อมูลส่วนบุคคล (PDPA)</b><br><br>
+  if (!titleEl || !bodyEl) return;
 
-ระบบจะเก็บและใช้ข้อมูลที่ท่านให้ไว้
-เช่น เลขสัญญา เลขบัตรประชาชน/พาสปอร์ตบางส่วน และเบอร์ติดต่อ
-เพื่อวัตถุประสงค์ในการตรวจสอบข้อมูลสัญญา
-และดำเนินการชำระเงินเท่านั้น<br><br>
+  titleEl.innerText = "นโยบายความเป็นส่วนตัว";
 
-ข้อมูลดังกล่าวจะไม่ถูกนำไปใช้ในวัตถุประสงค์อื่น
-และจะไม่เปิดเผยแก่บุคคลภายนอก
-ยกเว้นเท่าที่จำเป็นต่อการให้บริการ<br><br>
+  bodyEl.innerHTML = `
+    <b>การคุ้มครองข้อมูลส่วนบุคคล (PDPA)</b><br><br>
 
-ข้อมูลของท่านจะถูกจัดเก็บและประมวลผล
-ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล
-พ.ศ. 2562 (PDPA)
-`;
+    ระบบจะเก็บและใช้ข้อมูลที่ท่านให้ไว้
+    เช่น เลขสัญญา เลขบัตรประชาชน/พาสปอร์ตบางส่วน และเบอร์ติดต่อ
+    เพื่อวัตถุประสงค์ในการตรวจสอบข้อมูลสัญญา
+    และดำเนินการชำระเงินเท่านั้น<br><br>
+
+    ข้อมูลดังกล่าวจะไม่ถูกนำไปใช้ในวัตถุประสงค์อื่น
+    และจะไม่เปิดเผยแก่บุคคลภายนอก
+    ยกเว้นเท่าที่จำเป็นต่อการให้บริการ<br><br>
+
+    ข้อมูลของท่านจะถูกจัดเก็บและประมวลผล
+    ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล
+    พ.ศ. 2562 (PDPA)
+  `;
 
   showGuestModal();
 }
 
 function showGuestModal() {
-  document.getElementById("guestModalOverlay").style.display = "flex";
+  const overlay = document.getElementById("guestModalOverlay");
+  if (!overlay) return;
+  overlay.style.display = "flex";
 }
 
 function closeGuestModal() {
-  document.getElementById("guestModalOverlay").style.display = "none";
+  const overlay = document.getElementById("guestModalOverlay");
+  if (!overlay) return;
+  overlay.style.display = "none";
 }
