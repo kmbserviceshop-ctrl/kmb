@@ -126,6 +126,26 @@ function openGuestLookupPage() {
         🔍 ตรวจสอบข้อมูล
       </button>
 
+      <div style="
+  margin-top:12px;
+  font-size:12px;
+  color:#6b7280;
+  text-align:center;
+  line-height:1.5;
+">
+🔒 การกดปุ่ม “ตรวจสอบข้อมูล” ถือว่าคุณยอมรับ
+<a href="/terms" target="_blank" style="color:#2563eb;text-decoration:none;">
+เงื่อนไขการใช้บริการ
+</a>
+และ
+<a href="/privacy" target="_blank" style="color:#2563eb;text-decoration:none;">
+นโยบายความเป็นส่วนตัว
+</a>
+</div>
+
+
+
+
     </div>
   </div>
   `);
