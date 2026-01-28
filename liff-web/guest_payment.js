@@ -135,20 +135,22 @@ function openGuestLookupPage() {
 FORMAT CONTRACT NO
 ========================= */
 function formatPawnContract(input) {
-  let v = input.value.toUpperCase();
-  v = v.replace(/[^A-Z0-9]/g, "");
+  let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
+  // force PD
   if (!v.startsWith("PD")) {
     v = "PD" + v.replace(/^PD*/, "");
   }
 
-  let rest = v.slice(2).slice(0, 10);
+  // เอาเฉพาะตัวหลัง PD
+  let rest = v.slice(2);
+
   let year = rest.slice(0, 4);
-  let num = rest.slice(4, 10);
+  let num  = rest.slice(4, 10); // 6 หลักพอดี
 
   let result = "PD";
-  if (year) result += "-" + year;
-  if (num) result += "-" + num;
+  if (year.length) result += "-" + year;
+  if (num.length)  result += "-" + num;
 
   input.value = result;
 }
