@@ -10,47 +10,119 @@ ENTRY PAGE
 ========================= */
 function openGuestLookupPage() {
   renderCard(`
-  <div style="min-height:100vh;background:#f6f7f9;padding:24px 16px;">
-    <div style="max-width:420px;margin:0 auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.08)">
+  <div style="
+    min-height:100vh;
+    background:#f6f7f9;
+    padding:24px 16px;
+  ">
+    <div style="
+      max-width:420px;
+      margin:0 auto;
+      background:#ffffff;
+      border-radius:20px;
+      padding:24px 22px 28px;
+      box-shadow:0 8px 24px rgba(0,0,0,.06);
+    ">
 
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:20px;font-weight:800;">ต่ออายุสัญญา / ชำระเงิน</div>
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:20px;font-weight:800;color:#111827;">
+          ต่ออายุสัญญา / ชำระเงิน
+        </div>
         <div style="font-size:14px;color:#6b7280;margin-top:6px;">
           กรอกข้อมูลเพื่อดำเนินการชำระเงิน
         </div>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <label>เลขที่สัญญา / เลขที่ฝาก</label>
+      <!-- Contract -->
+      <div style="margin-bottom:18px;">
+        <label style="font-size:14px;font-weight:600;color:#111827;">
+          เลขที่สัญญา / เลขที่ฝาก
+        </label>
         <input
           id="guestContractNo"
           placeholder="PD-2026-000028"
           inputmode="text"
           oninput="formatPawnContract(this)"
-          style="width:100%;height:52px;border-radius:12px;border:1px solid #e5e7eb;padding:0 14px;">
+          style="
+            width:100%;
+            height:52px;
+            margin-top:8px;
+            border-radius:12px;
+            border:1px solid #d1d5db;
+            padding:10px 14px;
+            font-size:16px;
+            line-height:1.2;
+            box-sizing:border-box;
+          "
+        >
+        <div style="font-size:12px;color:#6b7280;margin-top:6px;">
+          ตัวอย่าง: PD-2026-000028
+        </div>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <label>เลขบัตรประชาชน / พาสปอร์ต (4 ตัวท้าย)</label>
+      <!-- ID CARD -->
+      <div style="margin-bottom:18px;">
+        <label style="font-size:14px;font-weight:600;color:#111827;">
+          เลขบัตรประชาชน / พาสปอร์ต (4 ตัวท้าย)
+        </label>
         <input
           id="guestIdCard"
           maxlength="4"
           inputmode="numeric"
-          style="width:100%;height:52px;border-radius:12px;border:1px solid #e5e7eb;padding:0 14px;">
+          style="
+            width:100%;
+            height:52px;
+            margin-top:8px;
+            border-radius:12px;
+            border:1px solid #d1d5db;
+            padding:10px 14px;
+            font-size:16px;
+            line-height:1.2;
+            box-sizing:border-box;
+          "
+        >
       </div>
 
-      <div style="margin-bottom:22px;">
-        <label>เบอร์ติดต่อ</label>
+      <!-- PHONE -->
+      <div style="margin-bottom:24px;">
+        <label style="font-size:14px;font-weight:600;color:#111827;">
+          เบอร์ติดต่อ
+        </label>
         <input
           id="guestPhone"
           inputmode="numeric"
-          style="width:100%;height:52px;border-radius:12px;border:1px solid #e5e7eb;padding:0 14px;">
+          placeholder="เช่น 0812345678"
+          style="
+            width:100%;
+            height:52px;
+            margin-top:8px;
+            border-radius:12px;
+            border:1px solid #d1d5db;
+            padding:10px 14px;
+            font-size:16px;
+            line-height:1.2;
+            box-sizing:border-box;
+          "
+        >
       </div>
 
+      <!-- BUTTON -->
       <button
         id="guestLookupBtn"
         onclick="submitGuestLookup(this)"
-        style="width:100%;height:54px;border-radius:14px;border:none;background:#2563eb;color:#fff;font-size:17px;font-weight:700;">
+        style="
+          width:100%;
+          height:54px;
+          border-radius:14px;
+          border:none;
+          background:#2563eb;
+          color:#ffffff;
+          font-size:17px;
+          font-weight:700;
+          cursor:pointer;
+        "
+      >
         🔍 ตรวจสอบข้อมูล
       </button>
 
@@ -96,7 +168,7 @@ async function submitGuestLookup(btn) {
     return;
   }
 
-  if (!/^PD-\d{4}-\d{6}$/.test(contract_no)) {
+  if (!/^PD-\\d{4}-\\d{6}$/.test(contract_no)) {
     showAlertModal(
       "รูปแบบไม่ถูกต้อง",
       "กรุณากรอกเลขสัญญาในรูปแบบ PD-2026-000028"
@@ -181,7 +253,13 @@ function openGuestAlreadySubmitted() {
     : "-";
 
   renderCard(`
-  <div style="max-width:420px;margin:40px auto;background:#fff;padding:24px;border-radius:20px;">
+  <div style="
+    max-width:420px;
+    margin:40px auto;
+    background:#ffffff;
+    padding:24px;
+    border-radius:20px;
+  ">
     <h3 style="margin-bottom:12px;">📌 แจ้งชำระแล้ว</h3>
 
     <div style="font-size:14px;line-height:1.8;color:#374151">
@@ -198,8 +276,18 @@ function openGuestAlreadySubmitted() {
       ⏳ ระบบกำลังตรวจสอบ กรุณารอการยืนยันจากร้าน
     </div>
 
-    <button onclick="openGuestLookupPage()"
-      style="margin-top:20px;width:100%;height:48px;border-radius:12px;border:none;background:#e5e7eb;">
+    <button
+      onclick="openGuestLookupPage()"
+      style="
+        margin-top:20px;
+        width:100%;
+        height:48px;
+        border-radius:12px;
+        border:none;
+        background:#e5e7eb;
+        font-size:15px;
+      "
+    >
       กลับหน้าหลัก
     </button>
   </div>
