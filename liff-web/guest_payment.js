@@ -360,69 +360,55 @@ function openGuestAlreadySubmitted() {
 }
 
 function openGuestTerms() {
-  const titleEl = document.getElementById("guestModalTitle");
-  const bodyEl = document.getElementById("guestModalBody");
+  const modal = document.getElementById("modal");
+  const content = document.getElementById("modalContent");
 
-  if (!titleEl || !bodyEl) return;
+  content.innerHTML = `
+    <h4>ข้อกำหนดและเงื่อนไขการใช้บริการ</h4>
+    <p>
+      <b>KPOS Connect (ผู้ใช้แบบไม่ล็อกอิน)</b><br><br>
 
-  titleEl.innerText = "ข้อกำหนดและเงื่อนไขการใช้บริการ";
+      การใช้บริการตรวจสอบข้อมูลและชำระเงินผ่านระบบนี้
+      มีวัตถุประสงค์เพื่ออำนวยความสะดวกแก่ลูกค้าในการต่ออายุสัญญา
+      และชำระค่าบริการเท่านั้น<br><br>
 
-  bodyEl.innerHTML = `
-    <b>KPOS Connect (ผู้ใช้แบบไม่ล็อกอิน)</b><br><br>
+      ข้อมูลที่แสดงในระบบเป็นข้อมูลจากร้านค้า
+      หากพบความคลาดเคลื่อน กรุณาติดต่อร้านค้าโดยตรง<br><br>
 
-    การใช้บริการตรวจสอบข้อมูลและชำระเงินผ่านระบบนี้
-    มีวัตถุประสงค์เพื่ออำนวยความสะดวกแก่ลูกค้าในการต่ออายุสัญญา
-    และชำระค่าบริการเท่านั้น<br><br>
+      ระบบไม่รับผิดชอบต่อความเสียหายใด ๆ
+      อันเกิดจากการใช้งานระบบหรือการกรอกข้อมูลไม่ถูกต้อง<br><br>
 
-    ข้อมูลที่แสดงในระบบเป็นข้อมูลจากร้านค้า
-    หากพบความคลาดเคลื่อน กรุณาติดต่อร้านค้าโดยตรง<br><br>
+      ร้านค้าขอสงวนสิทธิ์ในการปรับปรุงหรือเปลี่ยนแปลงเงื่อนไข
+      โดยไม่จำเป็นต้องแจ้งให้ทราบล่วงหน้า
+    </p>
 
-    ระบบไม่รับผิดชอบต่อความเสียหายใด ๆ
-    อันเกิดจากการใช้งานระบบหรือการกรอกข้อมูลไม่ถูกต้อง<br><br>
-
-    ร้านค้าขอสงวนสิทธิ์ในการปรับปรุงหรือเปลี่ยนแปลงเงื่อนไขการให้บริการ
-    โดยไม่จำเป็นต้องแจ้งให้ทราบล่วงหน้า
+    <button class="primary-btn" onclick="closeModal()">ปิด</button>
   `;
 
-  showGuestModal();
+  modal.style.display = "flex";
 }
 
 function openGuestPrivacy() {
-  const titleEl = document.getElementById("guestModalTitle");
-  const bodyEl = document.getElementById("guestModalBody");
+  const modal = document.getElementById("modal");
+  const content = document.getElementById("modalContent");
 
-  if (!titleEl || !bodyEl) return;
+  content.innerHTML = `
+    <h4>นโยบายความเป็นส่วนตัว</h4>
+    <p>
+      ระบบจะเก็บและใช้ข้อมูลที่ท่านให้ไว้
+      เช่น เลขสัญญา เลขบัตรประชาชน/พาสปอร์ตบางส่วน และเบอร์ติดต่อ
+      เพื่อวัตถุประสงค์ในการตรวจสอบข้อมูลและชำระเงินเท่านั้น<br><br>
 
-  titleEl.innerText = "นโยบายความเป็นส่วนตัว";
+      ข้อมูลจะไม่ถูกนำไปใช้ในวัตถุประสงค์อื่น
+      และจะไม่เปิดเผยแก่บุคคลภายนอก
+      เว้นแต่จำเป็นต่อการให้บริการ<br><br>
 
-  bodyEl.innerHTML = `
-    <b>การคุ้มครองข้อมูลส่วนบุคคล (PDPA)</b><br><br>
+      การประมวลผลข้อมูลเป็นไปตาม
+      พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)
+    </p>
 
-    ระบบจะเก็บและใช้ข้อมูลที่ท่านให้ไว้
-    เช่น เลขสัญญา เลขบัตรประชาชน/พาสปอร์ตบางส่วน และเบอร์ติดต่อ
-    เพื่อวัตถุประสงค์ในการตรวจสอบข้อมูลสัญญา
-    และดำเนินการชำระเงินเท่านั้น<br><br>
-
-    ข้อมูลดังกล่าวจะไม่ถูกนำไปใช้ในวัตถุประสงค์อื่น
-    และจะไม่เปิดเผยแก่บุคคลภายนอก
-    ยกเว้นเท่าที่จำเป็นต่อการให้บริการ<br><br>
-
-    ข้อมูลของท่านจะถูกจัดเก็บและประมวลผล
-    ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล
-    พ.ศ. 2562 (PDPA)
+    <button class="primary-btn" onclick="closeModal()">ปิด</button>
   `;
 
-  showGuestModal();
-}
-
-function showGuestModal() {
-  const overlay = document.getElementById("guestModalOverlay");
-  if (!overlay) return;
-  overlay.style.display = "flex";
-}
-
-function closeGuestModal() {
-  const overlay = document.getElementById("guestModalOverlay");
-  if (!overlay) return;
-  overlay.style.display = "none";
+  modal.style.display = "flex";
 }
