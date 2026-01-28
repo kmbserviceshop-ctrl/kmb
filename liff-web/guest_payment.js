@@ -168,13 +168,13 @@ async function submitGuestLookup(btn) {
     return;
   }
 
-  if (!/^PD-\\d{4}-\\d{6}$/.test(contract_no)) {
-    showAlertModal(
-      "รูปแบบไม่ถูกต้อง",
-      "กรุณากรอกเลขสัญญาในรูปแบบ PD-2026-000028"
-    );
-    return;
-  }
+  if (!/^PD-\d{4}-\d{6}$/.test(contract_no)) {
+  showAlertModal(
+    "รูปแบบไม่ถูกต้อง",
+    "กรุณากรอกเลขสัญญาในรูปแบบ PD-2026-000028"
+  );
+  return;
+}
 
   setButtonLoading(btn, "กำลังตรวจสอบ");
 
